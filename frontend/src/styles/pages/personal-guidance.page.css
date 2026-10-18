@@ -1,0 +1,631 @@
+/* Source: live presonal.php page <style> blocks (1), copied unchanged. Scoped to body.page-personal-guidance. */
+
+    /* Divine Guidance Colors */
+    :root {
+        --guidance-gold: #FFD700;
+        --guidance-saffron: #FF9933;
+        --guidance-indigo: #4B0082;
+        --guidance-lotus: #E6A8D7;
+        --guidance-peace: #87CEEB;
+        --guidance-earth: #8B4513;
+        --guidance-growth: #228B22;
+        --guidance-wisdom: #2F4F4F;
+        --guidance-light: #FFF8DC;
+        --guidance-deep: #191970;
+        
+        /* Divine Gradients */
+        --gradient-guru: linear-gradient(135deg, #FF9933 0%, #FFD700 25%, #4B0082 75%);
+        --gradient-mentor: linear-gradient(135deg, #4B0082 0%, #E6A8D7 50%, #87CEEB 100%);
+        --gradient-guidance: linear-gradient(135deg, #228B22 0%, #8B4513 50%, #FFD700 100%);
+        --gradient-aura: radial-gradient(circle at center, rgba(255, 215, 0, 0.2) 0%, transparent 70%);
+        --gradient-path: linear-gradient(90deg, #FF9933, #FFD700, #87CEEB, #4B0082, #228B22);
+        
+        /* Divine Shadows */
+        --shadow-guidance: 0 15px 40px rgba(255, 153, 51, 0.25);
+        --shadow-mentor: 0 10px 35px rgba(75, 0, 130, 0.2);
+        --shadow-light: 0 5px 25px rgba(135, 206, 235, 0.2);
+        --shadow-deep: 0 20px 50px rgba(0, 0, 0, 0.3);
+        --shadow-glow: 0 0 50px rgba(255, 215, 0, 0.4);
+    }
+    
+    /* Divine Background */
+    .guidance-bg {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: 
+            radial-gradient(circle at 20% 30%, rgba(255, 153, 51, 0.1) 0%, transparent 50%),
+            radial-gradient(circle at 80% 70%, rgba(75, 0, 130, 0.1) 0%, transparent 50%),
+            radial-gradient(circle at 50% 20%, rgba(135, 206, 235, 0.1) 0%, transparent 50%),
+            linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        z-index: -3;
+    }
+    
+    .guidance-pattern {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: 
+            linear-gradient(30deg, rgba(255, 153, 51, 0.05) 12%, transparent 12.5%, transparent 87%, rgba(255, 153, 51, 0.05) 87.5%, rgba(255, 153, 51, 0.05)),
+            linear-gradient(150deg, rgba(255, 153, 51, 0.05) 12%, transparent 12.5%, transparent 87%, rgba(255, 153, 51, 0.05) 87.5%, rgba(255, 153, 51, 0.05)),
+            linear-gradient(30deg, rgba(75, 0, 130, 0.05) 12%, transparent 12.5%, transparent 87%, rgba(75, 0, 130, 0.05) 87.5%, rgba(75, 0, 130, 0.05)),
+            linear-gradient(150deg, rgba(75, 0, 130, 0.05) 12%, transparent 12.5%, transparent 87%, rgba(75, 0, 130, 0.05) 87.5%, rgba(75, 0, 130, 0.05)),
+            linear-gradient(60deg, rgba(255, 215, 0, 0.05) 25%, transparent 25.5%, transparent 75%, rgba(255, 215, 0, 0.05) 75%, rgba(255, 215, 0, 0.05)),
+            linear-gradient(60deg, rgba(255, 215, 0, 0.05) 25%, transparent 25.5%, transparent 75%, rgba(255, 215, 0, 0.05) 75%, rgba(255, 215, 0, 0.05));
+        background-size: 120px 210px;
+        background-position: 0 0, 0 0, 60px 105px, 60px 105px, 0 0, 60px 105px;
+        z-index: -2;
+        animation: patternMove 40s linear infinite;
+    }
+    
+    @keyframes patternMove {
+        0% { background-position: 0 0, 0 0, 60px 105px, 60px 105px, 0 0, 60px 105px; }
+        100% { background-position: 120px 210px, 120px 210px, 180px 315px, 180px 315px, 120px 210px, 180px 315px; }
+    }
+    
+    /* Floating Guidance Elements */
+    .floating-om {
+        position: fixed;
+        font-family: 'Sanskrit', serif;
+        font-size: 4rem;
+        color: rgba(255, 153, 51, 0.1);
+        pointer-events: none;
+        z-index: -1;
+        animation: floatOm 20s ease-in-out infinite;
+    }
+    
+    @keyframes floatOm {
+        0%, 100% { transform: translate(0, 0) rotate(0deg); opacity: 0.1; }
+        25% { transform: translate(100px, 50px) rotate(90deg); opacity: 0.2; }
+        50% { transform: translate(50px, 100px) rotate(180deg); opacity: 0.1; }
+        75% { transform: translate(-50px, 50px) rotate(270deg); opacity: 0.2; }
+    }
+    
+    .floating-path {
+        position: fixed;
+        width: 80px;
+        height: 80px;
+        background: var(--gradient-path);
+        clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+        opacity: 0.1;
+        animation: floatPath 25s ease-in-out infinite;
+        z-index: -1;
+    }
+    
+    @keyframes floatPath {
+        0%, 100% { transform: translate(0, 0) rotate(0deg) scale(1); }
+        33% { transform: translate(150px, -50px) rotate(120deg) scale(1.2); }
+        66% { transform: translate(-100px, 100px) rotate(240deg) scale(0.8); }
+    }
+    
+    /* Guidance Hero */
+    .guidance-hero {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        position: relative;
+        overflow: hidden;
+        padding: 6rem 0;
+        background: linear-gradient(135deg, 
+            rgba(255, 248, 220, 0.9) 0%,
+            rgba(255, 255, 255, 0.95) 100%);
+    }
+    
+    .guidance-hero::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 200%;
+        height: 200%;
+        background: var(--gradient-aura);
+        animation: auraPulseGuidance 10s ease-in-out infinite alternate;
+        z-index: -1;
+    }
+    
+    @keyframes auraPulseGuidance {
+        0% { transform: translate(-50%, -50%) scale(1); opacity: 0.3; }
+        100% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.6; }
+    }
+    
+    .hero-title-guidance {
+        font-size: 4.5rem;
+        font-weight: 800;
+        line-height: 1.2;
+        margin-bottom: 1.5rem;
+        position: relative;
+        background: var(--gradient-guru);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    .hero-subtitle-guidance {
+        font-size: 1.5rem;
+        color: var(--guidance-wisdom);
+        margin-bottom: 2.5rem;
+        max-width: 700px;
+        font-weight: 300;
+        line-height: 1.8;
+    }
+    
+    /* Divine Buttons */
+    .btn-guidance {
+        padding: 1.2rem 3rem;
+        font-weight: 600;
+        border: none;
+        border-radius: 50px;
+        position: relative;
+        overflow: hidden;
+        transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        font-size: 1.1rem;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        background: var(--gradient-guru);
+        color: white;
+        box-shadow: var(--shadow-guidance);
+    }
+    
+    .btn-guidance::before {
+        content: 'ॐ';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 2rem;
+        opacity: 0;
+        transition: all 0.6s ease;
+        font-family: 'Sanskrit', serif;
+    }
+    
+    .btn-guidance:hover::before {
+        opacity: 0.3;
+        transform: translate(-50%, -50%) scale(3);
+    }
+    
+    .btn-guidance:hover {
+        transform: translateY(-8px);
+        box-shadow: var(--shadow-glow);
+        letter-spacing: 2px;
+    }
+    
+    .btn-guidance-light {
+        padding: 1.1rem 2.5rem;
+        background: transparent;
+        border: 2px solid var(--guidance-indigo);
+        color: var(--guidance-indigo);
+        border-radius: 50px;
+        transition: all 0.5s ease;
+    }
+    
+    .btn-guidance-light:hover {
+        background: var(--guidance-indigo);
+        color: white;
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-mentor);
+    }
+    
+    /* Mentorship Path */
+    .mentorship-path {
+        padding: 6rem 0;
+        background: linear-gradient(135deg, 
+            rgba(255, 153, 51, 0.05) 0%,
+            rgba(255, 248, 220, 0.8) 100%);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .path-card-guidance {
+        background: white;
+        border-radius: 25px;
+        padding: 3rem 2rem;
+        height: 100%;
+        transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        position: relative;
+        overflow: hidden;
+        border: 2px solid transparent;
+        box-shadow: var(--shadow-light);
+        text-align: center;
+    }
+    
+    .path-card-guidance::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 5px;
+        background: var(--gradient-path);
+    }
+    
+    .path-card-guidance:hover {
+        transform: translateY(-15px);
+        border-color: var(--guidance-saffron);
+        box-shadow: var(--shadow-guidance);
+    }
+    
+    .path-icon-guidance {
+        width: 100px;
+        height: 100px;
+        margin: 0 auto 2rem;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        color: white;
+        background: var(--gradient-mentor);
+        transition: all 0.6s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .path-icon-guidance::before {
+        content: '';
+        position: absolute;
+        top: -5px;
+        left: -5px;
+        right: -5px;
+        bottom: -5px;
+        background: var(--gradient-guru);
+        border-radius: 50%;
+        z-index: -1;
+        opacity: 0;
+        transition: opacity 0.6s ease;
+    }
+    
+    .path-card-guidance:hover .path-icon-guidance {
+        transform: rotate(360deg) scale(1.1);
+    }
+    
+    .path-card-guidance:hover .path-icon-guidance::before {
+        opacity: 1;
+    }
+    
+    /* Mentors Section */
+    .mentors-section {
+        padding: 6rem 0;
+        background: linear-gradient(135deg, 
+            rgba(75, 0, 130, 0.05) 0%,
+            rgba(255, 255, 255, 0.9) 100%);
+        position: relative;
+    }
+    
+    .mentor-card-guidance {
+        background: white;
+        border-radius: 25px;
+        overflow: hidden;
+        transition: all 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        position: relative;
+        border: 2px solid transparent;
+        box-shadow: var(--shadow-mentor);
+    }
+    
+    .mentor-card-guidance:hover {
+        transform: translateY(-20px) rotateX(5deg);
+        border-color: var(--guidance-indigo);
+        box-shadow: var(--shadow-deep);
+    }
+    
+    .mentor-img-guidance {
+        height: 300px;
+        width: 100%;
+        object-fit: cover;
+        transition: all 0.7s ease;
+        filter: brightness(0.9) contrast(1.1);
+    }
+    
+    .mentor-card-guidance:hover .mentor-img-guidance {
+        transform: scale(1.05);
+        filter: brightness(1.1) contrast(1.2);
+    }
+    
+    .mentor-overlay-guidance {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background: linear-gradient(to top, 
+            rgba(25, 25, 112, 0.9) 0%,
+            transparent 100%);
+        padding: 2rem;
+        color: white;
+    }
+    
+    .mentor-badge-guidance {
+        display: inline-block;
+        padding: 0.8rem 1.5rem;
+        background: var(--gradient-mentor);
+        color: white;
+        border-radius: 50px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        box-shadow: var(--shadow-mentor);
+    }
+    
+    /* Guidance Process */
+    .process-section {
+        padding: 6rem 0;
+        background: linear-gradient(135deg, 
+            rgba(34, 139, 34, 0.05) 0%,
+            rgba(255, 248, 220, 0.8) 100%);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .process-step-guidance {
+        background: white;
+        border-radius: 25px;
+        padding: 3rem;
+        margin-bottom: 3rem;
+        transition: all 0.6s ease;
+        position: relative;
+        border: 2px solid transparent;
+        box-shadow: var(--shadow-light);
+    }
+    
+    .process-step-guidance:hover {
+        transform: translateX(10px);
+        border-color: var(--guidance-growth);
+        box-shadow: var(--shadow-guidance);
+    }
+    
+    .step-number {
+        display: inline-block;
+        width: 60px;
+        height: 60px;
+        background: var(--gradient-guidance);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+        font-weight: 800;
+        margin-bottom: 1.5rem;
+        box-shadow: var(--shadow-guidance);
+    }
+    
+    /* Personal Sessions */
+    .sessions-section {
+        padding: 6rem 0;
+        background: linear-gradient(135deg, 
+            rgba(135, 206, 235, 0.1) 0%,
+            rgba(255, 255, 255, 0.9) 100%);
+        position: relative;
+    }
+    
+    .session-card-guidance {
+        background: white;
+        border-radius: 25px;
+        padding: 3rem;
+        height: 100%;
+        transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        position: relative;
+        overflow: hidden;
+        border: 2px solid transparent;
+        box-shadow: var(--shadow-light);
+        text-align: center;
+    }
+    
+    .session-card-guidance:hover {
+        transform: translateY(-15px);
+        border-color: var(--guidance-peace);
+        box-shadow: var(--shadow-guidance);
+    }
+    
+    .session-icon {
+        font-size: 4rem;
+        margin-bottom: 2rem;
+        color: var(--guidance-peace);
+        display: inline-block;
+        animation: sessionPulse 3s ease-in-out infinite;
+    }
+    
+    @keyframes sessionPulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+    }
+    
+    .session-badge {
+        position: absolute;
+        top: 1.5rem;
+        right: 1.5rem;
+        padding: 0.5rem 1.5rem;
+        background: var(--gradient-guidance);
+        color: white;
+        border-radius: 50px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        box-shadow: var(--shadow-guidance);
+    }
+    
+    /* Testimonials */
+    .testimonial-guidance {
+        padding: 6rem 0;
+        background: linear-gradient(135deg, 
+            rgba(255, 153, 51, 0.05) 0%,
+            rgba(75, 0, 130, 0.05) 100%);
+        position: relative;
+    }
+    
+    .testimonial-card-guidance {
+        background: white;
+        border-radius: 25px;
+        padding: 3rem;
+        transition: all 0.5s ease;
+        position: relative;
+        border: 2px solid transparent;
+        box-shadow: var(--shadow-light);
+    }
+    
+    .testimonial-card-guidance:hover {
+        transform: translateY(-10px);
+        border-color: var(--guidance-saffron);
+        box-shadow: var(--shadow-guidance);
+    }
+    
+    .testimonial-card-guidance::before {
+        content: '"';
+        position: absolute;
+        top: 1rem;
+        left: 1rem;
+        font-size: 4rem;
+        color: rgba(255, 153, 51, 0.2);
+        font-family: serif;
+        line-height: 1;
+    }
+    
+    /* FAQ Section */
+    .faq-section {
+        padding: 6rem 0;
+        background: linear-gradient(135deg, 
+            rgba(255, 248, 220, 0.8) 0%,
+            rgba(255, 255, 255, 0.95) 100%);
+        position: relative;
+    }
+    
+    .faq-card-guidance {
+        background: white;
+        border-radius: 25px;
+        padding: 2.5rem;
+        margin-bottom: 1.5rem;
+        transition: all 0.4s ease;
+        border: 2px solid transparent;
+        box-shadow: var(--shadow-light);
+        cursor: pointer;
+    }
+    
+    .faq-card-guidance:hover {
+        border-color: var(--guidance-gold);
+        transform: translateX(5px);
+    }
+    
+    .faq-card-guidance.active {
+        border-color: var(--guidance-saffron);
+        box-shadow: var(--shadow-guidance);
+    }
+    
+    /* Sanskrit Elements */
+    .sanskrit-guidance {
+        font-family: 'Sanskrit', serif;
+        color: var(--guidance-indigo);
+        font-size: 2rem;
+        margin-bottom: 1rem;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        display: inline-block;
+        position: relative;
+    }
+    
+    .sanskrit-guidance::after {
+        content: '';
+        position: absolute;
+        bottom: -5px;
+        left: 0;
+        width: 100%;
+        height: 3px;
+        background: var(--gradient-path);
+        border-radius: 3px;
+    }
+    
+    /* Section Headers */
+    .section-header-guidance {
+        text-align: center;
+        margin-bottom: 4rem;
+        position: relative;
+    }
+    
+    .section-title-guidance {
+        font-size: 3.5rem;
+        font-weight: 800;
+        margin-bottom: 1rem;
+        position: relative;
+        display: inline-block;
+        padding: 0 3rem;
+        color: var(--guidance-deep);
+    }
+    
+    .section-title-guidance::before,
+    .section-title-guidance::after {
+        content: '✦';
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 2rem;
+        color: var(--guidance-saffron);
+        animation: spinGuidance 4s linear infinite;
+    }
+    
+    .section-title-guidance::before {
+        left: 0;
+    }
+    
+    .section-title-guidance::after {
+        right: 0;
+    }
+    
+    @keyframes spinGuidance {
+        0% { transform: translateY(-50%) rotate(0deg); }
+        100% { transform: translateY(-50%) rotate(360deg); }
+    }
+    
+    .section-subtitle-guidance {
+        color: var(--guidance-wisdom);
+        font-size: 1.2rem;
+        max-width: 700px;
+        margin: 0 auto;
+        opacity: 0.8;
+    }
+    
+    /* Progress Path */
+    .progress-path {
+        height: 8px;
+        background: linear-gradient(90deg, #FF9933, #FFD700, #87CEEB, #4B0082, #228B22);
+        border-radius: 4px;
+        margin: 1rem 0;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .progress-path::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+        animation: pathShimmer 2s infinite;
+    }
+    
+    @keyframes pathShimmer {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(100%); }
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+        .hero-title-guidance {
+            font-size: 2.8rem;
+        }
+        
+        .section-title-guidance {
+            font-size: 2.2rem;
+        }
+        
+        .sanskrit-guidance {
+            font-size: 1.5rem;
+        }
+        
+        .floating-om {
+            font-size: 2rem;
+        }
+    }
+

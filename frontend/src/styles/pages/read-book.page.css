@@ -1,0 +1,42 @@
+/* Source: read_pdf.php <style> block (local saved copy), copied unchanged. Scoped to body.page-read-book. */
+    .pdf-viewer-container {
+        padding: 20px 0;
+        background: #f8f9fa;
+        min-height: calc(100vh - 150px);
+    }
+
+    .pdf-header {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
+    }
+
+    .pdf-viewer-wrapper {
+        background: white;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+        height: 80vh;
+    }
+
+    .pdf-embed {
+        width: 100%;
+        height: 100%;
+        border: none;
+    }
+
+    .pdf-controls {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+
+    @media (max-width: 768px) {
+        .pdf-viewer-wrapper {
+            height: 70vh;
+        }
+    }

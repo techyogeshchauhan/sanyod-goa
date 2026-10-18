@@ -1,0 +1,306 @@
+/* Admin panel. Colours, fonts and sidebar from the live admin/ pages (SB Admin 2 theme, inline
+   <style> of admin/login.php), adapted to Bootstrap 5 (D-09). Scoped to body.page-admin. */
+
+:root {
+  /* --adm-* names: page variables that footer.css also defines are dropped by the page scoping. */
+  --adm-primary: #d32f2f;
+  --adm-primary-dark: #b71c1c;
+  --adm-primary-light: #ff6659;
+  --adm-secondary: #f5f5f5;
+  --adm-accent: #ffab00;
+  --adm-text: #333333;
+  --adm-muted: #757575;
+  --adm-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  --adm-transition: all 0.3s ease;
+  --sidebar-width: 250px;
+}
+
+body {
+  background: linear-gradient(135deg, #f9f9f9 0%, #eaeaea 100%);
+  font-family: 'Poppins', sans-serif;
+  color: var(--adm-text);
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+.pppht {
+  font-family: 'Paytone One', sans-serif;
+  text-transform: uppercase;
+  font-size: 28px;
+  letter-spacing: 1px;
+  background: linear-gradient(45deg, var(--adm-primary), var(--adm-primary-light));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  position: relative;
+  padding-bottom: 5px;
+  margin: 0;
+  text-decoration: none;
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.pppht::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(90deg, var(--adm-primary), var(--adm-accent), var(--adm-primary));
+  border-radius: 2px;
+}
+
+/* Top bar */
+.admin-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 1030;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  box-shadow: var(--adm-shadow);
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.admin-topbar .menu-toggle {
+  border: none;
+  background: transparent;
+  color: var(--adm-primary);
+  font-size: 22px;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+.admin-topbar .menu-toggle:hover {
+  background: var(--adm-secondary);
+}
+
+.admin-topbar .admin-user a,
+.admin-topbar .admin-user button {
+  color: var(--adm-text);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+/* Sidebar */
+.admin-shell {
+  display: flex;
+  min-height: calc(100vh - 62px);
+}
+
+.admin-sidebar {
+  width: var(--sidebar-width);
+  flex-shrink: 0;
+  background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%);
+  box-shadow: 5px 0 15px rgba(0, 0, 0, 0.1);
+  padding: 15px 0 30px;
+}
+
+.admin-sidebar .nav-section {
+  color: rgba(236, 240, 241, 0.5);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 14px 30px 4px;
+}
+
+.admin-sidebar a {
+  display: flex;
+  align-items: center;
+  margin: 4px 15px;
+  border-radius: 8px;
+  color: #ecf0f1;
+  padding: 11px 15px;
+  font-weight: 500;
+  font-size: 14px;
+  text-decoration: none;
+  transition: var(--adm-transition);
+}
+
+.admin-sidebar a:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateX(5px);
+}
+
+.admin-sidebar a i {
+  margin-right: 10px;
+  width: 20px;
+  text-align: center;
+  font-size: 16px;
+}
+
+.admin-sidebar a.active {
+  background: var(--adm-primary);
+  color: #fff;
+  box-shadow: 0 4px 10px rgba(211, 47, 47, 0.3);
+}
+
+.admin-sidebar .count {
+  margin-left: auto;
+  background: var(--adm-accent);
+  color: #222;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 1px 7px;
+}
+
+#page-wrapper {
+  flex: 1;
+  min-width: 0;
+  padding: 25px;
+}
+
+@media (max-width: 991.98px) {
+  .admin-sidebar {
+    position: fixed;
+    top: 62px;
+    bottom: 0;
+    left: 0;
+    z-index: 1020;
+    overflow-y: auto;
+    transform: translateX(-100%);
+    transition: transform 0.25s ease;
+  }
+  .admin-sidebar.open {
+    transform: translateX(0);
+  }
+  #page-wrapper {
+    padding: 15px 10px;
+  }
+  .pppht {
+    font-size: 20px;
+  }
+}
+
+/* Page header */
+.admin-page-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.admin-page-title h1 {
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0;
+}
+
+/* Cards and panels */
+.dashboard-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: var(--adm-shadow);
+  padding: 20px;
+  transition: var(--adm-transition);
+  border-left: 5px solid var(--adm-primary);
+  height: 100%;
+}
+
+.dashboard-card:hover {
+  transform: translateY(-5px);
+}
+
+.dashboard-card .stat-label {
+  color: var(--adm-muted);
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.dashboard-card .value {
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.dashboard-card .icon {
+  font-size: 32px;
+  opacity: 0.25;
+}
+
+.admin-panel {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: var(--adm-shadow);
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.admin-panel > h2,
+.admin-panel > h5 {
+  font-size: 17px;
+  font-weight: 600;
+  margin-bottom: 15px;
+}
+
+.admin-table {
+  font-size: 14px;
+}
+
+.admin-table th {
+  font-weight: 600;
+  white-space: nowrap;
+  color: #555;
+  background: #fafafa;
+}
+
+.admin-table td {
+  vertical-align: middle;
+}
+
+.admin-thumb {
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: 6px;
+  background: #eee;
+}
+
+.btn-admin {
+  background: var(--adm-primary);
+  border-color: var(--adm-primary);
+  color: #fff;
+}
+
+.btn-admin:hover,
+.btn-admin:focus {
+  background: var(--adm-primary-dark);
+  border-color: var(--adm-primary-dark);
+  color: #fff;
+}
+
+.text-admin {
+  color: var(--adm-primary) !important;
+}
+
+.screenshot-preview {
+  max-width: 100%;
+  max-height: 520px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+}
+
+/* Login */
+.login-panel {
+  margin-top: 12vh;
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+  overflow: hidden;
+}
+
+.login-panel .panel-heading {
+  background: linear-gradient(45deg, var(--adm-primary), var(--adm-primary-light));
+  color: #fff;
+  font-weight: 600;
+  font-size: 18px;
+  padding: 15px 20px;
+}

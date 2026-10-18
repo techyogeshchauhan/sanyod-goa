@@ -1,0 +1,668 @@
+/* Source: live ind_know.php page <style> blocks (1), copied unchanged. Scoped to body.page-ind-know. */
+
+    /* Divine Color Palette */
+    :root {
+        --saffron-sunrise: #FF9933;
+        --golden-sunlight: #FFD700;
+        --temple-maroon: #800000;
+        --lotus-pink: #E6A8D7;
+        --lotus-white: #F8F8FF;
+        --sacred-indigo: #4B0082;
+        --turmeric-yellow: #FFC324;
+        --holy-basil: #006400;
+        --river-ganga: #87CEEB;
+        --sandalwood: #F5DEB3;
+        --ash-wisdom: #778899;
+        --moonlight: #E6E6FA;
+        
+        /* Divine Gradients */
+        --gradient-sunrise: linear-gradient(135deg, #FF9933 0%, #FFD700 100%);
+        --gradient-lotus: linear-gradient(135deg, #E6A8D7 0%, #F8F8FF 100%);
+        --gradient-sacred: linear-gradient(135deg, #4B0082 0%, #800000 100%);
+        --gradient-divine: linear-gradient(135deg, #FF9933, #FFD700, #4B0082, #006400);
+        --gradient-moksha: linear-gradient(45deg, #FF9933, #FFD700, #87CEEB, #006400);
+        --gradient-aura: radial-gradient(circle at center, rgba(255, 153, 51, 0.1) 0%, transparent 70%);
+        
+        /* Divine Shadows */
+        --shadow-divine: 0 10px 40px rgba(255, 153, 51, 0.2);
+        --shadow-aura: 0 0 30px rgba(255, 153, 51, 0.3);
+        --shadow-holy: 0 20px 60px rgba(75, 0, 130, 0.2);
+        --shadow-lotus: 0 15px 35px rgba(230, 168, 215, 0.2);
+    }
+    
+    /* Divine Background */
+    .divine-bg {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: 
+            radial-gradient(circle at 20% 30%, rgba(255, 153, 51, 0.1) 0%, transparent 50%),
+            radial-gradient(circle at 80% 70%, rgba(75, 0, 130, 0.1) 0%, transparent 50%),
+            radial-gradient(circle at 40% 80%, rgba(0, 100, 0, 0.1) 0%, transparent 50%),
+            linear-gradient(135deg, #0c0b1a 0%, #1a1830 100%);
+        z-index: -3;
+    }
+    
+    .divine-bg-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: url("data:image/svg+xml,%3Csvg width='200' height='200' viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23FF9933' fill-opacity='0.03'%3E%3Cpath d='M100,100 C110,90 120,80 130,70 C140,60 150,50 160,40 C170,30 180,20 190,10 L200,0 L200,200 L0,200 L0,0 L10,10 C20,20 30,30 40,40 C50,50 60,60 70,70 C80,80 90,90 100,100 Z'/%3E%3C/g%3E%3C/svg%3E");
+        z-index: -2;
+    }
+    
+    /* Divine Particles */
+    .divine-particle {
+        position: fixed;
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: -1;
+        opacity: 0.6;
+        filter: blur(1px);
+    }
+    
+    /* Sacred Mantra Overlay */
+    .mantra-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'%3E%3Ctext x='50%25' y='50%25' font-family='Sanskrit' font-size='40' fill='%23FF9933' fill-opacity='0.03' text-anchor='middle' dominant-baseline='middle'%3Eॐ%3C/text%3E%3C/svg%3E");
+        background-size: 200px;
+        z-index: -1;
+        opacity: 0.3;
+        animation: mantraFloat 60s linear infinite;
+    }
+    
+    @keyframes mantraFloat {
+        0% { transform: translateY(0); }
+        100% { transform: translateY(-200px); }
+    }
+    
+    /* Divine Hero Section */
+    .hero-divine {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        position: relative;
+        overflow: hidden;
+        padding: 6rem 0;
+    }
+    
+    .hero-divine::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: var(--gradient-aura);
+        animation: auraPulse 8s ease-in-out infinite alternate;
+        z-index: -1;
+    }
+    
+    @keyframes auraPulse {
+        0% { transform: scale(1) rotate(0deg); opacity: 0.3; }
+        100% { transform: scale(1.2) rotate(180deg); opacity: 0.6; }
+    }
+    
+    .hero-title-divine {
+        font-size: 4.5rem;
+        font-weight: 800;
+        line-height: 1.2;
+        margin-bottom: 1.5rem;
+        position: relative;
+        background: var(--gradient-sunrise);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        text-shadow: 0 10px 30px rgba(255, 153, 51, 0.3);
+        animation: titleGlow 4s ease-in-out infinite alternate;
+    }
+    
+    @keyframes titleGlow {
+        0% { filter: drop-shadow(0 0 20px rgba(255, 153, 51, 0.3)); }
+        100% { filter: drop-shadow(0 0 40px rgba(255, 214, 0, 0.5)); }
+    }
+    
+    .hero-subtitle-divine {
+        font-size: 1.5rem;
+        color: var(--lotus-white);
+        margin-bottom: 2.5rem;
+        max-width: 600px;
+        font-weight: 300;
+        line-height: 1.8;
+        opacity: 0.9;
+    }
+    
+    /* Divine Buttons */
+    .btn-divine {
+        padding: 1.2rem 3rem;
+        font-weight: 600;
+        border: none;
+        border-radius: 50px;
+        position: relative;
+        overflow: hidden;
+        transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        font-size: 1.1rem;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        background: var(--gradient-sunrise);
+        color: white;
+        box-shadow: var(--shadow-divine);
+    }
+    
+    .btn-divine::before {
+        content: 'ॐ';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 2rem;
+        opacity: 0;
+        transition: all 0.5s ease;
+    }
+    
+    .btn-divine:hover::before {
+        opacity: 0.2;
+        transform: translate(-50%, -50%) scale(2);
+    }
+    
+    .btn-divine:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-aura);
+        letter-spacing: 2px;
+    }
+    
+    .btn-divine-outline {
+        padding: 1.1rem 2.5rem;
+        background: transparent;
+        border: 2px solid var(--saffron-sunrise);
+        color: var(--saffron-sunrise);
+        border-radius: 50px;
+        transition: all 0.4s ease;
+    }
+    
+    .btn-divine-outline:hover {
+        background: var(--saffron-sunrise);
+        color: white;
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-divine);
+    }
+    
+    /* Divine Cards */
+    .wisdom-card-divine {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 3rem 2rem;
+        height: 100%;
+        transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        position: relative;
+        overflow: hidden;
+        border: 1px solid rgba(255, 153, 51, 0.2);
+        box-shadow: var(--shadow-divine);
+    }
+    
+    .wisdom-card-divine::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: var(--gradient-divine);
+        opacity: 0;
+        transition: opacity 0.6s ease;
+        z-index: -1;
+    }
+    
+    .wisdom-card-divine:hover::before {
+        opacity: 0.1;
+    }
+    
+    .wisdom-card-divine:hover {
+        transform: translateY(-10px) scale(1.02);
+        border-color: var(--saffron-sunrise);
+        box-shadow: var(--shadow-aura);
+    }
+    
+    .wisdom-icon-divine {
+        width: 100px;
+        height: 100px;
+        margin: 0 auto 2rem;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        color: var(--golden-sunlight);
+        background: rgba(255, 153, 51, 0.1);
+        transition: all 0.6s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .wisdom-icon-divine::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: conic-gradient(transparent, var(--golden-sunlight), transparent);
+        animation: rotateIcon 4s linear infinite;
+    }
+    
+    @keyframes rotateIcon {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    .wisdom-icon-divine i {
+        position: relative;
+        z-index: 2;
+        background: rgba(0, 0, 0, 0.8);
+        width: 80px;
+        height: 80px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+    }
+    
+    .wisdom-card-divine:hover .wisdom-icon-divine {
+        transform: rotate(360deg) scale(1.1);
+        color: white;
+        background: var(--gradient-sunrise);
+    }
+    
+    /* Divine Path Section */
+    .path-divine {
+        padding: 6rem 0;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .path-divine::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23FF9933' fill-opacity='0.03' fill-rule='evenodd'/%3E%3C/svg%3E");
+    }
+    
+    .path-card-divine {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 3rem;
+        height: 100%;
+        transition: all 0.6s ease;
+        position: relative;
+        overflow: hidden;
+        border: 1px solid rgba(255, 153, 51, 0.2);
+    }
+    
+    .path-card-divine:hover {
+        transform: translateY(-10px);
+        border-color: var(--saffron-sunrise);
+        box-shadow: var(--shadow-aura);
+    }
+    
+    .path-number-divine {
+        font-size: 5rem;
+        font-weight: 800;
+        line-height: 1;
+        margin-bottom: 1rem;
+        background: var(--gradient-sunrise);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        opacity: 0.3;
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+    }
+    
+    /* Divine Scriptures */
+    .scriptures-divine {
+        padding: 6rem 0;
+        background: linear-gradient(135deg, 
+            rgba(75, 0, 130, 0.1) 0%,
+            rgba(128, 0, 0, 0.1) 100%);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .scriptures-divine::before {
+        content: 'वेद उपनिषद् गीता धम्मपद';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) rotate(-5deg);
+        font-size: 10rem;
+        font-weight: 900;
+        color: rgba(255, 153, 51, 0.02);
+        white-space: nowrap;
+        font-family: 'Sanskrit', serif;
+        pointer-events: none;
+    }
+    
+    .scripture-card-divine {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        overflow: hidden;
+        transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        position: relative;
+        border: 1px solid rgba(255, 153, 51, 0.2);
+        box-shadow: var(--shadow-divine);
+    }
+    
+    .scripture-card-divine:hover {
+        transform: translateY(-15px) rotateX(5deg);
+        border-color: var(--saffron-sunrise);
+        box-shadow: var(--shadow-aura);
+    }
+    
+    .scripture-img-divine {
+        height: 250px;
+        width: 100%;
+        object-fit: cover;
+        transition: all 0.6s ease;
+        filter: sepia(0.3) brightness(0.9);
+    }
+    
+    .scripture-card-divine:hover .scripture-img-divine {
+        transform: scale(1.1);
+        filter: sepia(0) brightness(1.1);
+    }
+    
+    .scripture-badge-divine {
+        position: absolute;
+        top: 1rem;
+        left: 1rem;
+        padding: 0.5rem 1.5rem;
+        background: var(--gradient-sacred);
+        color: white;
+        border-radius: 50px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        box-shadow: var(--shadow-holy);
+    }
+    
+    /* Divine Meditation */
+    .meditation-divine {
+        padding: 6rem 0;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .meditation-divine::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(circle at center, 
+            rgba(255, 153, 51, 0.1) 0%,
+            transparent 70%);
+        animation: meditationGlow 10s ease-in-out infinite alternate;
+    }
+    
+    @keyframes meditationGlow {
+        0% { transform: scale(1); opacity: 0.3; }
+        100% { transform: scale(1.2); opacity: 0.6; }
+    }
+    
+    .meditation-card-divine {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 3rem;
+        transition: all 0.6s ease;
+        position: relative;
+        overflow: hidden;
+        border: 1px solid rgba(255, 153, 51, 0.2);
+        text-align: center;
+    }
+    
+    .meditation-card-divine:hover {
+        transform: translateY(-10px);
+        border-color: var(--lotus-pink);
+        box-shadow: var(--shadow-lotus);
+    }
+    
+    .chakra-icon {
+        font-size: 4rem;
+        margin-bottom: 2rem;
+        display: inline-block;
+        animation: chakraSpin 20s linear infinite;
+    }
+    
+    @keyframes chakraSpin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    /* Divine Teachers */
+    .teachers-divine {
+        padding: 6rem 0;
+        background: linear-gradient(135deg, 
+            rgba(255, 153, 51, 0.05) 0%,
+            rgba(75, 0, 130, 0.05) 100%);
+        position: relative;
+    }
+    
+    .teacher-card-divine {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        overflow: hidden;
+        transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        position: relative;
+        border: 1px solid rgba(255, 153, 51, 0.2);
+    }
+    
+    .teacher-card-divine:hover {
+        transform: translateY(-15px);
+        border-color: var(--saffron-sunrise);
+        box-shadow: var(--shadow-aura);
+    }
+    
+    .teacher-img-divine {
+        height: 300px;
+        width: 100%;
+        object-fit: cover;
+        transition: all 0.6s ease;
+        filter: brightness(0.9) contrast(1.1);
+    }
+    
+    .teacher-card-divine:hover .teacher-img-divine {
+        transform: scale(1.05);
+        filter: brightness(1.1) contrast(1.2);
+    }
+    
+    .teacher-overlay-divine {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(to bottom, 
+            transparent 0%,
+            rgba(0, 0, 0, 0.8) 100%);
+        display: flex;
+        align-items: flex-end;
+        padding: 2rem;
+    }
+    
+    .teacher-badge-divine {
+        display: inline-block;
+        padding: 0.8rem 1.5rem;
+        background: var(--gradient-sunrise);
+        color: white;
+        border-radius: 50px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        box-shadow: var(--shadow-divine);
+    }
+    
+    /* Divine Quotes */
+    .quotes-divine {
+        padding: 6rem 0;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .quote-card-divine {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 3rem;
+        transition: all 0.6s ease;
+        position: relative;
+        border-left: 5px solid var(--saffron-sunrise);
+        box-shadow: var(--shadow-divine);
+    }
+    
+    .quote-card-divine::before {
+        content: '"';
+        position: absolute;
+        top: 1rem;
+        left: 1rem;
+        font-size: 5rem;
+        color: rgba(255, 153, 51, 0.2);
+        font-family: serif;
+        line-height: 1;
+    }
+    
+    .quote-card-divine:hover {
+        transform: translateY(-10px);
+        border-left-color: var(--golden-sunlight);
+        box-shadow: var(--shadow-aura);
+    }
+    
+    /* Divine Progress */
+    .progress-divine {
+        height: 10px;
+        background: rgba(255, 153, 51, 0.1);
+        border-radius: 5px;
+        margin: 1rem 0;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .progress-divine-bar {
+        height: 100%;
+        background: var(--gradient-sunrise);
+        border-radius: 5px;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .progress-divine-bar::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+        animation: divineShimmer 2s infinite;
+    }
+    
+    @keyframes divineShimmer {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(100%); }
+    }
+    
+    /* Section Headers */
+    .section-header-divine {
+        text-align: center;
+        margin-bottom: 4rem;
+        position: relative;
+    }
+    
+    .section-title-divine {
+        font-size: 3.5rem;
+        font-weight: 800;
+        margin-bottom: 1rem;
+        position: relative;
+        display: inline-block;
+        padding: 0 3rem;
+        color: white;
+    }
+    
+    .section-title-divine::before,
+    .section-title-divine::after {
+        content: 'ॐ';
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 2rem;
+        color: var(--saffron-sunrise);
+        animation: omFloat 3s ease-in-out infinite;
+    }
+    
+    .section-title-divine::before {
+        left: 0;
+    }
+    
+    .section-title-divine::after {
+        right: 0;
+    }
+    
+    @keyframes omFloat {
+        0%, 100% { transform: translateY(-50%) scale(1); }
+        50% { transform: translateY(-50%) scale(1.2); }
+    }
+    
+    .section-subtitle-divine {
+        color: var(--lotus-white);
+        font-size: 1.2rem;
+        max-width: 700px;
+        margin: 0 auto;
+        opacity: 0.8;
+    }
+    
+    /* Sanskrit Typography */
+    .sanskrit-text-divine {
+        font-family: 'Sanskrit', serif;
+        color: var(--golden-sunlight);
+        font-size: 2rem;
+        margin-bottom: 1rem;
+        text-shadow: 0 0 20px rgba(255, 153, 51, 0.3);
+        display: inline-block;
+        animation: sanskritGlow 4s ease-in-out infinite alternate;
+    }
+    
+    @keyframes sanskritGlow {
+        0% { filter: drop-shadow(0 0 5px rgba(255, 153, 51, 0.3)); }
+        100% { filter: drop-shadow(0 0 15px rgba(255, 214, 0, 0.5)); }
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .hero-title-divine {
+            font-size: 2.8rem;
+        }
+        
+        .section-title-divine {
+            font-size: 2.2rem;
+        }
+        
+        .sanskrit-text-divine {
+            font-size: 1.5rem;
+        }
+    }
+

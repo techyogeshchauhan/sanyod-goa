@@ -1,0 +1,78 @@
+[
+  {
+    "legacyIds": [
+      11
+    ],
+    "slug": "manoranjan-shau",
+    "name": "Manoranjan Shau",
+    "categories": [
+      {
+        "category": "physical",
+        "specialisations": "Gynaecology, Liver Problems, Men Sexual Wellness, Neurological Disorders, Piles, Fissure & Fistula"
+      }
+    ],
+    "qualification": "BNYS",
+    "experienceYears": 10,
+    "fee": 49900,
+    "bio": "Dr. Manoranjan Shau is a highly experienced Naturopathy doctor with 15 years of expertise in the medical sector. He is a specialist in various health issues such as migraine, neurological disorders, and the treatment of piles, fissures, and fistula. Dr. Shau also addresses psychological issues with a holistic approach. His educational background includes a degree of Bachelor of Naturopathy and Yogic Sciences (B.N.Y.S). Dr. Shau's extensive experience and specialized knowledge helps him provide effective treatment to his patients and makes him a trusted practitioner in the medical field.",
+    "photo": "/uploads/doctors/doctor_68f09d40c317a.jpg",
+    "rating": 4.7,
+    "isVerified": true,
+    "availabilityText": "Available Today",
+    "sortOrder": 0
+  },
+  {
+    "legacyIds": [
+      12,
+      13
+    ],
+    "slug": "vaidya-sudarshan",
+    "name": "Vaidya Sudarshan",
+    "categories": [
+      {
+        "category": "physical",
+        "specialisations": "प्रमेेह(शुगर), पित्ताशय पत्थरी, दर्द (वात रोग),ज्वर, ग्रहणी(खाते ही पोटी जाना), रक्त पित्त(शरीर मे कही से भी रक्त स्राव)/अम्लपित्त(ऐसिडिटी), सर दर्द, शरीर मे कही भी गांठ, त्वक रोग"
+      },
+      {
+        "category": "chronical",
+        "specialisations": "प्रमेेह(शुगर), पित्ताशय पत्थरी, दर्द (वात रोग),ज्वर, ग्रहणी(खाते ही पोटी जाना), रक्त पित्त(शरीर मे कही से भी रक्त स्राव)/अम्लपित्त(ऐसिडिटी), सर दर्द, शरीर मे कही भी गांठ, त्वक रोग"
+      }
+    ],
+    "qualification": "Traditional Vaidya",
+    "experienceYears": 7,
+    "fee": 29900,
+    "bio": "",
+    "photo": "/uploads/doctors/doctor_697b878b15788.jpg",
+    "rating": 4.7,
+    "isVerified": true,
+    "availabilityText": "Available Today",
+    "sortOrder": 1
+  },
+  {
+    "legacyIds": [
+      10,
+      9
+    ],
+    "slug": "suharidia-sharma",
+    "name": "Suharidia Sharma",
+    "categories": [
+      {
+        "category": "mental",
+        "specialisations": "disease -Depression, Anxiety Neurosis, Bipolar disorder, Schizophrenia,ADHD, Autism, Anxiety Nervousa, Anxiety Bulumia,border line disorder, Obsessive compulsive disorder, generalised anxiety disorder,panic disorder,social Anxiety disorder, special phobia,narccistic personality disorder, antisocial personality disorder, insomnia,"
+      },
+      {
+        "category": "chronical",
+        "specialisations": "Disease -Osteology-Osteoarthritis Knee, Lumbar Spondylosis, Cervical Spondylosis,Gouty Arthritis, Psoriatic arthritis, Ankylosis Spondylosis, Rheumatoid arthritis, Skin-psoriasis,eczema, urticaria, Lichen Planus,Pumphgis vulgaris,All tinea, Vitiligo,SLE Vascular disease -Hypertension, Hyperlipidemia, varicose veins ,dry gangrene , Avascular Necrosis ,Brain stroke Respiratory disease-COPD, Allergic Asthma, Rhinitis, Nasal Polyps, Pneumonia, Atelectasis, Bronchitis Gastrointestinal disease -GERD, stomach ulcer , esophageal ulcer,dudonal ulcer, Haemorrhoids, Fistula, Fissure, Cirrhosis of liver Female reproductive disease -PCOS, Uterine fibroid, Adenomyosis,Enteromiosis, Fallopian tube block,Metrorrhagia, Menorrhagia Endocrinal disease -Hypothyroidism, Hyperthyroidism, Diabetes"
+      }
+    ],
+    "qualification": "BHMS",
+    "experienceYears": 5,
+    "fee": 49900,
+    "bio": "",
+    "photo": "/uploads/doctors/doctor_6978ee8eb4cc2.jpg",
+    "rating": 4.7,
+    "isVerified": true,
+    "availabilityText": "Available Today",
+    "sortOrder": 2
+  }
+]

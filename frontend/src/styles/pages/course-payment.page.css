@@ -1,0 +1,292 @@
+/* Source: payment.php <style> block (local saved copy), copied unchanged. Scoped to body.page-course-payment. */
+    .otto {
+        font-size: 25px;
+        color: darkred;
+        text-shadow:
+            0 1px 0 #ccc,
+            0 2px 0 #c9c9c9,
+            0 3px 0 #bbb,
+            0 4px 0 #b9b9b9,
+            0 5px 0 #aaa,
+            0 6px 1px rgba(0,0,0,.1),
+            0 0 5px rgba(0,0,0,.1),
+            0 1px 3px rgba(0,0,0,.3),
+            0 3px 5px rgba(0,0,0,.2),
+            0 5px 10px rgba(0,0,0,.25),
+            0 10px 10px rgba(0,0,0,.2),
+            0 20px 20px rgba(0,0,0,.15);
+    }
+
+    .payment-container {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0,0,0,.1);
+        overflow: hidden;
+        margin-bottom: 30px;
+    }
+
+    .course-summary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 30px;
+    }
+
+    .course-title {
+        font-size: 1.8rem;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+
+    .course-description {
+        opacity: .9;
+        margin-bottom: 20px;
+    }
+
+    .price-section {
+        background: rgba(255,255,255,.2);
+        padding: 15px;
+        border-radius: 10px;
+        text-align: center;
+    }
+
+    .final-price {
+        font-size: 2.5rem;
+        font-weight: bold;
+    }
+
+    .original-price {
+        text-decoration: line-through;
+        opacity: .8;
+    }
+
+    .discount-badge {
+        display: inline-block;
+        background: #ff6b6b;
+        color: white;
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-weight: bold;
+        margin-top: 8px;
+    }
+
+    .payment-form-section {
+        padding: 30px;
+    }
+
+    .form-title {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #2c3e50;
+        margin-bottom: 25px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #f0f0f0;
+    }
+
+    .payment-methods {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 15px;
+        margin-bottom: 25px;
+    }
+
+    .payment-method {
+        border: 2px solid #e0e0e0;
+        border-radius: 10px;
+        padding: 15px;
+        text-align: center;
+        cursor: pointer;
+        transition: .3s;
+    }
+
+    .payment-method:hover {
+        border-color: #3498db;
+        background: #f8f9fa;
+    }
+
+    .payment-method.selected {
+        border-color: #3498db;
+        background: #e3f2fd;
+    }
+
+    .payment-icon {
+        font-size: 2rem;
+        margin-bottom: 10px;
+        color: #3498db;
+    }
+
+    .payment-method-name {
+        font-weight: 600;
+        color: #2c3e50;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 8px;
+        display: block;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 12px 15px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        font-size: 1rem;
+    }
+
+    .form-control:focus {
+        border-color: #3498db;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(52,152,219,.1);
+    }
+
+    .transaction-fields {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 10px;
+        margin-top: 20px;
+    }
+
+    .hidden {
+        display: none;
+    }
+
+    .upload-area {
+        border: 2px dashed #3498db;
+        border-radius: 8px;
+        padding: 20px;
+        text-align: center;
+        background: #f8f9fa;
+        cursor: pointer;
+    }
+
+    .upload-icon {
+        font-size: 3rem;
+        color: #3498db;
+    }
+
+    .file-preview {
+        margin-top: 10px;
+        text-align: center;
+    }
+
+    .file-preview img {
+        max-width: 200px;
+        max-height: 200px;
+        border-radius: 8px;
+        border: 2px solid #e0e0e0;
+    }
+
+    .btn-custom {
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: .3s;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 12px 20px;
+        font-size: 1.05rem;
+    }
+
+    .btn-success-custom {
+        background: #27ae60;
+        color: white;
+    }
+
+    .btn-success-custom:hover {
+        background: #219a52;
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .btn-outline-custom {
+        background: transparent;
+        border: 2px solid #3498db;
+        color: #3498db;
+    }
+
+    .btn-outline-custom:hover {
+        background: #3498db;
+        color: white;
+    }
+
+    .user-info-card {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 25px;
+    }
+
+    .user-info-title {
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 15px;
+    }
+
+    .info-item {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 8px;
+    }
+
+    .info-label {
+        font-weight: 500;
+        color: #5a6c7d;
+    }
+
+    .info-value {
+        font-weight: 600;
+        color: #2c3e50;
+    }
+
+    .features-list {
+        margin-top: 25px;
+    }
+
+    .feature-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 12px;
+        color: #5a6c7d;
+    }
+
+    .feature-item i {
+        color: #27ae60;
+    }
+
+    .alert-info-custom {
+        background: #d1ecf1;
+        color: #0c5460;
+        border: 1px solid #bee5eb;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+
+    @media(max-width:768px) {
+        .payment-form-section {
+            padding: 20px;
+        }
+
+        .course-summary {
+            padding: 20px;
+        }
+
+        .info-item {
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .info-value {
+            text-align: left;
+        }
+    }

@@ -1,0 +1,53 @@
+{
+  "name": "sanyod-replica-frontend",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "SANYOD replica website: React 18 + TypeScript (Vite)",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc -b --noEmit",
+    "test": "vitest run",
+    "e2e": "playwright test",
+    "visual": "node scripts/screenshot-compare.mjs",
+    "assets": "node scripts/copy-legacy-assets.mjs"
+  },
+  "dependencies": {
+    "@fortawesome/fontawesome-free": "5.15.4",
+    "@hookform/resolvers": "^3.10.0",
+    "@popperjs/core": "^2.11.8",
+    "@tanstack/react-query": "^5.104.2",
+    "axios": "^1.20.0",
+    "bootstrap": "5.1.3",
+    "bootstrap-icons": "1.4.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-helmet-async": "^2.0.5",
+    "react-hook-form": "^7.90.0",
+    "react-router-dom": "^7.18.4",
+    "sweetalert2": "^11.26.25",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.64.0",
+    "@testing-library/dom": "^10.4.2",
+    "@testing-library/jest-dom": "^7.0.1",
+    "@testing-library/react": "^16.3.3",
+    "@types/bootstrap": "5.1",
+    "@types/node": "^22.20.5",
+    "@types/react": "^18.3.31",
+    "@types/react-dom": "^18.3.7",
+    "@vitejs/plugin-react": "^6.1.2",
+    "jsdom": "^29.1.1",
+    "known-css-properties": "^0.37.0",
+    "parse5": "^7.3.0",
+    "pixelmatch": "^8.0.0",
+    "pngjs": "^7.0.0",
+    "postcss": "^8.5.29",
+    "typescript": "^5.9.3",
+    "vite": "^8.3.4",
+    "vitest": "^5.0.4"
+  }
+}

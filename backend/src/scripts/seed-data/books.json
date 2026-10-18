@@ -1,0 +1,39 @@
+[
+  {
+    "legacyId": 26,
+    "slug": "patience-in-life",
+    "title": "Patience in Life",
+    "cover": "/Books/book_6944e13695250.png",
+    "pdf": "Books_pdf/bookpdf_6944e136963a3.pdf",
+    "sortOrder": 0,
+    "description": "Do you ever feel so drained by work, relationships, or social media that you’ve lost your inner peace? Do emotions often take over, leading to decisions you later regret?\n\nPatience in Life is not just a book, it’s a spiritual guide that helps you build inner strength and navigate life through the confluence of Karma, Bhakti, and Jnana. Inspired by timeless Indian scriptures, like the Bhagavad Gita, Yoga Darshan, and the Upanishads, this book offers a path to calm the inner storms of anger, greed, attachment, fear, jealousy, and ego. It leads you on a profound inner journey where Patience (Dhairya) becomes more than a virtue, it becomes the very foundation of Yogic living.\n\nThis book is a gem for anyone who:\n\n1. Is walking the path of self-growth\n\n2. Struggles with inner restlessness\n\n3. Wants a deep understanding of Indian Yoga, philosophy, and spirituality.",
+    "pricePdf": 10000,
+    "priceHardcopy": 30000,
+    "pages": 155,
+    "publishedYear": 2025
+  },
+  {
+    "legacyId": 27,
+    "slug": "dhairya",
+    "title": "धैर्य",
+    "cover": "/Books/book_69494cf552223.jpg",
+    "pdf": "Books_pdf/bookpdf_69494cf552dde.pdf",
+    "sortOrder": 1
+  },
+  {
+    "legacyId": 28,
+    "slug": "vigyan-tatha-adhyatma",
+    "title": "विज्ञान तथा अध्यात्म",
+    "cover": "/Books/book_69494dc648644.png",
+    "pdf": "Books_pdf/bookpdf_69494dc649396.pdf",
+    "sortOrder": 2
+  },
+  {
+    "legacyId": 30,
+    "slug": "science-and-spiritual",
+    "title": "Science & Spiritual",
+    "cover": "/Books/book_69494f59259d5.png",
+    "pdf": "Books_pdf/bookpdf_69494f5926c4d.pdf",
+    "sortOrder": 3
+  }
+]

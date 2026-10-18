@@ -1,0 +1,15 @@
+node_modules/
+dist/
+coverage/
+*.log
+.env
+.env.local
+
+# Uploaded files (PDFs, payment screenshots, CVs, images): back them up, never commit them.
+backend/storage/
+
+# Test output
+frontend/test-results/
+frontend/playwright-report/
+frontend/tests/visual/__screens__/
+frontend/.port/

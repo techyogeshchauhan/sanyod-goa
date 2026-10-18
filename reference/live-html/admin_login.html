@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Administrator</title>
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="assets/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="../assets/css/style3.css">
+    <link rel="stylesheet" href="../assets/css/style4.css">
+    <!-- MetisMenu CSS -->
+    <link href="assets/js/metisMenu/metisMenu.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link href="assets/css/sb-admin-2.css" rel="stylesheet">
+    <!-- Custom Fonts -->
+    <link href="assets/fonts/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <script src="assets/js/jquery.min.js" type="text/javascript"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Paytone+One&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #d32f2f;
+            --primary-dark: #b71c1c;
+            --primary-light: #ff6659;
+            --secondary-color: #f5f5f5;
+            --accent-color: #ffab00;
+            --text-dark: #333333;
+            --text-light: #757575;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f9f9f9 0%, #eaeaea 100%);
+            font-family: 'Poppins', sans-serif;
+            color: var(--text-dark);
+            overflow-x: hidden;
+        }
+        
+        .pppht {
+            font-family: "Paytone One", sans-serif;
+            text-transform: uppercase;
+            font-size: 32px;
+            letter-spacing: 1px;
+            background: linear-gradient(45deg, var(--primary-color), var(--primary-light));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: none;
+            position: relative;
+            padding-bottom: 5px;
+        }
+        
+        .pppht::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color), var(--primary-color));
+            border-radius: 2px;
+        }
+        
+        /* Navigation Styles */
+        .navbar-default {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: none;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+        
+        .navbar-default:hover {
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        .navbar-header {
+            padding: 10px 0;
+        }
+        
+        .navbar-toggle {
+            border: none;
+            background: transparent !important;
+        }
+        
+        .navbar-toggle:hover {
+            background: var(--secondary-color) !important;
+        }
+        
+        .navbar-toggle .icon-bar {
+            background: var(--primary-color);
+            width: 22px;
+            height: 3px;
+            transition: var(--transition);
+        }
+        
+        .navbar-toggle:hover .icon-bar {
+            background: var(--primary-dark);
+        }
+        
+        /* Top Navigation Links */
+        .nav.navbar-top-links.navbar-right li a {
+            color: var(--text-dark);
+            font-weight: 500;
+            transition: var(--transition);
+            padding: 15px 10px;
+        }
+        
+        .nav.navbar-top-links.navbar-right li a:hover, 
+        .nav.navbar-top-links.navbar-right li a:focus {
+            color: var(--primary-color);
+            background: transparent;
+        }
+        
+        .dropdown-menu {
+            border: none;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            padding: 10px 0;
+            margin-top: 5px;
+        }
+        
+        .dropdown-menu > li > a {
+            padding: 8px 20px;
+            color: var(--text-dark);
+            transition: var(--transition);
+            font-weight: 400;
+        }
+        
+        .dropdown-menu > li > a:hover {
+            background: var(--secondary-color);
+            color: var(--primary-color);
+            padding-left: 25px;
+        }
+        
+        /* Sidebar Styles */
+        .sidebar {
+            background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%);
+            box-shadow: 5px 0 15px rgba(0, 0, 0, 0.1);
+            border: none;
+        }
+        
+        .sidebar ul.nav {
+            margin-top: 20px;
+        }
+        
+        .sidebar ul.nav li {
+            margin: 5px 15px;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: var(--transition);
+        }
+        
+        .sidebar ul.nav li:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
+        }
+        
+        .sidebar ul.nav li a {
+            color: #ecf0f1;
+            padding: 15px 20px;
+            font-weight: 500;
+            transition: var(--transition);
+            border-radius: 8px;
+        }
+        
+        .sidebar ul.nav li a:hover {
+            color: white;
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .sidebar ul.nav li a i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+            font-size: 18px;
+        }
+        
+        .sidebar ul.nav li.active a {
+            background: var(--primary-color);
+            color: white;
+            box-shadow: 0 4px 10px rgba(211, 47, 47, 0.3);
+        }
+        
+        /* Content Area */
+        #page-wrapper {
+            padding: 20px 15px;
+            min-height: calc(100vh - 52px);
+            background: transparent;
+        }
+        
+        
+        /* Responsive Adjustments */
+        @media (max-width: 768px) {
+            .navbar-header {
+                float: none;
+                text-align: center;
+            }
+            
+            .pppht {
+                font-size: 24px;
+            }
+            
+            .sidebar {
+                position: static;
+                height: auto;
+            }
+            
+            #page-wrapper {
+                padding: 10px;
+            }
+        }
+        
+        /* Animation for page load */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .dashboard-card, .sidebar ul.nav li {
+            animation: fadeIn 0.5s ease forwards;
+        }
+        
+        .sidebar ul.nav li:nth-child(1) { animation-delay: 0.1s; }
+        .sidebar ul.nav li:nth-child(2) { animation-delay: 0.2s; }
+        .sidebar ul.nav li:nth-child(3) { animation-delay: 0.3s; }
+        .sidebar ul.nav li:nth-child(4) { animation-delay: 0.4s; }
+    </style>
+</head>
+
+<body >
+    <div id="wrapper" >
+        <!-- Navigation -->
+                <!-- The End of the Header -->
+    </div>
+
+    
+    <!-- Metis Menu Plugin JavaScript -->
+    <script src="assets/js/metisMenu/metisMenu.min.js"></script>
+
+    <!-- Custom Theme JavaScript -->
+    <script src="assets/js/sb-admin-2.js"></script>
+    
+    <script>
+        // Add active class to current menu item
+        $(document).ready(function() {
+            var url = window.location;
+            var element = $('ul.nav a').filter(function() {
+                return this.href == url || url.href.indexOf(this.href) == 0;
+            }).addClass('active').parent().addClass('active');
+            
+            while (element.is('li')) {
+                element = element.parent().addClass('in').parent().addClass('active');
+            }
+            
+            // Smooth animations
+            $('.dashboard-card').hover(
+                function() {
+                    $(this).css('transform', 'translateY(-5px)');
+                },
+                function() {
+                    $(this).css('transform', 'translateY(0)');
+                }
+            );
+        });
+    </script>
+</body>
+</html><div id="page-" class="col-md-4 col-md-offset-4">
+	<form class="form loginform" method="POST" action="authenticate.php">
+		<div class="login-panel panel panel-default">
+			<div class="panel-heading">Please Sign in</div>
+			<div class="panel-body">
+				<div class="form-group">
+					<label class="control-label">Username</label>
+					<input type="text" name="username" class="form-control" required="required">
+				</div>
+				<div class="form-group">
+					<label class="control-label">Password</label>
+					<input type="password" name="password" class="form-control" required="required">
+				</div>
+				<div class="checkbox">
+					<label>
+						<input name="remember" type="checkbox" value="1">Remember Me
+					</label>
+				</div>
+								<button type="submit" class="btn btn-success loginField">Login</button>
+			</div>
+		</div>
+	</form>
+</div>
+</div>
+    <!-- /#wrapper -->
+
+    <!-- jQuery -->
+
+
+    <!-- Bootstrap Core JavaScript -->
+
+        <script src="assets/js/bootstrap.min.js"></script>
+
+    <!-- Metis Menu Plugin JavaScript -->
+    <script src="assets/js/metisMenu/metisMenu.min.js"></script>
+
+
+
+
+    <!-- Custom Theme JavaScript -->
+    <script src="assets/js/sb-admin-2.js"></script>
+    <script src="assets/js/jquery.validate.min.js"></script>
+
+</body>
+
+</html>
