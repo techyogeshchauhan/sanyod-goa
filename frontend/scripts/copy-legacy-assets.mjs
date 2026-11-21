@@ -6,7 +6,14 @@ import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const here = dirname(fileURLToPath(import.meta.url));
-const LEGACY_ROOT = resolve(here, '../../..'); // D:\sanyod.in
+// The PHP site folder: LEGACY_SITE_DIR, else a "sanyod.in" folder next to replica-website
+// (D:\sanyod\sanyod.in), else the parent folder (the original D:\sanyod.in layout).
+const sibling = resolve(here, '../../../sanyod.in');
+const LEGACY_ROOT = process.env.LEGACY_SITE_DIR
+  ? resolve(process.env.LEGACY_SITE_DIR)
+  : existsSync(join(sibling, 'index.php'))
+    ? sibling
+    : resolve(here, '../../..');
 const PUBLIC_DIR = resolve(here, '../public');
 const SKIP = new Set(['Thumbs.db', 'clock.zip']);
 const PRIVATE = [/^Books_pdf\//, /^uploads\/payments\//];

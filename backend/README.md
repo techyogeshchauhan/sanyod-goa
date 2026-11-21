@@ -16,8 +16,9 @@ Requires Node 20+ and MongoDB (default `mongodb://127.0.0.1:27017/sanyod_replica
 
 ```bash
 npm install
-cp .env.example .env          # set SESSION_SECRET (≥ 32 chars); LEGACY_SITE_DIR=D:/sanyod.in to copy book PDFs
+cp .env.example .env          # set SESSION_SECRET (≥ 32 chars); LEGACY_SITE_DIR=D:/sanyod/sanyod.in (the PHP site folder)
 npm run seed                  # creates collections + the data visible on the live site
+npm run import:legacy         # copies the PHP site's PDFs, payment screenshots, event images; adds poster events as drafts
 npm run create-admin -- --username admin --password "a-strong-password" --role superadmin
 npm run dev                   # http://localhost:4000/api/health
 ```
@@ -34,7 +35,8 @@ Without `SMTP_HOST`, emails (order confirmations, approvals, reset links) are wr
 | `npm test` | Vitest + Supertest tests against `sanyod_replica_test` (dropped before and after; uploads go to a temp folder) |
 | `npm run db:init` | Create every collection and index (safe to re-run) |
 | `npm run seed` | Data from the live site: 4 books, 4 courses with 96 videos, 3 doctors, 6 programmes, settings. Copies book PDFs from `LEGACY_SITE_DIR/Books_pdf` |
-| `npm run migrate:mysql -- --file <export.sql> [--legacy-dir D:/sanyod.in] [--dry-run]` | Import the live MySQL data and uploads (see below) |
+| `npm run migrate:mysql -- --file <export.sql> [--legacy-dir D:/sanyod/sanyod.in] [--dry-run]` | Import the live MySQL data and uploads (see below) |
+| `npm run import:legacy [-- --legacy-dir <dir>] [--dry-run]` | Copies every file the PHP site folder holds into storage (all book PDFs, payment screenshots, event images) with the keys `migrate:mysql` uses, and upserts the 3 programmes read from the event posters as unpublished drafts ([docs/14 D-28](../docs/14-open-questions-and-decisions.md#3-decisions-log)). In PowerShell, run `npx tsx src/scripts/import-legacy-files.ts --dry-run`: npm drops flags after `--` |
 | `npm run create-admin` | Create or reset an admin (`--username`, `--password` ≥ 10 chars, `--role admin\|superadmin`, `--name`) |
 
 ## Files and uploads
@@ -51,7 +53,7 @@ Back up `storage/` together with the database. In production, proxy `/api` and `
 ## Migrating the live data
 
 1. Export the live database from phpMyAdmin (SQL, structure + data) and download the server folders (`Books/`, `Books_pdf/`, `Courses/`, `uploads/`, `assets/img/events/`).
-2. Dry run: `npm run migrate:mysql -- --file export.sql --legacy-dir D:/sanyod.in --dry-run`. The report lists rows read/written/skipped per table, password formats, missing files and tables it did not understand.
+2. Dry run: `npm run migrate:mysql -- --file export.sql --legacy-dir D:/sanyod/sanyod.in --dry-run`. The report lists rows read/written/skipped per table, password formats, missing files and tables it did not understand.
 3. Run it for real (same command without `--dry-run`). It is safe to re-run: records are matched by their old ids, and users who changed their password on the new site keep it.
 4. Spot-check users, payments and orders in the admin panel.
 
