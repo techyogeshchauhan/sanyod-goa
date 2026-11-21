@@ -9,36 +9,35 @@ import type { EventCategory, EventSummary } from '@shared/types/catalog';
 import { eventsApi, settingsApi } from '@/api/catalog';
 import { FieldError } from '@/components/common/FieldError';
 import { PageError } from '@/components/common/PageState';
-import { useBodyClass } from '@/hooks/useBodyClass';
+import { EmptyState, PageHero, Spinner } from '@/components/ui';
 import { useAuth } from '@/providers/AuthProvider';
 import { applyApiError } from '@/utils/forms';
 import { rupeesGrouped } from '@/utils/format';
-import '@/styles/pages/programs.page.css';
 
 const SECTIONS: { id: EventCategory; nav: string; icon: string; title: string; subtitle: string; col: string }[] = [
   {
     id: 'retreat',
-    nav: 'RETREAT PROGRAM',
-    icon: 'fas fa-mountain me-2',
-    title: 'Retreat Programs',
+    nav: 'Retreat programs',
+    icon: 'fas fa-mountain',
+    title: 'Retreat programs',
     subtitle: 'Join our peaceful retreat programs and experience meditation, relaxation and spiritual growth.',
-    col: 'col-lg-4 col-md-6 mb-4',
+    col: 'col-md-6 col-lg-4',
   },
   {
     id: 'seminar',
-    nav: 'SEMINAR',
-    icon: 'fas fa-chalkboard-teacher me-2',
-    title: 'Seminars & Workshops',
+    nav: 'Seminars',
+    icon: 'fas fa-chalkboard-teacher',
+    title: 'Seminars & workshops',
     subtitle: 'Attend our educational seminars and interactive workshops.',
-    col: 'col-lg-6 col-md-6 mb-4',
+    col: 'col-md-6',
   },
   {
     id: 'online',
-    nav: 'ONLINE CLASS',
-    icon: 'fas fa-laptop me-2',
-    title: 'Online Classes',
+    nav: 'Online classes',
+    icon: 'fas fa-laptop',
+    title: 'Online classes',
     subtitle: 'Learn meditation and mindfulness from anywhere through our online classes.',
-    col: 'col-lg-6 col-md-6 mb-4',
+    col: 'col-md-6',
   },
 ];
 
@@ -46,152 +45,126 @@ const SECTIONS: { id: EventCategory; nav: string; icon: string; title: string; s
 const PLACEHOLDER =
   'data:image/svg+xml;utf8,' +
   encodeURIComponent(
-    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 340"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4B0082"/><stop offset="1" stop-color="#FF9933"/></linearGradient></defs><rect width="600" height="340" fill="url(#g)"/><text x="300" y="190" font-size="64" text-anchor="middle" fill="rgba(255,255,255,0.85)" font-family="serif">ॐ</text></svg>',
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 340"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3d3a8c"/><stop offset="1" stop-color="#d9822b"/></linearGradient></defs><rect width="600" height="340" fill="url(#g)"/><text x="300" y="190" font-size="64" text-anchor="middle" fill="rgba(255,255,255,0.85)" font-family="serif">ॐ</text></svg>',
   );
 
 /** Events booking (programes.php). Login required, as on live. */
 export default function ProgramsPage() {
-  useBodyClass('page-programs');
   const [active, setActive] = useState<EventCategory>('retreat');
   const [booking, setBooking] = useState<EventSummary | null>(null);
   const { data: events, isLoading, error } = useQuery({ queryKey: ['events'], queryFn: eventsApi.list });
   const onClosed = useCallback(() => setBooking(null), []);
+  const section = SECTIONS.find((s) => s.id === active) ?? SECTIONS[0]!;
+  const list = (events ?? []).filter((e) => e.category === section.id);
 
   return (
-    <div className="container-fluid py-4">
-      <div className="container">
-        <div className="d-flex justify-content-center mb-5">
-          <nav className="nav category-nav">
+    <>
+      <PageHero
+        crumbs={[{ label: 'Programmes' }]}
+        eyebrow="Programmes & events"
+        title="Retreats, seminars and online classes"
+        lead="Choose a programme, pay by UPI and submit your booking. We confirm every booking after verifying the payment."
+      />
+      <section className="section">
+        <div className="container">
+          <div className="segmented mb-4" role="tablist" aria-label="Programme categories">
             {SECTIONS.map((s) => (
-              <a
+              <button
                 key={s.id}
-                className={`nav-links${active === s.id ? ' active' : ''}`}
+                type="button"
+                role="tab"
+                aria-selected={active === s.id}
                 data-category={s.id}
-                role="button"
-                tabIndex={0}
+                className={active === s.id ? 'active' : ''}
                 onClick={() => setActive(s.id)}
-                onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && setActive(s.id)}
               >
-                <i className={s.icon}></i>
-                {s.nav}
-              </a>
+                <i className={s.icon}></i> {s.nav}
+              </button>
             ))}
-          </nav>
-        </div>
+          </div>
 
-        {error && <PageError error={error} />}
+          {error && <PageError error={error} />}
 
-        {SECTIONS.map((s) => {
-          const list = (events ?? []).filter((e) => e.category === s.id);
-          return (
-            <div key={s.id} id={s.id} className={`content-section${active === s.id ? ' active' : ''}`}>
-              <h2 className="section-title">{s.title}</h2>
-              <p className="section-subtitle">{s.subtitle}</p>
-              {isLoading && (
-                <div className="text-center py-4">
-                  <div className="spinner-border text-primary" role="status">
-                    <span className="visually-hidden">Loading...</span>
-                  </div>
+          <div id={section.id} role="tabpanel">
+            <h2 className="h3 mb-1">{section.title}</h2>
+            <p className="text-muted mb-4">{section.subtitle}</p>
+            {isLoading && <Spinner />}
+            {!isLoading && !error && list.length === 0 && (
+              <EmptyState icon="far fa-calendar-alt" title="Coming soon" text="New programmes will be announced soon." />
+            )}
+            <div className="row g-4">
+              {list.map((ev) => (
+                <div className={section.col} key={ev.id}>
+                  <EventCard ev={ev} onBook={setBooking} />
                 </div>
-              )}
-              {!isLoading && list.length === 0 && <p className="text-center text-muted">New programmes will be announced soon.</p>}
-              <div className="row">
-                {list.map((ev) => (
-                  <div className={s.col} key={ev.id}>
-                    {s.id === 'retreat' ? (
-                      <div className="card-container">
-                        <EventCard ev={ev} onBook={setBooking} />
-                      </div>
-                    ) : (
-                      <EventCard ev={ev} onBook={setBooking} />
-                    )}
-                  </div>
-                ))}
-              </div>
+              ))}
             </div>
-          );
-        })}
-      </div>
+          </div>
+        </div>
+      </section>
       <BookingModal event={booking} onClosed={onClosed} />
-    </div>
+    </>
   );
 }
 
 function EventCard({ ev, onBook }: { ev: EventSummary; onBook: (e: EventSummary) => void }) {
   const online = ev.category === 'online';
+  const meta: { icon: string; text: string }[] = [];
+  if (!online && ev.dateText) meta.push({ icon: 'far fa-calendar-alt', text: ev.dateText });
+  if (online) {
+    if (ev.durationText) meta.push({ icon: 'far fa-calendar-check', text: `Duration: ${ev.durationText}` });
+    meta.push({ icon: 'fas fa-map-marker-alt', text: ev.location || 'Online' });
+    if (ev.timeText) meta.push({ icon: 'far fa-clock', text: ev.timeText === 'Flexible' ? 'Flexible time' : ev.timeText });
+  } else {
+    if (ev.timeText) meta.push({ icon: 'far fa-clock', text: ev.timeText });
+    if (ev.location) meta.push({ icon: 'fas fa-map-marker-alt', text: ev.location });
+    if (ev.durationText) meta.push({ icon: 'far fa-calendar-check', text: `Duration: ${ev.durationText}` });
+  }
+
   return (
-    <div className="card">
-      <img
-        src={ev.image ?? PLACEHOLDER}
-        className="card-img-top"
-        alt={ev.title}
-        onError={(e) => {
-          e.currentTarget.onerror = null;
-          e.currentTarget.src = PLACEHOLDER;
-        }}
-      />
-      <div className="card-body">
-        {ev.badge && <span className="badge">{ev.badge}</span>}
-        {!online && ev.dateText && (
-          <div className="event-date">
-            <i className="far fa-calendar-alt me-1"></i>
-            {ev.dateText}
-          </div>
-        )}
-        <h5 className="card-title">{ev.title}</h5>
-        <p className="card-text">{ev.description}</p>
-        <div className="price-tag">{rupeesGrouped(ev.price)}</div>
-        <div className="event-meta">
-          {online ? (
-            <>
-              {ev.durationText && (
-                <p>
-                  <i className="far fa-calendar-check"></i> Duration: {ev.durationText}
-                </p>
-              )}
-              <p>
-                <i className="fas fa-map-marker-alt"></i> {ev.location || 'Online'}
-              </p>
-              <p>
-                <i className="far fa-clock"></i> {ev.timeText === 'Flexible' ? 'Flexible Time' : ev.timeText}
-              </p>
-            </>
-          ) : (
-            <>
-              {ev.timeText && (
-                <p>
-                  <i className="far fa-clock"></i> {ev.timeText}
-                </p>
-              )}
-              {ev.location && (
-                <p>
-                  <i className="fas fa-map-marker-alt"></i> {ev.location}
-                </p>
-              )}
-              {ev.durationText && (
-                <p>
-                  <i className="far fa-calendar-check"></i> Duration: {ev.durationText}
-                </p>
-              )}
-            </>
-          )}
-        </div>
-        <div className="event-stats">
-          <span>
-            <i className="fas fa-users me-1"></i>
-            {ev.enrolledCount} enrolled
-          </span>
-          {ev.rating != null && (
-            <span className="star-rating">
-              {ev.rating} <i className="fas fa-star"></i>
-            </span>
-          )}
-        </div>
-        <button type="button" className="btn btn-booking w-100 mt-3 text-white" onClick={() => onBook(ev)}>
-          {ev.ctaLabel}
-        </button>
+    <article className="card-soft card-media hover reveal">
+      <div className="media">
+        {ev.badge && <span className="chip solid media-tag">{ev.badge}</span>}
+        <img
+          src={ev.image ?? PLACEHOLDER}
+          alt={ev.title}
+          loading="lazy"
+          onError={(e) => {
+            e.currentTarget.onerror = null;
+            e.currentTarget.src = PLACEHOLDER;
+          }}
+        />
       </div>
-    </div>
+      <div className="body">
+        <h3 className="h4">{ev.title}</h3>
+        <p className="text-muted small">{ev.description}</p>
+        <ul className="meta-list flex-column align-items-start gap-1 mb-3">
+          {meta.map((m) => (
+            <li key={m.text}>
+              <i className={m.icon}></i> {m.text}
+            </li>
+          ))}
+        </ul>
+        <div className="mt-auto">
+          <div className="d-flex justify-content-between align-items-end gap-2 mb-3">
+            <span className="price">{rupeesGrouped(ev.price)}</span>
+            <span className="small text-muted">
+              <i className="fas fa-users me-1"></i>
+              {ev.enrolledCount} enrolled
+              {ev.rating != null && (
+                <>
+                  {' · '}
+                  {ev.rating} <i className="fas fa-star text-saffron"></i>
+                </>
+              )}
+            </span>
+          </div>
+          <button type="button" className="btn btn-primary btn-booking w-100" onClick={() => onBook(ev)}>
+            {ev.ctaLabel}
+          </button>
+        </div>
+      </div>
+    </article>
   );
 }
 
@@ -243,85 +216,95 @@ function BookingModal({ event, onClosed }: { event: EventSummary | null; onClose
     }
   });
 
+  const upiId = settings?.upiIdDefault ?? '6355034424@upi';
+
   return (
-    <div className="modal fade" id="bookingModal" tabIndex={-1} aria-hidden="true" ref={ref}>
-      <div className="modal-dialog modal-dialog-centered">
+    <div className="modal fade" id="bookingModal" tabIndex={-1} aria-hidden="true" aria-labelledby="bookingModalTitle" ref={ref}>
+      <div className="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
         <div className="modal-content">
           <div className="modal-header">
-            <h5 className="modal-title">Book Your Event</h5>
-            <button type="button" className="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            <h5 className="modal-title" id="bookingModalTitle">
+              Book your event
+            </h5>
+            <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div className="modal-body">
             <form id="bookingForm" onSubmit={onSubmit} noValidate>
               {status && <div className={`alert alert-${status.type}`}>{status.text}</div>}
-              <div className="mb-3">
-                <label className="form-label">Event</label>
-                <input type="text" className="form-control" id="event_name" readOnly value={event?.title ?? ''} />
-              </div>
-              <div className="mb-3">
-                <label className="form-label">Date</label>
-                <input type="text" className="form-control" id="event_date" readOnly value={event?.dateText ?? ''} />
-              </div>
-              <div className="mb-3">
-                <label className="form-label">Time</label>
-                <input type="text" className="form-control" id="event_time" readOnly value={event?.timeText ?? ''} />
-              </div>
-              <div className="mb-3">
-                <label className="form-label">Location</label>
-                <input type="text" className="form-control" id="event_location" readOnly value={event?.location ?? ''} />
-              </div>
-              <div className="mb-3">
-                <label className="form-label">Price</label>
-                <input type="text" className="form-control" id="event_price" readOnly value={event ? `₹${(event.price / 100).toFixed(2)}` : ''} />
-              </div>
-              <div className="upi-section">
-                <h5>
-                  <i className="fas fa-qrcode me-2"></i>Pay Using UPI
-                </h5>
-                <img src={settings?.qrImageBooks ?? '/Books/QR.jpg'} alt="UPI QR" className="upi-qr" />
-                <p className="mt-2">
-                  <strong>UPI ID:</strong> {settings?.upiIdDefault ?? '6355034424@upi'}
-                </p>
-              </div>
-              <div className="mb-3">
-                <label className="form-label" htmlFor="transaction_id">Transaction ID (UTR)</label>
-                <input type="text" className="form-control" id="transaction_id" placeholder="Enter your UPI transaction ID" {...register('upiTransactionId')} />
-                <FieldError message={errors.upiTransactionId?.message} />
-              </div>
-              <div className="mb-3">
-                <label className="form-label" htmlFor="user_name">Full Name</label>
-                <input type="text" className="form-control" id="user_name" placeholder="Enter your full name" {...register('name')} />
-                <FieldError message={errors.name?.message} />
-              </div>
-              <div className="mb-3">
-                <label className="form-label" htmlFor="user_email">Email Address</label>
-                <input type="email" className="form-control" id="user_email" placeholder="Enter your email" {...register('email')} />
-                <FieldError message={errors.email?.message} />
-              </div>
-              <div className="mb-3">
-                <label className="form-label" htmlFor="user_phone">Phone Number</label>
-                <input
-                  type="tel"
-                  inputMode="numeric"
-                  className="form-control"
-                  id="user_phone"
-                  placeholder="10-digit phone number"
-                  {...register('phone', { onChange: (e) => (e.target.value = e.target.value.replace(/\D/g, '').slice(0, 10)) })}
-                />
-                <FieldError message={errors.phone?.message} />
-              </div>
-              <div className="d-grid">
-                <button type="submit" className="btn btn-booking" style={{ color: '#fff' }} disabled={isSubmitting}>
-                  {isSubmitting ? (
-                    <>
-                      <span className="spinner-border spinner-border-sm me-2" role="status"></span>Submitting...
-                    </>
-                  ) : (
-                    <>
-                      <i className="fas fa-check-circle me-2"></i>I Have Paid — Submit Booking
-                    </>
-                  )}
-                </button>
+              <div className="row g-4">
+                <div className="col-md-6">
+                  <div className="card-flat h-100" style={{ background: 'var(--surface-2)' }}>
+                    <input type="hidden" id="event_name" value={event?.title ?? ''} readOnly />
+                    <div className="small text-muted">Event</div>
+                    <h3 className="h5 mb-3">{event?.title}</h3>
+                    <div className="summary-line">
+                      <span className="text-muted">Date</span>
+                      <span id="event_date" className="text-end">{event?.dateText || '—'}</span>
+                    </div>
+                    <div className="summary-line">
+                      <span className="text-muted">Time</span>
+                      <span id="event_time" className="text-end">{event?.timeText || '—'}</span>
+                    </div>
+                    <div className="summary-line">
+                      <span className="text-muted">Location</span>
+                      <span id="event_location" className="text-end">{event?.location || '—'}</span>
+                    </div>
+                    <div className="summary-line total">
+                      <span>Price</span>
+                      <span id="event_price">{event ? `₹${(event.price / 100).toFixed(2)}` : ''}</span>
+                    </div>
+                    <div className="text-center mt-3">
+                      <div className="qr-box">
+                        <img src={settings?.qrImageBooks ?? '/Books/QR.jpg'} alt="UPI QR code" />
+                      </div>
+                      <div className="upi-row mt-3">
+                        <span className="small text-muted">UPI ID</span>
+                        <code>{upiId}</code>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="col-md-6 d-grid gap-3 align-content-start">
+                  <div>
+                    <label className="form-label" htmlFor="transaction_id">Transaction ID (UTR)</label>
+                    <input type="text" className="form-control" id="transaction_id" placeholder="Enter your UPI transaction ID" {...register('upiTransactionId')} />
+                    <FieldError message={errors.upiTransactionId?.message} />
+                  </div>
+                  <div>
+                    <label className="form-label" htmlFor="user_name">Full name</label>
+                    <input type="text" className="form-control" id="user_name" placeholder="Enter your full name" {...register('name')} />
+                    <FieldError message={errors.name?.message} />
+                  </div>
+                  <div>
+                    <label className="form-label" htmlFor="user_email">Email address</label>
+                    <input type="email" className="form-control" id="user_email" placeholder="Enter your email" {...register('email')} />
+                    <FieldError message={errors.email?.message} />
+                  </div>
+                  <div>
+                    <label className="form-label" htmlFor="user_phone">Phone number</label>
+                    <input
+                      type="tel"
+                      inputMode="numeric"
+                      className="form-control"
+                      id="user_phone"
+                      placeholder="10-digit phone number"
+                      {...register('phone', { onChange: (e) => (e.target.value = e.target.value.replace(/\D/g, '').slice(0, 10)) })}
+                    />
+                    <FieldError message={errors.phone?.message} />
+                  </div>
+                  <button type="submit" className="btn btn-primary btn-lg w-100 mt-1" disabled={isSubmitting}>
+                    {isSubmitting ? (
+                      <>
+                        <span className="spinner-border spinner-border-sm" role="status"></span> Submitting...
+                      </>
+                    ) : (
+                      <>
+                        <i className="fas fa-check-circle"></i> I Have Paid — Submit Booking
+                      </>
+                    )}
+                  </button>
+                  <p className="small text-muted mb-0">Pay the amount by UPI first, then enter the transaction ID shown in your UPI app.</p>
+                </div>
               </div>
             </form>
           </div>

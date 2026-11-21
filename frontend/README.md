@@ -34,9 +34,19 @@ npm run dev        # http://localhost:5173 (proxies /api and legacy *.php URLs t
 
 > In Git Bash, prefix commands that take `/paths` with `MSYS_NO_PATHCONV=1`.
 
-## How the UI stays identical
+## Design system
 
-- `src/main.tsx` imports the CSS in the live cascade order: Bootstrap 5.1.3 → themed Bootstrap (`styles/legacy/bootstrap.theme.min.css`) → Font Awesome 5.15.4 → Bootstrap Icons 1.4.1 → `styles/legacy/style.css` → `styles/layout/header.css` → `styles/layout/footer.css`.
+The public site uses its own design ([D-27](../docs/14-open-questions-and-decisions.md#3-decisions-log)); it is no longer a pixel replica of the live site.
+
+- `src/main.tsx` imports Font Awesome 5.15.4 → Bootstrap Icons 1.4.1 → Bootstrap 5 → `src/styles/theme.css` (tokens, typography, components).
+- Shared building blocks live in `src/components/ui` (`PageHero`, `Section`, `FeatureCard`, `StatRow`, `CtaBand`, `EmptyState`, `StatusChip`, `useReveal`, …), plus `components/auth/AuthShell` and `components/courses/CourseCard`.
+- Fonts: Fraunces (headings), Inter (text), Noto Sans/Serif Devanagari (Hindi), loaded in `index.html`.
+- Every public page is on the design system. Only three page stylesheets remain, still scoped by `body.page-<name>`: `home.page.css` (hero), `personality-test.page.css` (quiz) and `admin.page.css` (admin panel, D-09).
+- The Personality Test logic stays in `pages/personality/personalityTest.legacy.ts` (verbatim port of the live script). It drives the markup in `PersonalityTestContent.tsx` by element id and by the classes `.active`, `.progress-container`, `.question-counter`, `.navigation-buttons`, `.question-container`, `.option-item`; keep them when changing the markup.
+
+## How the UI stayed identical (before D-27, kept for history)
+
+- `src/main.tsx` imported the CSS in the live cascade order: Bootstrap 5.1.3 → themed Bootstrap (`styles/legacy/bootstrap.theme.min.css`) → Font Awesome 5.15.4 → Bootstrap Icons 1.4.1 → `styles/legacy/style.css` → `styles/layout/header.css` → `styles/layout/footer.css`.
 - Each page's original inline `<style>` is copied unchanged into `src/styles/pages/<name>.page.css`. `scripts/postcss-page-scope.js` scopes it to `body.page-<name>`, and the page activates it with `useBodyClass('page-<name>')`. So it applies to the whole document only while that page is shown, as in PHP.
 - Markup is converted from the live HTML keeping elements, classes and texts.
 

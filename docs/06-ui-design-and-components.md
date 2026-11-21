@@ -14,6 +14,8 @@ Confidence marks: ✅ Live · 📄 Code · 🔎 Inferred · ❓ Unknown.
 
 ## 0. Replication rules (what must match and what may change)
 
+> **Superseded for the public site's visual design by [D-27](14-open-questions-and-decisions.md#3-decisions-log) (21 Nov 2026).** The public site now uses its own design system (`frontend/src/styles/theme.css`, `frontend/src/components/ui`), not the live look. From the table below, only the **Workflows** row still applies (same steps, fields, validation rules and business rules); layout, design tokens, typography, components and UI copy follow the new design. The rest of this document (§ 1–6) describes the **live** site and remains the reference for content, page sections and behaviour, not for visuals.
+
 ### 0.1 Must match the live site
 
 | Area | Rule |

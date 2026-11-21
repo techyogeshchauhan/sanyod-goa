@@ -154,6 +154,8 @@ Rules:
 
 ## 6. CSS pipeline (key to an identical UI)
 
+> **Changed by [D-27](14-open-questions-and-decisions.md#3-decisions-log) (21 Nov 2026):** `src/main.tsx` now loads Font Awesome → Bootstrap Icons → Bootstrap 5 → `styles/theme.css` (the SANYOD design system). The legacy files (`styles/legacy/*`, `styles/layout/*`) are no longer imported. Page-scoped `*.page.css` files that remain still go through the body-class scoping below (D-17). The rest of this section describes the original replica pipeline.
+
 ### 6.1 Global import order (`src/main.tsx`)
 
 ```ts

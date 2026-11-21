@@ -12,7 +12,7 @@ Confidence marks: ✅ Live · 📄 Code · 🔎 Inferred · ❓ Unknown.
 
 | # | Principle |
 | --- | --- |
-| 1 | **Same look:** reuse the original HTML structure, class names and CSS so the overall look matches the live site. Small component adjustments are allowed only within the rules in [06 § 0](06-ui-design-and-components.md#0-replication-rules-what-must-match-and-what-may-change). |
+| 1 | **New look, same behaviour:** the public site uses the SANYOD design system; routes, workflows and rules stay as on live ([D-27](14-open-questions-and-decisions.md#3-decisions-log), replaces the earlier "same look" rule). |
 | 2 | **Same functionality:** every flow in [04](04-workflows.md) works the same for users, including the manual UPI payment + admin approval. |
 | 3 | **Fix what's broken or insecure** (500/404 pages, exposed PDFs/videos/admin, fake forms), invisibly to the user. |
 | 4 | **Old links keep working:** every legacy `.php` URL 301-redirects to its new route. |
@@ -135,6 +135,8 @@ Front-end routes and guards:
 ---
 
 ## 5. Keeping the UI identical
+
+> **Superseded by [D-27](14-open-questions-and-decisions.md#3-decisions-log) (21 Nov 2026):** the public site no longer copies the live CSS and markup; it uses the new design system. This section is kept for history. The pixel-diff gate below no longer applies to the public site.
 
 This is the most important part of the migration.
 

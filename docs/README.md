@@ -1,6 +1,6 @@
 # SANYOD Replica Website: Documentation
 
-The complete specification for rebuilding **sanyod.in** (PHP + MySQL) as a **MERN + TypeScript/TSX** application in `replica-website/`. The new site must replicate the live website's overall UI, common components, shared functionality and user workflows.
+The complete specification for rebuilding **sanyod.in** (PHP + MySQL) as a **MERN + TypeScript/TSX** application in `replica-website/`. The new site keeps the live website's functionality, content and user workflows, presented in a new visual design ([D-27](14-open-questions-and-decisions.md#3-decisions-log); the earlier "exact UI replica" rule is replaced).
 
 | | |
 | --- | --- |

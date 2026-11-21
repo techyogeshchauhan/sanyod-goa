@@ -9,9 +9,9 @@ export function passwordStrength(password: string): number {
 }
 
 export function strengthColor(strength: number): string {
-  if (strength < 50) return '#dc3545';
-  if (strength < 75) return '#ffc107';
-  return '#28a745';
+  if (strength < 50) return '#c2453d';
+  if (strength < 75) return '#c9a227';
+  return '#4f8a5f';
 }
 
 export function PasswordStrengthMeter({ password }: { password: string }) {

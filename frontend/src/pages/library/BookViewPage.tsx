@@ -1,162 +1,130 @@
 import { useQuery } from '@tanstack/react-query';
-import { useEffect, useRef } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { libraryApi } from '@/api/catalog';
 import { ApiError } from '@/api/client';
-import { PageError, PageLoading } from '@/components/common/PageState';
-import { useBodyClass } from '@/hooks/useBodyClass';
+import { PageError } from '@/components/common/PageState';
+import { Spinner } from '@/components/ui';
 import { fileSize, longDate, nl2lines } from '@/utils/format';
-import '@/styles/pages/view-book.page.css';
 
 /** One purchased book (view_book.php design, filled with the real book). */
 export default function BookViewPage() {
-  useBodyClass('page-view-book');
   const { slug = '' } = useParams();
   const { data: book, isLoading, error } = useQuery({ queryKey: ['library', 'book', slug], queryFn: () => libraryApi.book(slug) });
   const { data: all } = useQuery({ queryKey: ['library', 'books'], queryFn: libraryApi.books });
-  const cardRef = useRef<HTMLDivElement>(null);
 
-  // Live script: fade the card in.
-  useEffect(() => {
-    const card = cardRef.current;
-    if (!card) return;
-    card.style.opacity = '0';
-    card.style.transform = 'translateY(30px)';
-    card.style.transition = 'all 0.6s ease';
-    const id = window.setTimeout(() => {
-      card.style.opacity = '1';
-      card.style.transform = 'translateY(0)';
-    }, 100);
-    return () => window.clearTimeout(id);
-  }, [book]);
-
-  if (isLoading) return <PageLoading />;
-  if (error instanceof ApiError && error.code === 'NOT_PURCHASED') {
-    return (
-      <div className="container py-5 text-center">
-        <div className="alert alert-warning d-inline-block">
-          You have not purchased this book yet. <Link to={`/books/${slug}`}>View purchase options</Link>
-        </div>
-      </div>
-    );
-  }
+  if (isLoading) return <Spinner />;
+  if (error instanceof ApiError && error.code === 'NOT_PURCHASED') return <NotPurchased slug={slug} />;
   if (error || !book) return <PageError error={error} />;
 
-  const others = (all ?? []).filter((b) => b.slug !== book.slug).slice(0, 3);
+  const others = (all ?? []).filter((b) => b.slug !== book.slug).slice(0, 4);
   const confirmDownload = (e: React.MouseEvent) => {
     if (!window.confirm('Are you sure you want to download this PDF file?')) e.preventDefault();
   };
+  const details: [string, string][] = [
+    ['Purchased', longDate(book.purchasedAt)],
+    ...(book.orderNumber ? ([['Order', book.orderNumber]] as [string, string][]) : []),
+    ['Format', 'PDF'],
+    ['File size', fileSize(book.fileSizeBytes)],
+    ['Pages', book.pages ? String(book.pages) : '—'],
+    ['Language', /[ऀ-ॿ]/.test(book.title) ? 'Hindi' : 'English'],
+    ['Published', book.publishedYear ? String(book.publishedYear) : '—'],
+    ['Publisher', 'Sanyod.in'],
+  ];
 
   return (
-    <div className="book-view-container">
+    <section className="section">
       <div className="container">
-        <Link to="/my-books" className="btn btn-back mb-4">
-          <i className="fas fa-arrow-left"></i> Back to Books
-        </Link>
-        <div className="book-detail-card" ref={cardRef}>
-          <div className="book-header">
-            <div className="book-header-content">
-              <div className="book-cover">
-                <img src={book.cover} alt={book.title} />
-              </div>
-              <div className="book-info">
-                <h1 className="book-title">{book.title}</h1>
-                <p className="book-author">By {book.author}</p>
-                <div className="book-meta-grid">
-                  <div className="meta-item">
-                    <div className="meta-label">Category</div>
-                    <div className="meta-value">Spirituality</div>
-                  </div>
-                  <div className="meta-item">
-                    <div className="meta-label">Pages</div>
-                    <div className="meta-value">{book.pages ?? '—'}</div>
-                  </div>
-                  <div className="meta-item">
-                    <div className="meta-label">Language</div>
-                    <div className="meta-value">{/[ऀ-ॿ]/.test(book.title) ? 'Hindi' : 'English'}</div>
-                  </div>
-                  <div className="meta-item">
-                    <div className="meta-label">Format</div>
-                    <div className="meta-value">PDF</div>
-                  </div>
-                </div>
-                <div className="book-actions">
-                  <Link to={`/my-books/${book.slug}/read`} className="btn-action btn-read">
-                    <i className="fas fa-book-open"></i> Read Online
-                  </Link>
-                  <a href={libraryApi.pdfUrl(book.slug, true)} className="btn-action btn-download" onClick={confirmDownload}>
-                    <i className="fas fa-download"></i> Download PDF
-                  </a>
-                </div>
-              </div>
+        <nav className="crumbs" aria-label="Breadcrumb">
+          <Link to="/">Home</Link>
+          <span>
+            <Link to="/my-books">My Books</Link>
+          </span>
+          <span>{book.title}</span>
+        </nav>
+        <div className="row g-5">
+          <div className="col-md-4">
+            <div className="cover-frame mx-auto" style={{ maxWidth: 320 }}>
+              <img src={book.cover} alt={book.title} />
             </div>
           </div>
-          <div className="book-body">
-            <div className="book-section">
-              <h3 className="section-title">Book Description</h3>
-              <div className="book-description">
-                {nl2lines(book.description).map((line, i) => (
-                  <span key={i}>
-                    {i > 0 && <br />}
-                    {line}
-                  </span>
-                ))}
-              </div>
+          <div className="col-md-8">
+            <span className="chip sage mb-2">
+              <i className="fas fa-check"></i> In your library
+            </span>
+            <h1 className="deva mb-2">{book.title}</h1>
+            <p className="lead">by {book.author}</p>
+            <div className="d-flex gap-2 flex-wrap mb-4">
+              <Link to={`/my-books/${book.slug}/read`} className="btn btn-primary btn-lg">
+                <i className="fas fa-book-open"></i> Read Online
+              </Link>
+              <a href={libraryApi.pdfUrl(book.slug, true)} className="btn btn-light btn-lg" onClick={confirmDownload}>
+                <i className="fas fa-download text-saffron"></i> Download PDF
+              </a>
             </div>
-            <div className="book-section">
-              <h3 className="section-title">Additional Information</h3>
-              <table className="info-table">
-                <tbody>
-                  <tr>
-                    <td>Purchase Date</td>
-                    <td>{longDate(book.purchasedAt)}</td>
-                  </tr>
-                  {book.orderNumber && (
-                    <tr>
-                      <td>Order Number</td>
-                      <td>{book.orderNumber}</td>
-                    </tr>
-                  )}
-                  <tr>
-                    <td>File Size</td>
-                    <td>{fileSize(book.fileSizeBytes)}</td>
-                  </tr>
-                  <tr>
-                    <td>Publisher</td>
-                    <td>Sanyod.in</td>
-                  </tr>
-                  <tr>
-                    <td>Publication Year</td>
-                    <td>{book.publishedYear ?? '—'}</td>
-                  </tr>
-                </tbody>
-              </table>
+            <div className="row g-4">
+              <div className="col-lg-7">
+                <div className="card-flat prose h-100">
+                  <h2 className="h5 mb-3">About this book</h2>
+                  {nl2lines(book.description).map((line, i) => (
+                    <span key={i}>
+                      {i > 0 && <br />}
+                      {line}
+                    </span>
+                  ))}
+                </div>
+              </div>
+              <div className="col-lg-5">
+                <div className="card-flat h-100">
+                  <h2 className="h5 mb-3">Details</h2>
+                  {details.map(([k, v]) => (
+                    <div className="summary-line" key={k}>
+                      <span className="text-muted">{k}</span>
+                      <span className="text-ink fw-600 text-end">{v}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
         {others.length > 0 && (
-          <div className="similar-books">
-            <h3 className="section-title">More Books</h3>
-            <div className="similar-grid">
+          <div className="mt-5 pt-3">
+            <h2 className="h3 mb-4">More from your library</h2>
+            <div className="row g-4">
               {others.map((b) => (
-                <div className="similar-card" key={b.id}>
-                  <div className="similar-cover">
-                    <img src={b.cover} alt={b.title} />
-                  </div>
-                  <div className="similar-content">
-                    <h4 className="similar-title">{b.title}</h4>
-                    <p className="similar-author">{b.author}</p>
-                    <Link to={`/my-books/${b.slug}`} className="btn-view-similar">
-                      View Details
-                    </Link>
-                  </div>
+                <div className="col-6 col-md-3" key={b.id}>
+                  <Link to={`/my-books/${b.slug}`} className="book-tile">
+                    <div className="cover-frame">
+                      <img src={b.cover} alt="" />
+                    </div>
+                    <h3 className="h6 mt-2 deva">{b.title}</h3>
+                  </Link>
                 </div>
               ))}
             </div>
           </div>
         )}
       </div>
-    </div>
+    </section>
+  );
+}
+
+export function NotPurchased({ slug }: { slug: string }) {
+  return (
+    <section className="section">
+      <div className="container container-narrow">
+        <div className="empty-state">
+          <span className="icon-badge lg">
+            <i className="fas fa-lock"></i>
+          </span>
+          <h1 className="h3">You have not purchased this book yet</h1>
+          <p>Buy the PDF or the printed book to read it here.</p>
+          <Link to={`/books/${slug}`} className="btn btn-primary">
+            View purchase options
+          </Link>
+        </div>
+      </div>
+    </section>
   );
 }

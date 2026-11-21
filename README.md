@@ -1,6 +1,6 @@
 # SANYOD Replica Website (MERN + TypeScript/TSX)
 
-A rebuild of **sanyod.in** (Sankhya Yog Darshan), currently PHP + MySQL, on **MongoDB · Express · React (TSX) · Node.js**. It keeps the live site's overall UI, common components, functionality and user workflows.
+A rebuild of **sanyod.in** (Sankhya Yog Darshan), currently PHP + MySQL, on **MongoDB · Express · React (TSX) · Node.js**. It keeps the live site's functionality, content and user workflows, with a new visual design ([D-27](docs/14-open-questions-and-decisions.md#3-decisions-log); the UI is no longer an exact replica).
 
 > **Status (19 Oct 2026): phases 1–6 built.** Every page of the PHP site is rebuilt (public site, books, courses, health, programmes, personality test, user library) with a working API, UPI payment flow, file uploads, emails and a full admin panel. Phase 7 (data migration + launch) is ready to run once the database export and server files arrive: see [backend/README.md](backend/README.md#migrating-the-live-data) and the open items in [docs/14](docs/14-open-questions-and-decisions.md).
 

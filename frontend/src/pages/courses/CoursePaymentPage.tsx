@@ -5,22 +5,20 @@ import type { PaymentMethod } from '@shared/types/catalog';
 import { formatRupees } from '@shared/utils/text';
 import { courseDetailApi, paymentsApi, settingsApi } from '@/api/catalog';
 import { ApiError } from '@/api/client';
-import { PageError, PageLoading } from '@/components/common/PageState';
-import { useBodyClass } from '@/hooks/useBodyClass';
+import { PageError } from '@/components/common/PageState';
+import { Spinner } from '@/components/ui';
 import { useAuth } from '@/providers/AuthProvider';
 import NotFoundPage from '@/pages/NotFoundPage';
-import '@/styles/pages/course-payment.page.css';
 
 const METHODS: { id: PaymentMethod; icon: string; name: string }[] = [
   { id: 'upi', icon: 'fa fa-mobile-alt', name: 'UPI' },
-  { id: 'card', icon: 'fa fa-credit-card', name: 'Credit/Debit Card' },
-  { id: 'netbanking', icon: 'fa fa-university', name: 'Net Banking' },
+  { id: 'card', icon: 'fa fa-credit-card', name: 'Card' },
+  { id: 'netbanking', icon: 'fa fa-university', name: 'Net banking' },
   { id: 'wallet', icon: 'fa fa-wallet', name: 'Wallet' },
 ];
 
 /** Course purchase (payment.php): method, transaction ID and screenshot, approved by the admin. */
 export default function CoursePaymentPage() {
-  useBodyClass('page-course-payment');
   const { slug = '' } = useParams();
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -34,7 +32,7 @@ export default function CoursePaymentPage() {
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
-  if (isLoading) return <PageLoading />;
+  if (isLoading) return <Spinner />;
   if (error instanceof ApiError && error.status === 404) return <NotFoundPage />;
   if (error || !data) return <PageError error={error} />;
   const { course, purchase } = data;
@@ -63,13 +61,7 @@ export default function CoursePaymentPage() {
     if (!file) return setFormError('Please upload your payment screenshot.');
     setSubmitting(true);
     try {
-      const { payment } = await paymentsApi.create({
-        itemType: 'course',
-        itemSlug: course.slug,
-        upiTransactionId: transactionId.trim(),
-        paymentMethod: method,
-        screenshot: file,
-      });
+      const { payment } = await paymentsApi.create({ itemType: 'course', itemSlug: course.slug, upiTransactionId: transactionId.trim(), paymentMethod: method, screenshot: file });
       void queryClient.invalidateQueries({ queryKey: ['course', slug] });
       void queryClient.invalidateQueries({ queryKey: ['payments'] });
       navigate(`/payment/success?id=${payment.id}`, { replace: true });
@@ -82,240 +74,178 @@ export default function CoursePaymentPage() {
   const blocked = purchase?.canWatch || purchase?.status === 'pending';
 
   return (
-    <section style={{ background: '#f0f0f0', padding: '40px 0' }}>
+    <section className="section">
       <div className="container">
-        <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
-          <h2 className="otto" style={{ fontSize: '30px' }}>
-            <i className="fa fa-credit-card"></i> <b>PAYMENT</b>
-          </h2>
-          <Link to={`/courses/${course.slug}`} className="btn-custom btn-outline-custom">
-            <i className="fa fa-arrow-left"></i> Back to Course
-          </Link>
-        </div>
-        <div className="row">
-          {/* COURSE INFORMATION */}
-          <div className="col-lg-5 mb-4">
-            <div className="payment-container">
-              <div className="course-summary">
-                <h3 className="course-title">{course.title}</h3>
-                <p className="course-description">
-                  {course.description.length > 160 ? `${course.description.slice(0, 160)}...` : course.description}
-                </p>
-                <div className="price-section">
-                  <div className="final-price">{amount}</div>
-                  {course.discountPercent > 0 && (
-                    <>
-                      <div className="original-price">{formatRupees(course.originalPrice, false)}</div>
-                      <div className="discount-badge">{course.discountPercent}% OFF</div>
-                    </>
-                  )}
-                </div>
+        <nav className="crumbs" aria-label="Breadcrumb">
+          <Link to="/">Home</Link>
+          <span>
+            <Link to="/courses">Courses</Link>
+          </span>
+          <span>
+            <Link to={`/courses/${course.slug}`}>{course.title}</Link>
+          </span>
+          <span>Payment</span>
+        </nav>
+        <h1 className="h2 mb-4">Complete your purchase</h1>
+        <div className="row g-5">
+          <div className="col-lg-5 order-lg-2">
+            <div className="card-flat sticky-aside">
+              <div className="split-media mb-3" style={{ aspectRatio: '16 / 9' }}>
+                <img src={course.image} alt="" />
               </div>
-              <div className="p-4">
-                <div className="user-info-card">
-                  <h4 className="user-info-title">Your Information</h4>
-                  <div className="info-item">
-                    <span className="info-label">Name:</span>
-                    <span className="info-value">{user?.name}</span>
-                  </div>
-                  <div className="info-item">
-                    <span className="info-label">Email:</span>
-                    <span className="info-value">{user?.email}</span>
-                  </div>
-                </div>
-                <div className="features-list">
-                  <h5 className="mb-3">What you'll get:</h5>
-                  <div className="feature-item">
-                    <i className="fa fa-check-circle"></i>
-                    <span>Full lifetime access to all {course.videoCount} videos</span>
-                  </div>
-                  <div className="feature-item">
-                    <i className="fa fa-check-circle"></i>
-                    <span>Downloadable resources</span>
-                  </div>
-                  <div className="feature-item">
-                    <i className="fa fa-check-circle"></i>
-                    <span>Certificate of completion</span>
-                  </div>
-                  <div className="feature-item">
-                    <i className="fa fa-check-circle"></i>
-                    <span>{'Q&A support from instructors'}</span>
-                  </div>
-                  <div className="feature-item">
-                    <i className="fa fa-check-circle"></i>
-                    <span>Mobile and TV access</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* PAYMENT SECTION */}
-          <div className="col-lg-7">
-            <div className="payment-container">
-              <div className="payment-form-section">
-                <h3 className="form-title">Complete Your Purchase</h3>
-                {blocked ? (
-                  <div className="alert-info-custom">
-                    <h6>
-                      <i className="fa fa-info-circle"></i> {purchase?.canWatch ? 'You already own this course' : 'Payment already submitted'}
-                    </h6>
-                    <p className="mb-2">
-                      {purchase?.canWatch
-                        ? 'All videos of this course are unlocked for you.'
-                        : 'Your payment for this course is under review. You will receive an email once it is approved (usually within 24 hours).'}
-                    </p>
-                    <Link to={purchase?.canWatch ? `/courses/${course.slug}` : '/my-orders'} className="btn btn-primary btn-sm">
-                      {purchase?.canWatch ? 'Go to Course' : 'View My Orders'}
-                    </Link>
-                  </div>
-                ) : (
+              <h2 className="h4 deva">{course.title}</h2>
+              <div className="d-flex align-items-baseline gap-2 flex-wrap mb-3">
+                <span className="price">{amount}</span>
+                {course.discountPercent > 0 && (
                   <>
-                    <div className="alert-info-custom">
-                      <h6>
-                        <i className="fa fa-clock-o"></i> Payment Approval Process
-                      </h6>
-                      <p className="mb-0">
-                        After payment, submit your transaction ID and payment screenshot. Your payment will be reviewed by our admin team.
-                      </p>
-                    </div>
-                    <form id="paymentForm" onSubmit={onSubmit} noValidate>
-                      {formError && (
-                        <div className="alert alert-danger">
-                          <i className="fa fa-exclamation-circle"></i> {formError}
-                        </div>
-                      )}
-                      <div className="form-group">
-                        <label className="form-label">Select Payment Method</label>
-                        <div className="payment-methods">
-                          {METHODS.map((m) => (
-                            <div
-                              key={m.id}
-                              className={`payment-method${method === m.id ? ' selected' : ''}`}
-                              data-method={m.id}
-                              role="button"
-                              tabIndex={0}
-                              onClick={() => setMethod(m.id)}
-                              onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && setMethod(m.id)}
-                            >
-                              <div className="payment-icon">
-                                <i className={m.icon}></i>
-                              </div>
-                              <div className="payment-method-name">{m.name}</div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                      <div id="transactionFields" className={`transaction-fields${method ? '' : ' hidden'}`}>
-                        <div className="form-group">
-                          <label className="form-label" htmlFor="transaction_id">
-                            Transaction ID *
-                          </label>
-                          <input
-                            type="text"
-                            className="form-control"
-                            id="transaction_id"
-                            placeholder="Enter your transaction ID"
-                            value={transactionId}
-                            onChange={(e) => setTransactionId(e.target.value)}
-                          />
-                        </div>
-                        <div className="form-group">
-                          <label className="form-label">Upload Payment Screenshot *</label>
-                          <label className="upload-area d-block" htmlFor="screenshot">
-                            <div className="upload-icon">
-                              <i className="fa fa-cloud-upload-alt"></i>
-                            </div>
-                            <h5>Click to Upload Screenshot</h5>
-                            <p className="text-muted">JPG, PNG, GIF - Max 5MB</p>
-                            <input type="file" id="screenshot" accept="image/*" style={{ display: 'none' }} onChange={onFile} />
-                          </label>
-                          <div id="filePreview" className="file-preview">
-                            {file && preview && (
-                              <>
-                                <div className="alert alert-success">
-                                  <i className="fa fa-check-circle"></i> File selected: {file.name}
-                                </div>
-                                <img src={preview} alt="Payment Screenshot" className="img-thumbnail" />
-                              </>
-                            )}
-                          </div>
-                        </div>
-                        <div className="form-group">
-                          <label className="form-label">Payment Instructions</label>
-                          <div id="paymentInstructions" className="bg-light p-3 rounded">
-                            <Instructions method={method} upi={upi} amount={amount} qr={settings?.qrImageCourses ?? '/images/Qr.png'} />
-                          </div>
-                        </div>
-                      </div>
-                      <div className="form-group">
-                        <button type="submit" className="btn-custom btn-success-custom" id="submitBtn" disabled={!method || submitting} style={{ width: '100%' }}>
-                          {submitting ? (
-                            <>
-                              <span className="spinner-border spinner-border-sm me-2" role="status"></span> Submitting...
-                            </>
-                          ) : (
-                            <>
-                              <i className="fa fa-lock"></i> Submit Payment for Approval - {amount}
-                            </>
-                          )}
-                        </button>
-                      </div>
-                      <div className="text-center">
-                        <small className="text-muted">
-                          <i className="fa fa-shield-alt"></i> Your payment information is secure.
-                        </small>
-                      </div>
-                    </form>
+                    <span className="price-old">{formatRupees(course.originalPrice, false)}</span>
+                    <span className="chip sage">{course.discountPercent}% off</span>
                   </>
                 )}
               </div>
+              <div className="summary-line">
+                <span className="text-muted">Name</span>
+                <span className="text-ink fw-600">{user?.name}</span>
+              </div>
+              <div className="summary-line">
+                <span className="text-muted">Email</span>
+                <span className="text-ink fw-600 text-break text-end">{user?.email}</span>
+              </div>
+              <h3 className="h6 mt-4 mb-3">What you'll get</h3>
+              <ul className="check-list small">
+                <li>Full lifetime access to all {course.videoCount} videos</li>
+                <li>Downloadable resources</li>
+                <li>Certificate of completion</li>
+                <li>Q&amp;A support from instructors</li>
+              </ul>
             </div>
+          </div>
+
+          <div className="col-lg-7 order-lg-1">
+            {blocked ? (
+              <div className="card-flat">
+                <span className="icon-badge sage">
+                  <i className="fa fa-check"></i>
+                </span>
+                <h2 className="h4">{purchase?.canWatch ? 'You already own this course' : 'Payment already submitted'}</h2>
+                <p className="text-muted">
+                  {purchase?.canWatch
+                    ? 'All videos of this course are unlocked for you.'
+                    : 'Your payment for this course is under review. You will receive an email once it is approved (usually within 24 hours).'}
+                </p>
+                <Link to={purchase?.canWatch ? `/courses/${course.slug}` : '/my-orders'} className="btn btn-primary">
+                  {purchase?.canWatch ? 'Go to course' : 'View my orders'}
+                </Link>
+              </div>
+            ) : (
+              <form id="paymentForm" className="card-flat" onSubmit={onSubmit} noValidate>
+                <div className="alert alert-info small">
+                  <i className="fa fa-info-circle me-1"></i> Pay, then submit your transaction ID and a screenshot. Our team approves payments within 24 hours.
+                </div>
+                {formError && (
+                  <div className="alert alert-danger">
+                    <i className="fa fa-exclamation-circle me-1"></i> {formError}
+                  </div>
+                )}
+                <h2 className="h5 mb-3">1. Choose a payment method</h2>
+                <div className="row g-2 mb-4">
+                  {METHODS.map((m) => (
+                    <div className="col-6 col-md-3" key={m.id}>
+                      <div
+                        className={`option-card payment-method text-center p-3${method === m.id ? ' active selected' : ''}`}
+                        data-method={m.id}
+                        role="button"
+                        tabIndex={0}
+                        onClick={() => setMethod(m.id)}
+                        onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && setMethod(m.id)}
+                      >
+                        <i className={`${m.icon} fa-lg text-saffron mb-2 d-block`}></i>
+                        <span className="small fw-600 text-ink">{m.name}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {method && (
+                  <>
+                    <h2 className="h5 mb-3">2. Pay {amount}</h2>
+                    <div id="paymentInstructions" className="mb-4">
+                      {method === 'upi' ? (
+                        <div className="d-flex gap-3 flex-wrap align-items-center">
+                          <div className="qr-box">
+                            <img src={settings?.qrImageCourses ?? '/images/Qr.png'} alt="UPI QR code" />
+                          </div>
+                          <ol className="small text-muted mb-0 ps-3">
+                            <li>Open Google Pay, PhonePe or Paytm.</li>
+                            <li>
+                              Send payment to: <strong className="text-ink">{upi}</strong>
+                            </li>
+                            <li>
+                              Enter amount: <strong className="text-ink">{amount}</strong>
+                            </li>
+                            <li>Complete the payment and take a screenshot.</li>
+                          </ol>
+                        </div>
+                      ) : (
+                        <ol className="small text-muted mb-0 ps-3">
+                          <li>{{ card: 'Use your credit/debit card.', netbanking: 'Select your bank.', wallet: 'Open your wallet.' }[method]}</li>
+                          <li>
+                            Pay <strong className="text-ink">{amount}</strong> to <strong className="text-ink">{upi}</strong>.
+                          </li>
+                          <li>Complete the payment and take a screenshot.</li>
+                        </ol>
+                      )}
+                    </div>
+
+                    <h2 className="h5 mb-3">3. Confirm your payment</h2>
+                    <div className="mb-3">
+                      <label className="form-label" htmlFor="transaction_id">
+                        Transaction ID *
+                      </label>
+                      <input type="text" className="form-control" id="transaction_id" placeholder="Enter your transaction ID" value={transactionId} onChange={(e) => setTransactionId(e.target.value)} />
+                    </div>
+                    <div className="mb-4">
+                      <span className="form-label d-block">Payment screenshot *</span>
+                      <label className="dropzone" htmlFor="screenshot">
+                        {file && preview ? (
+                          <>
+                            <img src={preview} alt="Payment screenshot" style={{ maxHeight: 160, borderRadius: 10 }} />
+                            <div className="small text-sage fw-600 mt-2">
+                              <i className="fa fa-check-circle"></i> {file.name}
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            <i className="fa fa-cloud-upload-alt fa-2x text-saffron mb-2"></i>
+                            <div className="fw-600 text-ink">Click to upload screenshot</div>
+                            <div className="small text-muted">JPG, PNG or GIF, max 5 MB</div>
+                          </>
+                        )}
+                        <input type="file" id="screenshot" accept="image/*" className="d-none" onChange={onFile} />
+                      </label>
+                    </div>
+                  </>
+                )}
+
+                <button type="submit" className="btn btn-primary btn-lg w-100" id="submitBtn" disabled={!method || submitting}>
+                  {submitting ? (
+                    <>
+                      <span className="spinner-border spinner-border-sm text-white" role="status"></span> Submitting…
+                    </>
+                  ) : (
+                    <>
+                      <i className="fa fa-lock"></i> Submit Payment for Approval - {amount}
+                    </>
+                  )}
+                </button>
+                <p className="text-center small text-muted mt-2 mb-0">
+                  <i className="fa fa-shield-alt me-1"></i> Your payment information is secure.
+                </p>
+              </form>
+            )}
           </div>
         </div>
       </div>
     </section>
-  );
-}
-
-function Instructions({ method, upi, amount, qr }: { method: PaymentMethod | null; upi: string; amount: string; qr: string }) {
-  if (!method) return null;
-  if (method === 'upi') {
-    return (
-      <>
-        <h6>UPI Payment Instructions:</h6>
-        <ol>
-          <li>
-            <img src={qr} alt="UPI QR code" style={{ width: '220px', maxWidth: '100%' }} />
-          </li>
-          <li>Open Google Pay, PhonePe or Paytm.</li>
-          <li>
-            Send payment to: <strong>{upi}</strong>
-          </li>
-          <li>
-            Enter amount: <strong>{amount}</strong>
-          </li>
-          <li>Complete the payment.</li>
-          <li>Take a screenshot.</li>
-          <li>Enter your Transaction ID.</li>
-        </ol>
-      </>
-    );
-  }
-  const title = { card: 'Card Payment Instructions:', netbanking: 'Net Banking Instructions:', wallet: 'Wallet Payment Instructions:' }[method];
-  const first = { card: 'Use your Credit/Debit Card.', netbanking: 'Select your bank.', wallet: 'Open your wallet.' }[method];
-  return (
-    <>
-      <h6>{title}</h6>
-      <ol>
-        <li>{first}</li>
-        <li>
-          Pay <strong>{amount}</strong> to <strong>{upi}</strong>.
-        </li>
-        <li>Complete the payment.</li>
-        <li>Take a screenshot.</li>
-        <li>Enter your Transaction ID.</li>
-      </ol>
-    </>
   );
 }

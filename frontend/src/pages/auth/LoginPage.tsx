@@ -3,16 +3,14 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { loginSchema, type LoginInput } from '@shared/schemas/auth';
+import { AuthShell } from '@/components/auth/AuthShell';
 import { FieldError } from '@/components/common/FieldError';
-import { useBodyClass } from '@/hooks/useBodyClass';
 import { useAuth } from '@/providers/AuthProvider';
 import { redirectTarget } from '@/routes/guards';
 import { applyApiError } from '@/utils/forms';
-import '@/styles/pages/login.page.css';
 
-/** User login (login.php). */
+/** User login (login.php). Returns to the page that asked for a login. */
 export default function LoginPage() {
-  useBodyClass('page-login');
   const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -35,55 +33,45 @@ export default function LoginPage() {
   });
 
   return (
-    <div className="container my-5">
-      <div className="row justify-content-center">
-        <div className="col-md-5">
-          <div className="login-card card shadow-sm">
-            <div className="card-header">User Login</div>
-            <div className="card-body">
-              {error && <div className="alert alert-danger">{error}</div>}
-
-              <form method="POST" autoComplete="off" onSubmit={onSubmit}>
-                <div className="mb-3">
-                  <label htmlFor="email" className="form-label">
-                    Email address
-                  </label>
-                  <input type="email" id="email" className="form-control" placeholder="Enter your email" required {...register('email')} />
-                  <FieldError message={errors.email?.message} />
-                </div>
-                <div className="mb-3">
-                  <label htmlFor="password" className="form-label">
-                    Password
-                  </label>
-                  <input
-                    type="password"
-                    id="password"
-                    className="form-control"
-                    placeholder="Enter your password"
-                    required
-                    {...register('password')}
-                  />
-                  <FieldError message={errors.password?.message} />
-                </div>
-                <div className="d-grid gap-2">
-                  <button type="submit" className="btn btn-primary" disabled={isSubmitting}>
-                    Login
-                  </button>
-                </div>
-              </form>
-
-              <div className="mt-3 text-center">
-                <Link to="/register" state={location.state}>
-                  Don't have an account? Register
-                </Link>
-              </div>
-              <div className="mt-3 text-center">
-                <Link to="/forgot-password">forget</Link>
-              </div>
-            </div>
-          </div>
+    <AuthShell
+      cardClass="login-card"
+      icon="fas fa-sign-in-alt"
+      title="Welcome back"
+      subtitle="Log in to continue your courses, read your books and track your orders."
+      footer={
+        <>
+          New to SANYOD?{' '}
+          <Link to="/register" state={location.state} className="fw-600">
+            Create a free account
+          </Link>
+        </>
+      }
+    >
+      {error && <div className="alert alert-danger">{error}</div>}
+      <form autoComplete="on" onSubmit={onSubmit} noValidate>
+        <div className="mb-3">
+          <label htmlFor="email" className="form-label">
+            Email address
+          </label>
+          <input type="email" id="email" className="form-control" placeholder="you@example.com" autoComplete="email" {...register('email')} />
+          <FieldError message={errors.email?.message} />
         </div>
-      </div>
-    </div>
+        <div className="mb-2">
+          <div className="d-flex justify-content-between align-items-baseline">
+            <label htmlFor="password" className="form-label">
+              Password
+            </label>
+            <Link to="/forgot-password" className="small fw-600">
+              Forgot password?
+            </Link>
+          </div>
+          <input type="password" id="password" className="form-control" placeholder="Your password" autoComplete="current-password" {...register('password')} />
+          <FieldError message={errors.password?.message} />
+        </div>
+        <button type="submit" className="btn btn-primary btn-lg w-100 mt-3" disabled={isSubmitting}>
+          {isSubmitting ? <i className="fas fa-spinner fa-spin"></i> : 'Login'}
+        </button>
+      </form>
+    </AuthShell>
   );
 }

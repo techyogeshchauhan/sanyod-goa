@@ -1,20 +1,17 @@
 import { useScrollY } from '@/hooks/useScrollY';
 
-/** Back-to-top button: visible after 300px of scrolling (footer.php script). */
+/** Back-to-top button, visible after 400px of scrolling. */
 export function BackToTop() {
   const scrollY = useScrollY();
   return (
-    <a
-      href="#"
-      className={`back-to-top${scrollY > 300 ? ' show' : ''}`}
+    <button
+      type="button"
+      className={`back-to-top${scrollY > 400 ? ' show' : ''}`}
       id="backToTop"
       aria-label="Back to top"
-      onClick={(e) => {
-        e.preventDefault();
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }}
+      onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
     >
       <i className="fa fa-arrow-up"></i>
-    </a>
+    </button>
   );
 }

@@ -1,183 +1,182 @@
-import { useState, type CSSProperties } from 'react';
+import { useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { newsletterSchema } from '@shared/schemas/forms';
 import { formsApi } from '@/api/forms';
 import { SITE } from '@/config/site';
 
-const QUICK_LINKS = [
-  { to: '/', label: 'Home' },
-  { to: '/programs', label: 'Programe' },
-  { to: '/personality-test', label: 'Personality Test' },
-  { to: '/books', label: 'Books' },
+const EXPLORE = [
   { to: '/courses', label: 'Courses' },
-  // Live label "Sprituality" pointed to courses.php; now links to the spirituality section (A3).
-  { to: '/spirituality/indian-knowledge', label: 'Sprituality' },
-  { to: '/health', label: 'Health' },
-  { to: '/about', label: 'About' },
+  { to: '/books', label: 'Books' },
+  { to: '/programs', label: 'Programmes' },
+  { to: '/health', label: 'Health Consultation' },
+  { to: '/personality-test', label: 'Personality Test' },
 ] as const;
 
-// Live: jQuery staggers `.footer-item a, .contact-info a` by 0.1s in document order.
-const delay = (index: number): CSSProperties => ({ animationDelay: `${index * 0.1}s` });
+const SPIRITUALITY = [
+  { to: '/spirituality/indian-knowledge', label: 'Indian Knowledge & Wisdom' },
+  { to: '/spirituality/library', label: 'Spiritual Library' },
+  { to: '/spirituality/community', label: 'Community & Satsang' },
+  { to: '/spirituality/personal-guidance', label: 'Personal Guidance' },
+  { to: '/about', label: 'About SANYOD' },
+  { to: '/contact', label: 'Contact' },
+] as const;
 
-type SubscribeState = 'idle' | 'loading' | 'done';
+const SOCIAL = [
+  { key: 'facebook', icon: 'fab fa-facebook-f', label: 'Facebook' },
+  { key: 'twitter', icon: 'fab fa-twitter', label: 'Twitter' },
+  { key: 'instagram', icon: 'fab fa-instagram', label: 'Instagram' },
+  { key: 'linkedin', icon: 'fab fa-linkedin-in', label: 'LinkedIn' },
+] as const;
 
-/** Footer (footer.php "Footer Start"). */
+type SubscribeState = 'idle' | 'loading' | 'done' | 'error';
+
+/** Site footer: about, links, contact details, newsletter. */
 export function Footer() {
-  const [subscribe, setSubscribe] = useState<SubscribeState>('idle');
+  const [state, setState] = useState<SubscribeState>('idle');
   const [email, setEmail] = useState('');
-  let linkIndex = 0;
-  const next = () => delay(linkIndex++);
+  const [message, setMessage] = useState('');
+  // Social profiles are placeholders ("#") until the real links are provided (Q17).
+  const social = SOCIAL.filter((s) => SITE.social[s.key] && SITE.social[s.key] !== '#');
 
-  /** Same feedback as live (spinner → "Subscribed!"), but the email is now saved (A2). */
-  async function handleSubscribe() {
+  async function handleSubscribe(e: FormEvent) {
+    e.preventDefault();
     const parsed = newsletterSchema.safeParse({ email });
     if (!parsed.success) {
-      window.alert('Please enter a valid email address');
+      setState('error');
+      setMessage('Please enter a valid email address.');
       return;
     }
-    setSubscribe('loading');
+    setState('loading');
     try {
       await formsApi.newsletter(parsed.data);
-      setSubscribe('done');
+      setState('done');
+      setMessage('Thank you! You are subscribed.');
+      setEmail('');
     } catch {
-      setSubscribe('idle');
-      window.alert('Subscription failed. Please try again later.');
+      setState('error');
+      setMessage('Subscription failed. Please try again later.');
     }
   }
 
   return (
-    <>
-      <div className="container-fluid footer py-5">
-        <div className="footer-decoration decoration-1">
-          <i className="fas fa-om"></i>
-        </div>
-        <div className="footer-decoration decoration-2">
-          <i className="fas fa-lotus"></i>
-        </div>
-
-        <div className="container py-5 position-relative" style={{ zIndex: 1 }}>
-          <div className="row g-5">
-            <div className="col-md-6 col-lg-6 col-xl-3">
-              <div className="footer-item d-flex flex-column">
-                <div className="footer-item">
-                  <h4 className="text-white mb-4">
-                    <b>San -sankhya (सांख्य), Yo - Yog (योग), d- darshan (दर्शन)</b>
-                  </h4>
-                  <p className="mb-3 text-white">
-                    साधक <span className="name-highlight">जामवंत</span>, सांख्य योग दर्शन के गहन अध्येता और जीवन के समग्र विकास के
-                    लिए समर्पित एक मार्गदर्शक हैं। इनकी यात्रा सांख्य और योग के प्राचीन भारतीय दर्शन से शुरू हुई, जो जीवन को{' '}
-                    <span className="highlight-text">वैज्ञानिक, आध्यात्मिक, शारीरिक और मानसिक स्वास्थ्य</span> के दृष्टिकोण से
-                    समझने का एक अनूठा मार्ग प्रदान करते हैं।
-                  </p>
-                </div>
-                <div className="position-relative mt-3">
-                  <input
-                    className="form-control rounded-pill w-100 py-3 ps-4 pe-5"
-                    type="text"
-                    placeholder="Enter your email"
-                    aria-label="Email for newsletter"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') void handleSubscribe();
-                    }}
-                  />
-                  <button
-                    type="button"
-                    className={`btn btn-secondary rounded-pill position-absolute top-0 end-0 py-2 mt-2 me-2${subscribe === 'done' ? ' bg-success' : ''}`}
-                    onClick={handleSubscribe}
-                    disabled={subscribe !== 'idle'}
-                  >
-                    {subscribe === 'loading' ? <i className="fas fa-spinner fa-spin"></i> : subscribe === 'done' ? 'Subscribed!' : 'Subscribe'}
-                  </button>
-                </div>
-              </div>
-            </div>
-            <div className="col-md-6 col-lg-6 col-xl-3">
-              <div className="footer-item d-flex flex-column text-white">
-                <h4 className="text-white mb-4">Quick Links</h4>
-                {QUICK_LINKS.map((link) => (
-                  <Link key={link.label} to={link.to} style={next()}>
-                    <i className="fas fa-angle-right me-2"></i>
-                    {link.label}
-                  </Link>
-                ))}
-                <Link to="/admin/login" target="_blank" style={next()}>
-                  {' '}
-                  <i className="fas fa-angle-right me-2"></i>Admin Login
-                </Link>
-              </div>
-            </div>
-            <div className="col-md-6 col-lg-6 col-xl-3">
-              <div className="footer-item d-flex flex-column working-hours">
-                <h4 className="text-white mb-4">Still have questions</h4>
-                {SITE.workingHours.map((h) => (
-                  <div className="mb-3" key={h.label}>
-                    <h6 className="mb-0">{h.label}</h6>
-                    <p className="mb-0">{h.value}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div className="col-md-6 col-lg-6 col-xl-3">
-              <div className="footer-item d-flex flex-column contact-info">
-                <h4 className="text-white mb-4">Contact Info</h4>
-                <a href="#" style={next()} onClick={(e) => e.preventDefault()}>
-                  <i className="fa fa-map-marker-alt me-2"></i> {SITE.location}
-                </a>
-                <a href={`mailto:${SITE.email}`} style={next()}>
-                  <i className="fas fa-envelope me-2"></i>
+    <footer className="site-footer">
+      <div className="container">
+        <div className="row g-5">
+          <div className="col-lg-4">
+            <Link to="/" className="brand mb-3">
+              <img src={SITE.logo} alt="" style={{ height: 44, background: '#fff', borderRadius: 12, padding: 4 }} />
+              <span>
+                <span className="brand-name text-white">{SITE.name}</span>
+                <span className="brand-tagline" style={{ color: '#9a93a3' }}>
+                  {SITE.tagline}
+                </span>
+              </span>
+            </Link>
+            <p className="footer-about mt-3 deva" lang="hi">
+              San - sankhya (सांख्य), Yo - Yog (योग), d - darshan (दर्शन). साधक <strong>जामवंत</strong>, सांख्य योग दर्शन के गहन अध्येता और
+              जीवन के समग्र विकास के लिए समर्पित एक मार्गदर्शक हैं। इनकी यात्रा सांख्य और योग के प्राचीन भारतीय दर्शन से शुरू हुई, जो जीवन को{' '}
+              <strong>वैज्ञानिक, आध्यात्मिक, शारीरिक और मानसिक स्वास्थ्य</strong> के दृष्टिकोण से समझने का एक अनूठा मार्ग प्रदान करते हैं।
+            </p>
+          </div>
+          <div className="col-6 col-md-4 col-lg-2">
+            <h4>Explore</h4>
+            <ul className="footer-links">
+              {EXPLORE.map((l) => (
+                <li key={l.to}>
+                  <Link to={l.to}>{l.label}</Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div className="col-6 col-md-4 col-lg-3">
+            <h4>Spirituality</h4>
+            <ul className="footer-links">
+              {SPIRITUALITY.map((l) => (
+                <li key={l.to}>
+                  <Link to={l.to}>{l.label}</Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div className="col-md-4 col-lg-3">
+            <h4>Get in touch</h4>
+            <ul className="footer-links mb-4">
+              <li>
+                <i className="fas fa-map-marker-alt me-2 text-saffron"></i>
+                {SITE.location}
+              </li>
+              <li>
+                <a href={`mailto:${SITE.email}`}>
+                  <i className="fas fa-envelope me-2 text-saffron"></i>
                   {SITE.email}
                 </a>
-                <a href={`tel:${SITE.phone}`} style={next()}>
-                  <i className="fas fa-phone me-2"></i>
+              </li>
+              <li>
+                <a href={`tel:${SITE.phone}`}>
+                  <i className="fas fa-phone me-2 text-saffron"></i>
                   {SITE.phone}
                 </a>
-                <a href={`tel:${SITE.phone}`} className="mb-3" style={next()}>
-                  <i className="fas fa-print me-2"></i>
-                  {SITE.phone}
-                </a>
-                <div className="d-flex mt-2">
-                  <a className="btn btn-secondary btn-md-square rounded-circle me-3" href={SITE.social.facebook} style={next()} aria-label="Facebook">
-                    <i className="fab fa-facebook-f text-white"></i>
-                  </a>
-                  <a className="btn btn-secondary btn-md-square rounded-circle me-3" href={SITE.social.twitter} style={next()} aria-label="Twitter">
-                    <i className="fab fa-twitter text-white"></i>
-                  </a>
-                  <a className="btn btn-secondary btn-md-square rounded-circle me-3" href={SITE.social.instagram} style={next()} aria-label="Instagram">
-                    <i className="fab fa-instagram text-white"></i>
-                  </a>
-                  <a className="btn btn-secondary btn-md-square rounded-circle me-0" href={SITE.social.linkedin} style={next()} aria-label="LinkedIn">
-                    <i className="fab fa-linkedin-in text-white"></i>
-                  </a>
-                </div>
-              </div>
-            </div>
+              </li>
+            </ul>
+            <h4 className="mb-2">Opening hours</h4>
+            <ul className="footer-links small" style={{ gap: '0.25rem' }}>
+              {SITE.workingHours.map((h) => (
+                <li key={h.label}>
+                  <span className="text-white-50">{h.label.replace(':', '')}</span> · {h.value}
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
-      </div>
 
-      <div className="container-fluid copyright py-4">
-        <div className="container">
-          <div className="row g-4 align-items-center">
-            <div className="col-md-6 text-center text-md-start mb-md-0">
-              <span className="text-body">
-                <a href="#" className="border-bottom text-white" onClick={(e) => e.preventDefault()}>
-                  <i className="fas fa-copyright text-light me-2"></i>
-                </a>
-                Copyrights 2025 San-sankhya Yog Darshan All rights reserved.
-              </span>
-            </div>
-            <div className="col-md-6 text-center text-md-end text-body">
-              Designed By{' '}
-              <a className="border-bottom text-white" href="#" onClick={(e) => e.preventDefault()}>
-                {' '}
-                Hawkswave, New Delhi
-              </a>
-            </div>
+        <div className="row g-4 align-items-center mt-4">
+          <div className="col-lg-6">
+            <h4 className="mb-1">Stay in touch</h4>
+            <p className="mb-0 small" style={{ color: '#9a93a3' }}>
+              New courses, books and satsang dates, straight to your inbox.
+            </p>
+          </div>
+          <div className="col-lg-6">
+            <form className="newsletter" onSubmit={handleSubscribe} noValidate>
+              <input
+                type="email"
+                aria-label="Email address"
+                placeholder="Your email address"
+                value={email}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  if (state !== 'loading') setState('idle');
+                }}
+              />
+              <button type="submit" className="btn btn-primary btn-sm" disabled={state === 'loading'}>
+                {state === 'loading' ? <i className="fas fa-spinner fa-spin"></i> : 'Subscribe'}
+              </button>
+            </form>
+            {(state === 'done' || state === 'error') && (
+              <div className={`small mt-2 ${state === 'done' ? 'text-success' : 'text-warning'}`} role="status">
+                {message}
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="footer-bottom d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
+          <span>© {new Date().getFullYear()} San-sankhya Yog Darshan. All rights reserved.</span>
+          <div className="d-flex align-items-center gap-3">
+            {social.length > 0 && (
+              <div className="social d-flex gap-2">
+                {social.map((s) => (
+                  <a key={s.key} href={SITE.social[s.key]} target="_blank" rel="noopener" aria-label={s.label}>
+                    <i className={s.icon}></i>
+                  </a>
+                ))}
+              </div>
+            )}
+            <Link to="/admin/login">Admin</Link>
+            <span>Designed by Hawkswave, New Delhi</span>
           </div>
         </div>
       </div>
-    </>
+    </footer>
   );
 }

@@ -1,14 +1,9 @@
-// Global CSS in the same cascade order as the live <head> (header.php) and footer (docs/07 § 6.1).
-import '@fortawesome/fontawesome-free/css/all.min.css'; //       1. Font Awesome 5.15.4
-import 'bootstrap-icons/font/bootstrap-icons.css'; //            2. Bootstrap Icons 1.4.1
-import './styles/legacy/animate.min.css'; //                     3. lib/animate (animate.css 3.5.2, from live)
-import './styles/legacy/owl.carousel.min.css'; //                4. lib/owlcarousel (Owl Carousel 2.2.1, from live)
-import 'bootstrap/dist/css/bootstrap.min.css'; //                5. Bootstrap 5.1.3 (live CDN)
-import './styles/legacy/bootstrap.theme.min.css'; //             6. themed Bootstrap: brand red/navy
-import './styles/legacy/style.css'; //                           7. template CSS
-import './styles/layout/header.css'; //                          8. header.php inline CSS
-import './styles/layout/footer.css'; //                          9. footer.php inline CSS (global)
-// 10. Page CSS (*.page.css) is imported by each page and scoped to body.page-<name>.
+// Global CSS: icon fonts, Bootstrap 5 (grid, utilities, components), then the SANYOD design
+// system that restyles it. Page-specific CSS (*.page.css) is scoped to body.page-<name>.
+import '@fortawesome/fontawesome-free/css/all.min.css';
+import 'bootstrap-icons/font/bootstrap-icons.css';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import './styles/theme.css';
 import 'bootstrap'; // Bootstrap JS data API (collapse, dropdown, modal)
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';

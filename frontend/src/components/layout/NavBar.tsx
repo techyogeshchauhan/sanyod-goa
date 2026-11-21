@@ -1,31 +1,41 @@
 import { Collapse } from 'bootstrap';
 import { useEffect, useRef } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
+import { Avatar } from '@/components/ui';
 import { SITE } from '@/config/site';
+import { useScrollY } from '@/hooks/useScrollY';
 import { useAuth } from '@/providers/AuthProvider';
 
 const MENU = [
   { to: '/', label: 'Home', end: true },
-  { to: '/programs', label: 'Programe' },
-  { to: '/personality-test', label: 'Personality Test' },
-  { to: '/books', label: 'Books' },
   { to: '/courses', label: 'Courses' },
+  { to: '/books', label: 'Books' },
+  { to: '/programs', label: 'Programmes' },
+  { to: '/health', label: 'Health' },
+  { to: '/personality-test', label: 'Personality Test' },
 ] as const;
 
 const SPIRITUALITY = [
-  { to: '/spirituality/indian-knowledge', label: 'Indian Knowledge Wisdom' },
-  { to: '/spirituality/library', label: 'Spiritual Library' },
-  { to: '/spirituality/community', label: 'Community & Satsanga' },
-  { to: '/spirituality/personal-guidance', label: 'Personal Guidance' },
+  { to: '/spirituality/indian-knowledge', label: 'Indian Knowledge & Wisdom', icon: 'fas fa-om' },
+  { to: '/spirituality/library', label: 'Spiritual Library', icon: 'fas fa-book-open' },
+  { to: '/spirituality/community', label: 'Community & Satsang', icon: 'fas fa-users' },
+  { to: '/spirituality/personal-guidance', label: 'Personal Guidance', icon: 'fas fa-hands-helping' },
 ] as const;
 
-const navClass = ({ isActive }: { isActive: boolean }) => `nav-item nav-link${isActive ? ' active' : ''}`;
+const ACCOUNT = [
+  { to: '/my-books', label: 'My Books', icon: 'fas fa-book' },
+  { to: '/my-courses', label: 'My Courses', icon: 'fas fa-play-circle' },
+  { to: '/my-orders', label: 'My Orders', icon: 'fas fa-receipt' },
+] as const;
 
-/** Navbar (header.php "Navbar Start"). Highlights the current page (allowed adjustment A5). */
+const navClass = ({ isActive }: { isActive: boolean }) => `nav-link${isActive ? ' active' : ''}`;
+
+/** Site header: brand, main menu, Spirituality menu and the account menu. */
 export function NavBar() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const scrollY = useScrollY();
   const collapseRef = useRef<HTMLDivElement>(null);
   const spiritualityActive = location.pathname.startsWith('/spirituality');
 
@@ -43,83 +53,97 @@ export function NavBar() {
   }
 
   return (
-    <div className="container-fluid nav-bar sticky-top px-3 px-lg-4 py-2 py-lg-0">
-      <nav className="navbar navbar-expand-lg navbar-light">
-        <Link to="/" className="navbar-brand p-0 d-flex align-items-center">
-          <img src={SITE.logo} alt="SANKHYA YOG DARSHAN Logo" />
-          <div className="brand-text">
-            <span className="brand-name" style={{ fontSize: '34px' }}>
-              {SITE.name}
+    <header className={`site-header${scrollY > 8 ? ' scrolled' : ''}`}>
+      <div className="container">
+        <nav className="navbar navbar-expand-lg p-0" aria-label="Main">
+          <Link to="/" className="brand me-3">
+            <img src={SITE.logo} alt="" />
+            <span>
+              <span className="brand-name">{SITE.name}</span>
+              <span className="brand-tagline">{SITE.tagline}</span>
             </span>
-            <span className="brand-tagline">{SITE.tagline}</span>
-          </div>
-        </Link>
-        <button
-          className="navbar-toggler"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarCollapse"
-          aria-controls="navbarCollapse"
-          aria-label="Toggle navigation"
-        >
-          <span className="fas fa-bars"></span>
-        </button>
-        <div className="collapse navbar-collapse" id="navbarCollapse" ref={collapseRef}>
-          <div className="navbar-nav mx-auto py-0">
-            {MENU.map((item) => (
-              <NavLink key={item.to} to={item.to} end={'end' in item && item.end} className={navClass}>
-                {item.label}
-              </NavLink>
-            ))}
-            <div className="nav-item dropdown">
-              <a
-                href="#"
-                className={`nav-link dropdown-toggle${spiritualityActive ? ' active' : ''}`}
-                data-bs-toggle="dropdown"
-                role="button"
-                aria-expanded="false"
-                onClick={(e) => e.preventDefault()}
-              >
-                Spirituality
-              </a>
-              <div className="dropdown-menu m-0">
-                {SPIRITUALITY.map((item) => (
-                  <Link key={item.to} to={item.to} className="dropdown-item">
-                    {item.label}
-                  </Link>
-                ))}
+          </Link>
+          <button
+            className="navbar-toggler"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#navbarCollapse"
+            aria-controls="navbarCollapse"
+            aria-expanded="false"
+            aria-label="Toggle navigation"
+          >
+            <i className="fas fa-bars"></i>
+          </button>
+          <div className="collapse navbar-collapse" id="navbarCollapse" ref={collapseRef}>
+            <div className="navbar-nav mx-auto gap-lg-1">
+              {MENU.map((item) => (
+                <NavLink key={item.to} to={item.to} end={'end' in item && item.end} className={navClass}>
+                  {item.label}
+                </NavLink>
+              ))}
+              <div className="nav-item dropdown">
+                <a
+                  href="#"
+                  className={`nav-link dropdown-toggle${spiritualityActive ? ' active' : ''}`}
+                  data-bs-toggle="dropdown"
+                  aria-expanded="false"
+                  onClick={(e) => e.preventDefault()}
+                >
+                  Spirituality
+                </a>
+                <div className="dropdown-menu">
+                  {SPIRITUALITY.map((item) => (
+                    <Link key={item.to} to={item.to} className={`dropdown-item${location.pathname === item.to ? ' active' : ''}`}>
+                      <i className={`${item.icon} me-2 text-saffron`} style={{ width: 18 }}></i>
+                      {item.label}
+                    </Link>
+                  ))}
+                </div>
               </div>
+              <NavLink to="/about" className={navClass}>
+                About
+              </NavLink>
+              <NavLink to="/contact" className={navClass}>
+                Contact
+              </NavLink>
             </div>
-            <NavLink to="/health" className={navClass}>
-              Health
-            </NavLink>
-            <NavLink to="/about" className={navClass}>
-              About
-            </NavLink>
+            <div className="header-actions d-flex align-items-center gap-2">
+              {user ? (
+                <div className="dropdown">
+                  <button className="user-chip dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <Avatar name={displayName} />
+                    <span className="text-truncate" style={{ maxWidth: 140 }}>
+                      {displayName}
+                    </span>
+                  </button>
+                  <div className="dropdown-menu dropdown-menu-end">
+                    {ACCOUNT.map((item) => (
+                      <Link key={item.to} to={item.to} className="dropdown-item">
+                        <i className={`${item.icon} me-2 text-saffron`} style={{ width: 18 }}></i>
+                        {item.label}
+                      </Link>
+                    ))}
+                    <div className="dropdown-divider"></div>
+                    <button type="button" className="dropdown-item" onClick={handleLogout}>
+                      <i className="fas fa-sign-out-alt me-2 text-muted" style={{ width: 18 }}></i>
+                      Logout
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <Link to="/login" className="btn btn-light btn-sm">
+                    Log in
+                  </Link>
+                  <Link to="/register" className="btn btn-primary btn-sm">
+                    Join free
+                  </Link>
+                </>
+              )}
+            </div>
           </div>
-
-          <div className="d-flex align-items-center">
-            {user ? (
-              <>
-                <span className="me-3 text-dark">
-                  <i className="fas fa-user"></i> {displayName}
-                </span>
-                <Link to="/my-books" className="btn btn-outline-primary btn-sm me-2" aria-label="My Books">
-                  <i className="fas fa-book"></i> <span className="d-none d-md-inline">My Books</span>
-                </Link>
-                <button type="button" className="btn btn-danger rounded-pill py-2 px-3 px-md-4 me-2" onClick={handleLogout}>
-                  Logout
-                </button>
-              </>
-            ) : (
-              <Link to="/login" className="btn btn-primary rounded-pill py-2 px-3 px-md-4 me-2" aria-label="User Login">
-                <i className="fas fa-sign-in-alt d-md-none"></i>
-                <span className="d-none d-md-inline">User Login</span>
-              </Link>
-            )}
-          </div>
-        </div>
-      </nav>
-    </div>
+        </nav>
+      </div>
+    </header>
   );
 }

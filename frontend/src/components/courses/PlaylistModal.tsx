@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { CourseVideo } from '@shared/types/catalog';
 import { courseDetailApi } from '@/api/catalog';
 import { useAuth } from '@/providers/AuthProvider';
+import { duration } from '@/utils/format';
 import { purchaseRequired } from './dialogs';
 
 interface Props {
@@ -16,8 +17,8 @@ interface Props {
 const embed = (id: string) => `https://www.youtube.com/embed/${id}?autoplay=1&rel=0`;
 
 /**
- * "<course> - Playlist" modal (courses.php / course_details.php). The list replaces the HTML
- * that get_videos.php returned; locked videos open the live "Purchase Required!" dialog.
+ * Course playlist (courses.php / course_details.php): player + video list. Free videos and
+ * videos of owned courses play; locked ones offer the purchase.
  */
 export function PlaylistModal({ course, onClose, onPurchase }: Props) {
   const ref = useRef<HTMLDivElement>(null);
@@ -46,7 +47,7 @@ export function PlaylistModal({ course, onClose, onPurchase }: Props) {
 
   useEffect(() => () => Modal.getInstance(ref.current as HTMLElement)?.dispose(), []);
 
-  // Auto-play the first available video, as live did after loading the list.
+  // Start with the requested video, or the first one the viewer may watch.
   useEffect(() => {
     if (!course || !videos) return;
     const start = course.startWith ? videos.find((v) => v.id === course.startWith && v.canAccess) : undefined;
@@ -65,71 +66,67 @@ export function PlaylistModal({ course, onClose, onPurchase }: Props) {
   }
 
   return (
-    <div className="modal fade" id="playlistModal" tabIndex={-1} aria-hidden="true" ref={ref}>
-      <div className="modal-dialog modal-lg">
-        <div className="modal-content video-modal-content">
-          <div className="modal-header bg-dark text-white">
+    <div className="modal fade" id="playlistModal" tabIndex={-1} aria-hidden="true" aria-labelledby="playlistModalTitle" ref={ref}>
+      <div className="modal-dialog modal-xl modal-dialog-centered">
+        <div className="modal-content">
+          <div className="modal-header">
             <h5 className="modal-title" id="playlistModalTitle">
-              {course ? `${course.title} - Playlist` : 'Playlist'}
+              {course ? course.title : 'Playlist'}
             </h5>
-            <button type="button" className="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div className="modal-body p-0">
             <div className="row g-0">
-              <div className="col-md-8 p-0">
-                {current ? (
-                  <iframe
-                    id="mainVideoPlayer"
-                    width="100%"
-                    height="400"
-                    src={embed(current)}
-                    frameBorder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                    title="Course video"
-                  ></iframe>
-                ) : (
-                  <div className="d-flex align-items-center justify-content-center text-white-50 text-center p-4" style={{ height: 400, background: '#000' }}>
-                    {videos && videos.length === 0 ? 'No videos in this course yet.' : (
-                      <span>
-                        <i className="fa fa-lock fa-2x mb-3 d-block"></i>
-                        Purchase this course to unlock all videos
-                      </span>
-                    )}
-                  </div>
-                )}
+              <div className="col-lg-8 bg-dark">
+                <div className="ratio ratio-16x9">
+                  {current ? (
+                    <iframe
+                      id="mainVideoPlayer"
+                      src={embed(current)}
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                      title="Course video"
+                    ></iframe>
+                  ) : (
+                    <div className="d-flex align-items-center justify-content-center text-center p-4" style={{ color: '#b9b2c6' }}>
+                      {videos && videos.length === 0 ? (
+                        'No videos in this course yet.'
+                      ) : (
+                        <span>
+                          <i className="fa fa-lock fa-2x mb-3 d-block"></i>
+                          Purchase this course to unlock all videos
+                        </span>
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
-              <div className="col-md-4 p-0">
-                <div className="video-list bg-dark">
-                  <div id="videoPlaylist" className="p-3">
-                    {isLoading && (
-                      <div className="text-center text-white p-3">
-                        <i className="fas fa-spinner fa-spin"></i> Loading videos...
+              <div className="col-lg-4">
+                <div className="playlist-list" id="videoPlaylist">
+                  {isLoading && (
+                    <div className="text-center text-muted p-4">
+                      <i className="fas fa-spinner fa-spin"></i> Loading videos…
+                    </div>
+                  )}
+                  {isError && <div className="text-center text-muted p-4">Error loading videos</div>}
+                  {videos?.length === 0 && <div className="text-center text-muted p-4">No videos available</div>}
+                  {videos?.map((v) => {
+                    const state = v.isFree ? 'free' : v.canAccess ? 'unlocked' : 'paid';
+                    return (
+                      <div
+                        key={v.id}
+                        className={`video-row video-item ${state} ${v.canAccess ? 'open' : 'locked'}${current && v.youtubeId === current ? ' current' : ''}`}
+                        role="button"
+                        tabIndex={0}
+                        onClick={() => play(v)}
+                        onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && play(v)}
+                      >
+                        <span className="num">{v.canAccess ? v.order : <i className="fas fa-lock" style={{ fontSize: '0.75rem' }}></i>}</span>
+                        <span className="title small">{v.title}</span>
+                        {state === 'free' ? <span className="chip sage">Free</span> : <span className="small text-muted">{duration(v.durationSec)}</span>}
                       </div>
-                    )}
-                    {isError && <div className="text-center text-white p-3">Error loading videos</div>}
-                    {videos?.length === 0 && <div className="text-center text-white p-3">No videos available</div>}
-                    {videos?.map((v) => {
-                      const state = v.isFree ? 'free' : v.canAccess ? 'unlocked' : 'paid';
-                      return (
-                        <div
-                          key={v.id}
-                          className={`video-item ${state} text-white`}
-                          role="button"
-                          tabIndex={0}
-                          style={{ background: current && v.youtubeId === current ? '#2c3e50' : 'transparent' }}
-                          onClick={() => play(v)}
-                          onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && play(v)}
-                        >
-                          <i className={`fa ${v.canAccess ? 'fa-play-circle' : 'fa-lock'} me-2`}></i>
-                          <strong>{v.order}.</strong> {v.title}
-                          {state === 'free' && <span className="free-badge">FREE</span>}
-                          {state === 'paid' && <span className="locked-badge">🔒 Premium</span>}
-                          {state === 'unlocked' && <span className="unlocked-badge">Unlocked</span>}
-                        </div>
-                      );
-                    })}
-                  </div>
+                    );
+                  })}
                 </div>
               </div>
             </div>

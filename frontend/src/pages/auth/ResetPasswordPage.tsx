@@ -4,66 +4,69 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { PASSWORD_MIN_LENGTH } from '@shared/constants';
 import { authApi } from '@/api/auth';
 import { ApiError } from '@/api/client';
+import { AuthShell } from '@/components/auth/AuthShell';
 import { PasswordStrengthMeter } from '@/components/auth/PasswordStrengthMeter';
-import { useBodyClass } from '@/hooks/useBodyClass';
+import { Spinner } from '@/components/ui';
 import { useAuth } from '@/providers/AuthProvider';
-import '@/styles/pages/reset-password.page.css';
-
-function ResetFailedAlert({ message }: { message: string }) {
-  return (
-    <div className="alert alert-danger alert-dismissible fade show" role="alert">
-      <h5>
-        <i className="fas fa-exclamation-triangle me-2"></i>Reset Failed
-      </h5>
-      {message}
-      <hr />
-      <div className="mt-2">
-        <Link to="/forgot-password" className="btn btn-outline-danger btn-sm">
-          <i className="fas fa-sync-alt me-1"></i>Get New Reset Link
-        </Link>
-      </div>
-    </div>
-  );
-}
-
-function InvalidLink() {
-  return (
-    <div className="text-center py-5">
-      <i className="fas fa-exclamation-circle fa-4x text-warning mb-4"></i>
-      <h3 className="fw-bold">Invalid Reset Link</h3>
-      <p className="text-muted mb-4">This reset link is invalid or has expired.</p>
-      <div className="d-grid gap-2 col-md-6 mx-auto">
-        <Link to="/forgot-password" className="btn btn-danger">
-          <i className="fas fa-redo me-2"></i>Request New Reset Link
-        </Link>
-        <Link to="/login" className="btn btn-outline-danger">
-          <i className="fas fa-sign-in-alt me-2"></i>Back to Login
-        </Link>
-      </div>
-    </div>
-  );
-}
 
 function Requirement({ met, label, metLabel }: { met: boolean; label: string; metLabel?: string }) {
   return (
     <li className={met ? 'met' : ''}>
-      {met ? <i className="fas fa-check-circle text-success"></i> : <i className="fas fa-circle fa-xs"></i>} {met ? (metLabel ?? label) : label}
+      <i className={`fas ${met ? 'fa-check-circle' : 'fa-circle'} me-2`} style={met ? undefined : { fontSize: '0.5rem', verticalAlign: 'middle' }}></i>
+      {met ? (metLabel ?? label) : label}
     </li>
   );
 }
 
-/** Set new password (reset_password.php). */
+function PasswordField({
+  id,
+  label,
+  value,
+  onChange,
+  autoFocus,
+}: {
+  id: string;
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  autoFocus?: boolean;
+}) {
+  const [show, setShow] = useState(false);
+  return (
+    <>
+      <label htmlFor={id} className="form-label">
+        {label}
+      </label>
+      <div className="input-group">
+        <input
+          type={show ? 'text' : 'password'}
+          name={id}
+          id={id}
+          className="form-control"
+          style={{ borderRight: 0 }}
+          required
+          minLength={PASSWORD_MIN_LENGTH}
+          autoComplete="new-password"
+          autoFocus={autoFocus}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+        />
+        <button className="btn btn-light" style={{ borderRadius: '0 12px 12px 0' }} type="button" onClick={() => setShow((v) => !v)} aria-label="Show or hide password">
+          <i className={`fas ${show ? 'fa-eye-slash' : 'fa-eye'}`}></i>
+        </button>
+      </div>
+    </>
+  );
+}
+
+/** Set a new password (reset_password.php). */
 export default function ResetPasswordPage() {
-  useBodyClass('page-reset-password');
   const [params] = useSearchParams();
   const token = params.get('token') ?? '';
   const navigate = useNavigate();
   const { setUser } = useAuth();
-
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -88,7 +91,7 @@ export default function ResetPasswordPage() {
       setUser(user);
       navigate('/', { replace: true });
     } catch (err) {
-      setError(err instanceof ApiError ? `❌ ${err.message}` : '❌ Something went wrong. Please try again.');
+      setError(err instanceof ApiError ? err.message : 'Something went wrong. Please try again.');
       setSubmitting(false);
     }
   }
@@ -97,132 +100,54 @@ export default function ResetPasswordPage() {
   const invalid = missingParams || (validation.isSuccess && !validation.data.valid) || validation.isError;
 
   return (
-    <div className="container my-5">
-      <div className="row justify-content-center">
-        <div className="col-md-8 col-lg-6">
-          <div className="reset-card card shadow-lg">
-            <div className="card-header">
-              <i className="fas fa-redo-alt me-2"></i>Set New Password
-            </div>
-            <div className="card-body p-4">
-              {validation.isLoading && !missingParams ? (
-                <div className="text-center py-5">
-                  <div className="spinner-border text-danger" role="status">
-                    <span className="visually-hidden">Loading...</span>
-                  </div>
-                </div>
-              ) : invalid ? (
-                <>
-                  <ResetFailedAlert
-                    message={missingParams ? '❌ Invalid reset link parameters.' : '❌ This reset link is invalid or has expired.'}
-                  />
-                  <InvalidLink />
-                </>
-              ) : (
-                <>
-                  {error && <ResetFailedAlert message={error} />}
-
-                  <div className="text-center mb-4">
-                    <div className="mb-3">
-                      <i className="fas fa-user-shield fa-4x text-danger"></i>
-                    </div>
-                    <h3 className="fw-bold">Create New Password</h3>
-                    <p className="text-muted">
-                      For: <span className="fw-bold text-primary">{validation.data?.email}</span>
-                    </p>
-                  </div>
-
-                  <form method="POST" autoComplete="off" id="resetForm" onSubmit={onSubmit}>
-                    <div className="mb-4">
-                      <label htmlFor="password" className="form-label fw-bold">
-                        New Password
-                      </label>
-                      <div className="input-group">
-                        <span className="input-group-text bg-light">
-                          <i className="fas fa-lock text-danger"></i>
-                        </span>
-                        <input
-                          type={showPassword ? 'text' : 'password'}
-                          name="password"
-                          id="password"
-                          className="form-control"
-                          placeholder="Enter new password"
-                          required
-                          minLength={PASSWORD_MIN_LENGTH}
-                          autoFocus
-                          value={password}
-                          onChange={(e) => setPassword(e.target.value)}
-                        />
-                        <button className="btn btn-outline-secondary" type="button" id="togglePassword" onClick={() => setShowPassword((v) => !v)} aria-label="Show or hide password">
-                          <i className={`fas ${showPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
-                        </button>
-                      </div>
-                      <PasswordStrengthMeter password={password} />
-                    </div>
-
-                    <div className="mb-4">
-                      <label htmlFor="confirm_password" className="form-label fw-bold">
-                        Confirm Password
-                      </label>
-                      <div className="input-group">
-                        <span className="input-group-text bg-light">
-                          <i className="fas fa-lock text-danger"></i>
-                        </span>
-                        <input
-                          type={showConfirm ? 'text' : 'password'}
-                          name="confirm_password"
-                          id="confirm_password"
-                          className="form-control"
-                          placeholder="Confirm new password"
-                          required
-                          minLength={PASSWORD_MIN_LENGTH}
-                          value={confirm}
-                          onChange={(e) => setConfirm(e.target.value)}
-                        />
-                        <button className="btn btn-outline-secondary" type="button" id="toggleConfirmPassword" onClick={() => setShowConfirm((v) => !v)} aria-label="Show or hide password">
-                          <i className={`fas ${showConfirm ? 'fa-eye-slash' : 'fa-eye'}`}></i>
-                        </button>
-                      </div>
-                      <div id="passwordMatch" className="mt-2">
-                        {password && confirm ? (
-                          matches ? (
-                            <span className="text-success">
-                              <i className="fas fa-check me-1"></i>Passwords match
-                            </span>
-                          ) : (
-                            <span className="text-danger">
-                              <i className="fas fa-times me-1"></i>Passwords do not match
-                            </span>
-                          )
-                        ) : null}
-                      </div>
-                    </div>
-
-                    <div className="alert alert-info">
-                      <h6>
-                        <i className="fas fa-info-circle me-2"></i>Password Requirements
-                      </h6>
-                      <ul className="requirement-list mb-0">
-                        <Requirement met={lengthOk} label={`Minimum ${PASSWORD_MIN_LENGTH} characters`} />
-                        <Requirement met={matches} label="Passwords must match" metLabel="Passwords match" />
-                      </ul>
-                    </div>
-
-                    <div className="d-grid gap-3 mt-4">
-                      <button type="submit" className="btn btn-danger btn-lg" id="resetBtn" disabled={!canSubmit}>
-                        <i className="fas fa-key me-2"></i>Set New Password &amp; Login
-                      </button>
-                      <Link to="/forgot-password" className="btn btn-outline-secondary">
-                        <i className="fas fa-sync-alt me-2"></i>Get New Reset Link
-                      </Link>
-                    </div>
-                  </form>
-                </>
-              )}
-            </div>
+    <AuthShell cardClass="reset-card" icon="fas fa-user-shield" title="Set a new password">
+      {validation.isLoading && !missingParams ? (
+        <Spinner />
+      ) : invalid ? (
+        <div>
+          <div className="alert alert-danger">{missingParams ? 'Invalid reset link parameters.' : 'This reset link is invalid or has expired.'}</div>
+          <h3 className="h4">Invalid Reset Link</h3>
+          <p className="text-muted">This reset link is invalid or has expired. Request a new one; it is valid for 1 hour.</p>
+          <div className="d-grid gap-2">
+            <Link to="/forgot-password" className="btn btn-primary">
+              <i className="fas fa-redo"></i> Request a new reset link
+            </Link>
+            <Link to="/login" className="btn btn-light">
+              Back to login
+            </Link>
           </div>
         </div>
-      </div>
-    </div>
+      ) : (
+        <>
+          <p className="text-muted mb-4">
+            For <strong className="text-ink">{validation.data?.email}</strong>
+          </p>
+          {error && (
+            <div className="alert alert-danger">
+              {error}{' '}
+              <Link to="/forgot-password" className="fw-600">
+                Get a new link
+              </Link>
+            </div>
+          )}
+          <form autoComplete="off" id="resetForm" onSubmit={onSubmit} noValidate>
+            <div className="mb-3">
+              <PasswordField id="password" label="New password" value={password} onChange={setPassword} autoFocus />
+              <PasswordStrengthMeter password={password} />
+            </div>
+            <div className="mb-3">
+              <PasswordField id="confirm_password" label="Confirm new password" value={confirm} onChange={setConfirm} />
+            </div>
+            <ul className="requirement-list mb-4">
+              <Requirement met={lengthOk} label={`Minimum ${PASSWORD_MIN_LENGTH} characters`} />
+              <Requirement met={matches} label="Passwords must match" metLabel="Passwords match" />
+            </ul>
+            <button type="submit" className="btn btn-primary btn-lg w-100" id="resetBtn" disabled={!canSubmit}>
+              <i className="fas fa-key"></i> Set new password &amp; log in
+            </button>
+          </form>
+        </>
+      )}
+    </AuthShell>
   );
 }

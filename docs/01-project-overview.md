@@ -40,7 +40,7 @@ Full list: [02-features.md](02-features.md).
 
 | Area | Notes |
 | --- | --- |
-| All public pages and their behaviour | Pixel-close replication ([06](06-ui-design-and-components.md)) |
+| All public pages and their behaviour | Same content and behaviour in a new visual design ([D-27](14-open-questions-and-decisions.md#3-decisions-log)) |
 | User accounts | Register, login, logout, forgot/reset password (by email) |
 | Books | Catalogue, details, PDF / hard-copy purchase with UPI proof, My Books, protected PDF reader, My Orders |
 | Courses | Catalogue, details, playlist with free/locked videos, course purchase with UPI proof, My Courses |
@@ -56,7 +56,7 @@ Full list: [02-features.md](02-features.md).
 - Payment gateway (Razorpay/Cashfree): release 1 keeps **manual UPI + admin approval**.
 - Real library search across texts (keep the simulated search UI, or a simple site search).
 - Mobile apps (the home page shows "56K+ App Downloads", but no app is part of this project).
-- Rewriting content, redesigning pages, new languages.
+- Rewriting the Hindi/spiritual content, new languages. (Redesigning the pages and rewriting UI copy is in scope since D-27.)
 - Template leftover pages (`blog`, `service`, `team`, `testimonial`) unless the owner keeps them.
 
 ---
@@ -65,7 +65,7 @@ Full list: [02-features.md](02-features.md).
 
 | # | Principle |
 | --- | --- |
-| P1 | **Replicate, don't redesign:** same HTML structure, class names, CSS, texts and flows. |
+| P1 | **Same functionality, new design:** same routes, workflows, rules and content, presented in the SANYOD design system ([D-27](14-open-questions-and-decisions.md#3-decisions-log); replaces "replicate, don't redesign"). |
 | P2 | **Read-only references:** the live site and the PHP code are never changed. |
 | P3 | **Everything in `replica-website/`:** code, assets, docs, scripts. |
 | P4 | **TypeScript end to end** with shared types and zod schemas (`backend/src/shared`, imported by the frontend via `@shared/*`). |
