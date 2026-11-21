@@ -9,7 +9,7 @@ import { Payment } from '../src/models/Payment';
 import { User } from '../src/models/User';
 import { migrate } from '../src/scripts/migrate-mysql';
 import { parseTuples, readDump } from '../src/scripts/mysql-dump';
-import { verifyBcrypt, verifyLegacy } from '../src/utils/passwords';
+import { verifyBcrypt } from '../src/utils/passwords';
 import { setupTestApp, teardownTestApp } from './helpers';
 
 // A small phpMyAdmin-style export with the columns seen in the PHP code.
@@ -78,10 +78,11 @@ describe('MySQL → MongoDB migration', () => {
     const { unknown } = await migrate(DUMP);
     expect(unknown).toEqual(['site_visits']);
 
-    const asha = await User.findOne({ legacyId: 1 }).select('+legacyPasswordHash +legacyAlgo');
+    const asha = await User.findOne({ legacyId: 1 }).select('+passwordHash +legacyPasswordHash +legacyAlgo');
     expect(asha?.email).toBe('asha@example.com');
-    expect(asha?.legacyAlgo).toBe('md5');
-    expect(verifyLegacy('password', asha?.legacyPasswordHash ?? '', 'md5')).toBe(true);
+    expect(asha?.legacyAlgo).toBeUndefined();
+    expect(asha?.legacyPasswordHash).toBeUndefined();
+    expect(asha?.passwordHash).toBeUndefined(); // MD5 cannot be upgraded safely; user must reset.
     const ravi = await User.findOne({ legacyId: 2 }).select('+passwordHash');
     expect(ravi?.passwordHash?.startsWith('$2b$')).toBe(true);
     expect(await verifyBcrypt('x', ravi?.passwordHash ?? '')).toBe(false);

@@ -1,5 +1,5 @@
 import nodemailer, { type Transporter } from 'nodemailer';
-import { env } from '../../config/env';
+import { env, isProduction } from '../../config/env';
 import { logger } from '../../utils/logger';
 
 export interface MailMessage {
@@ -30,9 +30,13 @@ export async function sendMail(message: MailMessage): Promise<boolean> {
   if (!message.to.trim()) return false;
   const transport = getTransporter();
   if (!transport) {
+    if (isProduction) {
+      logger.error('SMTP is not configured; email was not sent');
+      return false;
+    }
     outbox.push(message);
     if (outbox.length > 50) outbox.shift();
-    logger.info({ to: message.to, subject: message.subject, text: message.text }, 'Email (SMTP not configured)');
+    logger.info('Email recorded in the development outbox (SMTP not configured)');
     return true;
   }
   for (let attempt = 1; attempt <= 3; attempt++) {
@@ -40,7 +44,7 @@ export async function sendMail(message: MailMessage): Promise<boolean> {
       await transport.sendMail({ from: env.MAIL_FROM, ...message });
       return true;
     } catch (err) {
-      logger.warn({ err, attempt, to: message.to, subject: message.subject }, 'Email send failed');
+      logger.warn({ err, attempt }, 'Email send failed');
       if (attempt < 3) await new Promise((r) => setTimeout(r, attempt * 1000));
     }
   }

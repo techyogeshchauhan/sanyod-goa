@@ -34,7 +34,7 @@ export const loginSchema = z.object({
 
 export const forgotPasswordSchema = z.object({ email });
 
-export const resetTokenQuerySchema = z.object({
+export const resetTokenBodySchema = z.object({
   token: z.string().trim().min(20).max(200),
 });
 

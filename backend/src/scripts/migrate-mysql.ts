@@ -28,6 +28,7 @@ import { User } from '../models/User';
 import { PREFERRED_TIMES } from '../shared/constants';
 import { importFile } from '../services/storage';
 import { slugify } from '../modules/admin/helpers';
+import { hashPassword } from '../utils/passwords';
 import { initDb } from './init-db';
 import { readDump, type Row, type SqlValue } from './mysql-dump';
 
@@ -103,11 +104,13 @@ async function upsert<T>(model: { updateOne: (f: object, u: object, o: object) =
   r.written++;
 }
 
-function hashFields(password: string) {
+async function hashFields(password: string): Promise<{ passwordHash: string } | null> {
   if (/^\$2[aby]\$\d{2}\$/.test(password)) return { passwordHash: password.replace(/^\$2y\$/, '$2b$') };
-  if (/^[a-f0-9]{32}$/i.test(password)) return { legacyPasswordHash: password.toLowerCase(), legacyAlgo: 'md5' as const };
-  if (/^[a-f0-9]{40}$/i.test(password)) return { legacyPasswordHash: password.toLowerCase(), legacyAlgo: 'sha1' as const };
-  return { legacyPasswordHash: password, legacyAlgo: 'plain' as const };
+  // Fast unsalted legacy hashes cannot be upgraded without the user's password. Omit them
+  // so the account must use the normal password-reset flow instead of storing weak secrets.
+  if (/^[a-f0-9]{32}$/i.test(password) || /^[a-f0-9]{40}$/i.test(password)) return null;
+  // The old MySQL column also contained plaintext values. Hash those immediately at import.
+  return { passwordHash: await hashPassword(password) };
 }
 
 const ORDER_STATUS: Record<string, string> = {
@@ -151,22 +154,24 @@ async function migrateUsers(tables: Map<string, Row[]>) {
       continue;
     }
     const password = str(pick(row, 'password', 'pass', 'user_password'));
-    const hashes = password ? hashFields(password) : {};
-    const algo = 'legacyAlgo' in hashes ? (hashes.legacyAlgo as string) : 'passwordHash' in hashes ? 'bcrypt' : 'none';
-    algos[algo] = (algos[algo] ?? 0) + 1;
     const existing = await User.findOne({ $or: [{ legacyId }, { email }] }).select('+passwordHash');
+    const importedHash = password && !existing?.passwordHash ? await hashFields(password) : null;
+    const algo = !password ? 'none' : existing?.passwordHash ? 'preserved' : importedHash ? 'bcrypt' : 'reset-required';
+    algos[algo] = (algos[algo] ?? 0) + 1;
     const doc = {
       legacyId,
       name: str(pick(row, 'name', 'full_name', 'username', 'user_name')) || email.split('@')[0],
       email,
       // Never overwrite a password the user already changed on the new site.
-      ...(existing?.passwordHash && !('passwordHash' in hashes && existing.passwordHash === hashes.passwordHash) ? {} : hashes),
+      ...(importedHash ?? {}),
       isActive: str(pick(row, 'status', 'is_active')) === '0' || /inactive|blocked/i.test(str(row.status ?? null)) ? false : true,
       ...(date(pick(row, 'created_at', 'created', 'reg_date')) ? { createdAt: date(pick(row, 'created_at', 'created', 'reg_date')) } : {}),
     };
+    const unset: Record<string, ''> = { legacyPasswordHash: '', legacyAlgo: '' };
+    if (password && !existing?.passwordHash && !importedHash) unset.passwordHash = '';
     if (dryRun) r.written++;
     else {
-      const saved = await User.findOneAndUpdate({ $or: [{ legacyId }, { email }] }, { $set: doc }, { upsert: true, new: true, runValidators: true, timestamps: false });
+      const saved = await User.findOneAndUpdate({ $or: [{ legacyId }, { email }] }, { $set: doc, $unset: unset }, { upsert: true, new: true, runValidators: true, timestamps: false });
       map.set(legacyId, saved._id);
       r.written++;
     }

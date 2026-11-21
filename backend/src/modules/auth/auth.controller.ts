@@ -21,9 +21,12 @@ export function me(req: Request, res: Response) {
 }
 
 export async function register(req: Request, res: Response) {
-  const user = await authService.register(req.body as RegisterInput);
-  await signIn(req, user);
-  res.status(201).json({ data: { user } });
+  await authService.register(req.body as RegisterInput);
+  res.json({
+    data: {
+      message: 'If this address was available, your account is ready. If you already have an account, sign in or reset your password.',
+    },
+  });
 }
 
 export async function login(req: Request, res: Response) {
@@ -44,7 +47,7 @@ export async function forgotPassword(req: Request, res: Response) {
 }
 
 export async function validateResetToken(req: Request, res: Response) {
-  const result = await authService.validateResetToken(String(req.query.token));
+  const result = await authService.validateResetToken(String(req.body.token));
   res.json({ data: result });
 }
 

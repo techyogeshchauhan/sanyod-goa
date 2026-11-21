@@ -41,6 +41,7 @@ import { deleteStored, publicUrl, saveUpload } from '../../services/storage';
 import { asyncHandler } from '../../utils/asyncHandler';
 import { AppError, badRequest, conflict, notFound } from '../../utils/errors';
 import { hashPassword, verifyBcrypt } from '../../utils/passwords';
+import { revokeAdminSessions } from '../../utils/session';
 import { toAdminPayment } from './sales.routes';
 import { audit, createdAt, iso, paged, searchFilter, skip } from './helpers';
 import { z } from 'zod';
@@ -359,6 +360,7 @@ peopleRouter.post(
     }
     admin.passwordHash = await hashPassword(newPassword);
     await admin.save();
+    await revokeAdminSessions(String(admin._id), req.sessionID);
     await audit(req, 'admin.password', 'Admin', admin._id);
     res.json({ data: { message: 'Password changed' } });
   }),
@@ -401,6 +403,10 @@ peopleRouter.patch(
     const admin = await Admin.findById(req.params.id).select('+passwordHash');
     if (!admin) throw notFound('Admin not found');
     const self = String(admin._id) === sessionAdmin(req).id;
+    const authorizationChanged =
+      (input.role !== undefined && input.role !== admin.role) ||
+      (input.isActive !== undefined && input.isActive !== admin.isActive) ||
+      Boolean(input.password);
     if (self && (input.isActive === false || (input.role && input.role !== 'superadmin'))) {
       throw badRequest('You cannot deactivate or demote your own account');
     }
@@ -410,6 +416,7 @@ peopleRouter.patch(
     if (input.isActive !== undefined) admin.isActive = input.isActive;
     if (input.password) admin.passwordHash = await hashPassword(input.password);
     await admin.save();
+    if (authorizationChanged) await revokeAdminSessions(String(admin._id), self ? req.sessionID : undefined);
     await audit(req, 'admin.update', 'Admin', admin._id, { username: admin.username, role: admin.role, isActive: admin.isActive });
     res.json({ data: toAccount(admin) });
   }),

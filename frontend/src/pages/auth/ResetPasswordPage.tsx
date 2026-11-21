@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
-import { useState, type FormEvent } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { useEffect, useState, type FormEvent } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { PASSWORD_MIN_LENGTH } from '@shared/constants';
 import { authApi } from '@/api/auth';
 import { ApiError } from '@/api/client';
@@ -61,14 +61,21 @@ function PasswordField({
 
 /** Set a new password (reset_password.php). */
 export default function ResetPasswordPage() {
-  const [params] = useSearchParams();
-  const token = params.get('token') ?? '';
+  const location = useLocation();
+  const [token] = useState(() => {
+    return new URLSearchParams(location.hash.replace(/^#/, '')).get('token') ?? '';
+  });
   const navigate = useNavigate();
   const { setUser } = useAuth();
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!token) return;
+    window.history.replaceState(window.history.state, '', location.pathname + location.search);
+  }, [location.pathname, location.search, token]);
 
   const validation = useQuery({
     queryKey: ['reset-token', token],

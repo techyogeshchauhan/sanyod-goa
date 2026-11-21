@@ -10,7 +10,7 @@ interface AuthContextValue {
   user: SessionUser | null;
   isLoading: boolean;
   login: (input: LoginInput) => Promise<SessionUser>;
-  register: (input: RegisterInput) => Promise<SessionUser>;
+  register: (input: RegisterInput) => Promise<void>;
   logout: () => Promise<void>;
   setUser: (user: SessionUser | null) => void;
 }
@@ -42,9 +42,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const register = useCallback(
     async (input: RegisterInput) => {
-      const { user } = await authApi.register(input);
-      setUser(user);
-      return user;
+      await authApi.register(input);
     },
     [setUser],
   );

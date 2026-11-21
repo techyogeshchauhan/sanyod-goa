@@ -31,6 +31,6 @@ export const errorHandler: ErrorRequestHandler = (err, req, res, _next) => {
     return res.status(status).json({ error: { code: 'BAD_REQUEST', message: 'Invalid request' } });
   }
 
-  logger.error({ err, requestId: req.id, path: req.originalUrl }, 'Unhandled error');
+  logger.error({ err, requestId: req.id, path: req.path }, 'Unhandled error');
   res.status(500).json({ error: { code: 'INTERNAL_ERROR', message: 'Something went wrong. Please try again later.' } });
 };

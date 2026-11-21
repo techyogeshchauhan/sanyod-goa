@@ -8,41 +8,38 @@ import type { LoginInput, RegisterInput, ResetPasswordInput } from '../../shared
 import type { ResetTokenValidation, SessionUser } from '../../shared/types/auth';
 import { sendMail } from '../../services/email/mailer';
 import { resetPasswordEmail } from '../../services/email/templates/resetPassword';
-import { AppError, conflict } from '../../utils/errors';
-import { hashPassword, sha256, verifyBcrypt, verifyLegacy } from '../../utils/passwords';
+import { AppError } from '../../utils/errors';
+import { hashPassword, sha256, verifyBcrypt } from '../../utils/passwords';
 
 const invalidCredentials = () => new AppError(401, 'INVALID_CREDENTIALS', 'Invalid email or password');
 
-export async function register(input: RegisterInput): Promise<SessionUser> {
-  const exists = await User.exists({ email: input.email });
-  if (exists) throw conflict('EMAIL_TAKEN', 'This email is already registered', { email: 'This email is already registered' });
-  const user = await User.create({
-    name: input.name,
-    email: input.email,
-    passwordHash: await hashPassword(input.password),
-  });
-  return toSessionUser(user);
+export async function register(input: RegisterInput): Promise<void> {
+  const passwordHash = await hashPassword(input.password);
+  try {
+    await User.create({ name: input.name, email: input.email, passwordHash });
+  } catch (err) {
+    // Keep registration responses identical for new and already-registered addresses.
+    const duplicate = err as { code?: number; keyPattern?: Record<string, unknown>; keyValue?: Record<string, unknown> };
+    if (
+      typeof err === 'object' &&
+      err !== null &&
+      duplicate.code === 11000 &&
+      (duplicate.keyPattern?.email || duplicate.keyValue?.email)
+    ) {
+      return;
+    }
+    throw err;
+  }
 }
 
 export async function authenticate(input: LoginInput): Promise<SessionUser> {
-  const user = await User.findOne({ email: input.email }).select('+passwordHash +legacyPasswordHash +legacyAlgo');
-  if (!user) {
+  const user = await User.findOne({ email: input.email }).select('+passwordHash');
+  if (!user?.passwordHash) {
     await hashPassword(input.password); // keep timing similar for unknown emails
     throw invalidCredentials();
   }
 
-  let ok = false;
-  if (user.passwordHash) {
-    ok = await verifyBcrypt(input.password, user.passwordHash);
-  } else if (user.legacyPasswordHash && user.legacyAlgo) {
-    ok = verifyLegacy(input.password, user.legacyPasswordHash, user.legacyAlgo);
-    if (ok) {
-      user.passwordHash = await hashPassword(input.password);
-      user.legacyPasswordHash = undefined;
-      user.legacyAlgo = undefined;
-    }
-  }
-  if (!ok) throw invalidCredentials();
+  if (!(await verifyBcrypt(input.password, user.passwordHash))) throw invalidCredentials();
   if (!user.isActive) {
     throw new AppError(403, 'ACCOUNT_DISABLED', 'Your account has been deactivated. Please use the contact form on our website for assistance.');
   }
@@ -61,7 +58,7 @@ export async function requestPasswordReset(email: string): Promise<void> {
   user.passwordResetExpires = new Date(Date.now() + RESET_TOKEN_TTL_MINUTES * 60 * 1000);
   await user.save();
 
-  const link = `${env.APP_URL.replace(/\/$/, '')}/reset-password?token=${encodeURIComponent(token)}`;
+  const link = `${env.APP_URL.replace(/\/$/, '')}/reset-password#token=${encodeURIComponent(token)}`;
   await sendMail(resetPasswordEmail(user.email, user.name, link, RESET_TOKEN_TTL_MINUTES));
 }
 

@@ -1,21 +1,20 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { PASSWORD_MIN_LENGTH } from '@shared/constants';
 import { registerSchema, type RegisterInput } from '@shared/schemas/auth';
 import { AuthShell } from '@/components/auth/AuthShell';
 import { FieldError } from '@/components/common/FieldError';
 import { useAuth } from '@/providers/AuthProvider';
-import { redirectTarget } from '@/routes/guards';
 import { applyApiError } from '@/utils/forms';
 
-/** User registration (register.php). Signs the user in and returns to the requested page (D-04). */
+/** User registration (register.php). Returns the same next step for existing and new email addresses. */
 export default function RegisterPage() {
   const { register: registerUser } = useAuth();
-  const navigate = useNavigate();
   const location = useLocation();
   const [error, setError] = useState<string | null>(null);
+  const [submitted, setSubmitted] = useState(false);
   const {
     register,
     handleSubmit,
@@ -27,7 +26,7 @@ export default function RegisterPage() {
     setError(null);
     try {
       await registerUser(values);
-      navigate(redirectTarget(location.state), { replace: true });
+      setSubmitted(true);
     } catch (err) {
       setError(applyApiError(err, setFieldError));
     }
@@ -49,7 +48,16 @@ export default function RegisterPage() {
       }
     >
       {error && <div className="alert alert-danger">{error}</div>}
-      <form onSubmit={onSubmit} noValidate>
+      {submitted ? (
+        <div className="alert alert-success" role="status">
+          <p className="mb-3">If this address was available, your account is ready. If you already have an account, sign in or reset your password.</p>
+          <div className="d-flex gap-2 flex-wrap">
+            <Link to="/login" state={location.state} className="btn btn-primary">Sign in</Link>
+            <Link to="/forgot-password" className="btn btn-light">Reset password</Link>
+          </div>
+        </div>
+      ) : (
+        <form onSubmit={onSubmit} noValidate>
         <div className="mb-3">
           <label htmlFor="name" className="form-label">
             Full name
@@ -81,7 +89,8 @@ export default function RegisterPage() {
         <button type="submit" className="btn btn-primary btn-lg w-100 mt-3" disabled={isSubmitting}>
           {isSubmitting ? <i className="fas fa-spinner fa-spin"></i> : 'Register'}
         </button>
-      </form>
+        </form>
+      )}
     </AuthShell>
   );
 }

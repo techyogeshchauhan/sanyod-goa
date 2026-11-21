@@ -1,4 +1,5 @@
 import type { Request, RequestHandler } from 'express';
+import { Admin, toSessionAdmin } from '../models/Admin';
 import { User } from '../models/User';
 import type { SessionAdmin, SessionUser } from '../shared/types/auth';
 import { AppError, forbidden, unauthenticated } from '../utils/errors';
@@ -17,8 +18,21 @@ export const requireUser: RequestHandler = (req, _res, next) => {
 };
 
 export const requireAdmin: RequestHandler = (req, _res, next) => {
-  if (!req.session?.admin) return next(unauthenticated('Admin login required', 'ADMIN_UNAUTHENTICATED'));
-  next();
+  const sessionAdmin = req.session?.admin;
+  if (!sessionAdmin) return next(unauthenticated('Admin login required', 'ADMIN_UNAUTHENTICATED'));
+  Admin.findOne({ _id: sessionAdmin.id, isActive: true })
+    .then((admin) => {
+      if (!admin) {
+        return req.session.destroy((err) => {
+          if (err) return next(err);
+          next(unauthenticated('Admin login required', 'ADMIN_UNAUTHENTICATED'));
+        });
+      }
+      // A session is an identity reference, not the authority for a current role.
+      req.session.admin = toSessionAdmin(admin);
+      next();
+    })
+    .catch(next);
 };
 
 export const requireSuperAdmin: RequestHandler = (req, _res, next) => {

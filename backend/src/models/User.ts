@@ -7,7 +7,7 @@ const userSchema = new Schema(
     name: { type: String, required: true, trim: true, maxlength: 100 },
     email: { type: String, required: true, unique: true, lowercase: true, trim: true },
     passwordHash: { type: String, select: false },
-    /** Only for migrated non-bcrypt hashes; upgraded to bcrypt on first successful login. */
+    /** Temporary migration fields; authentication never reads them. Scrub with the security remediation command. */
     legacyPasswordHash: { type: String, select: false },
     legacyAlgo: { type: String, enum: ['md5', 'sha1', 'plain'], select: false },
     passwordResetTokenHash: { type: String, select: false, index: true },

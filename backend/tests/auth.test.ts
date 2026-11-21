@@ -118,7 +118,7 @@ describe('password reset', () => {
     const stored = await User.findOne({ email: 'seeker@example.com' }).select('+passwordResetTokenHash');
     expect(stored?.passwordResetTokenHash).not.toBe(token); // only the hash is stored
 
-    const valid = await request(app).get('/api/auth/reset-password/validate').query({ token }).expect(200);
+    const valid = await request(app).post('/api/auth/reset-password/validate').send({ token }).expect(200);
     expect(valid.body.data).toEqual({ valid: true, email: 'seeker@example.com' });
 
     const mismatch = await c.post('/api/auth/reset-password', { token, password: 'newpass12', confirmPassword: 'other' });

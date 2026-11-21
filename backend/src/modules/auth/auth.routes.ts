@@ -12,7 +12,7 @@ import {
   loginSchema,
   registerSchema,
   resetPasswordSchema,
-  resetTokenQuerySchema,
+  resetTokenBodySchema,
 } from '../../shared/schemas/auth';
 import { asyncHandler } from '../../utils/asyncHandler';
 import * as ctrl from './auth.controller';
@@ -31,9 +31,9 @@ authRouter.post(
   forgotPasswordLimiter,
   asyncHandler(ctrl.forgotPassword),
 );
-authRouter.get(
+authRouter.post(
   '/reset-password/validate',
-  validate({ query: resetTokenQuerySchema }),
+  validate({ body: resetTokenBodySchema }),
   asyncHandler(ctrl.validateResetToken),
 );
 authRouter.post('/reset-password', validate({ body: resetPasswordSchema }), asyncHandler(ctrl.resetPassword));
