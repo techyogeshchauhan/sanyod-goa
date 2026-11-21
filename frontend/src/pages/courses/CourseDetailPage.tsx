@@ -8,7 +8,7 @@ import { ApiError } from '@/api/client';
 import { confirmPurchase, loginRequired, purchaseRequired } from '@/components/courses/dialogs';
 import { PlaylistModal } from '@/components/courses/PlaylistModal';
 import { PageError } from '@/components/common/PageState';
-import { Spinner } from '@/components/ui';
+import { FitImage, Spinner } from '@/components/ui';
 import { useAuth } from '@/providers/AuthProvider';
 import NotFoundPage from '@/pages/NotFoundPage';
 import { duration, nl2lines } from '@/utils/format';
@@ -90,7 +90,7 @@ export default function CourseDetailPage() {
             </div>
             <div className="col-lg-5">
               <div className="split-media" style={{ aspectRatio: '16 / 10' }}>
-                <img src={course.image} alt="" />
+                <FitImage src={course.image} />
               </div>
             </div>
           </div>

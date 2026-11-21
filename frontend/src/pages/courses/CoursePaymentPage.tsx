@@ -6,7 +6,7 @@ import { formatRupees } from '@shared/utils/text';
 import { courseDetailApi, paymentsApi, settingsApi } from '@/api/catalog';
 import { ApiError } from '@/api/client';
 import { PageError } from '@/components/common/PageState';
-import { Spinner } from '@/components/ui';
+import { FitImage, Spinner } from '@/components/ui';
 import { useAuth } from '@/providers/AuthProvider';
 import NotFoundPage from '@/pages/NotFoundPage';
 
@@ -91,7 +91,7 @@ export default function CoursePaymentPage() {
           <div className="col-lg-5 order-lg-2">
             <div className="card-flat sticky-aside">
               <div className="split-media mb-3" style={{ aspectRatio: '16 / 9' }}>
-                <img src={course.image} alt="" />
+                <FitImage src={course.image} />
               </div>
               <h2 className="h4 deva">{course.title}</h2>
               <div className="d-flex align-items-baseline gap-2 flex-wrap mb-3">

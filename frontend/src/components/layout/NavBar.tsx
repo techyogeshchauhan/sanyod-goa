@@ -55,7 +55,8 @@ export function NavBar() {
   return (
     <header className={`site-header${scrollY > 8 ? ' scrolled' : ''}`}>
       <div className="container">
-        <nav className="navbar navbar-expand-lg p-0" aria-label="Main">
+        {/* xl: below 1200px the logo, nine items and the account menu don't fit on one line. */}
+        <nav className="navbar navbar-expand-xl p-0" aria-label="Main">
           <Link to="/" className="brand me-3">
             <img src={SITE.logo} alt="" />
             <span>
@@ -75,7 +76,7 @@ export function NavBar() {
             <i className="fas fa-bars"></i>
           </button>
           <div className="collapse navbar-collapse" id="navbarCollapse" ref={collapseRef}>
-            <div className="navbar-nav mx-auto gap-lg-1">
+            <div className="navbar-nav mx-auto gap-xl-1">
               {MENU.map((item) => (
                 <NavLink key={item.to} to={item.to} end={'end' in item && item.end} className={navClass}>
                   {item.label}
@@ -110,13 +111,23 @@ export function NavBar() {
             <div className="header-actions d-flex align-items-center gap-2">
               {user ? (
                 <div className="dropdown">
-                  <button className="user-chip dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                  <button
+                    className="user-chip dropdown-toggle"
+                    type="button"
+                    data-bs-toggle="dropdown"
+                    aria-expanded="false"
+                    aria-label={`Account menu: ${displayName}`}
+                    title={displayName}
+                  >
                     <Avatar name={displayName} />
-                    <span className="text-truncate" style={{ maxWidth: 140 }}>
+                    <span className="user-chip-name text-truncate" style={{ maxWidth: 140 }}>
                       {displayName}
                     </span>
                   </button>
                   <div className="dropdown-menu dropdown-menu-end">
+                    <div className="user-menu-name text-truncate" style={{ maxWidth: 240 }}>
+                      {displayName}
+                    </div>
                     {ACCOUNT.map((item) => (
                       <Link key={item.to} to={item.to} className="dropdown-item">
                         <i className={`${item.icon} me-2 text-saffron`} style={{ width: 18 }}></i>

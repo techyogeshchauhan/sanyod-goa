@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { CtaBand, FeatureCard, PageHero, Section, StatRow, type Tone } from '@/components/ui';
+import { CtaBand, FeatureCard, FitImage, PageHero, Section, StatRow, type Tone } from '@/components/ui';
 
 const STOCK = 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80';
 
@@ -120,7 +120,7 @@ export default function SpiritualLibraryPage() {
               <article className="card-soft card-media hover reveal">
                 <div className="media">
                   <span className="media-tag chip solid">{f.tag}</span>
-                  <img src={STOCK} alt="" loading="lazy" />
+                  <FitImage src={STOCK} loading="lazy" />
                 </div>
                 <div className="body">
                   <h3 className="h4">{f.title}</h3>

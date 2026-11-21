@@ -18,15 +18,17 @@
 
 .hero-visual {
   position: relative;
-  max-width: 520px;
+  max-width: 440px;
   margin-left: auto;
 }
 
+/* The founder photo is 2:3 (853×1280): same frame, so it shows whole. */
 .hero-visual img {
   width: 100%;
-  aspect-ratio: 4 / 5;
-  object-fit: cover;
-  border-radius: 32px 32px 32px 140px;
+  aspect-ratio: 2 / 3;
+  object-fit: contain;
+  background: var(--surface-2);
+  border-radius: 28px;
   box-shadow: var(--shadow-lg);
 }
 
@@ -41,10 +43,11 @@
   z-index: -1;
 }
 
+/* Hangs below the photo, over its plain bottom margin only (the figure ends ~10% above the edge). */
 .hero-float {
   position: absolute;
   left: -24px;
-  bottom: 32px;
+  bottom: -36px;
   height: auto;
   display: flex;
   align-items: center;

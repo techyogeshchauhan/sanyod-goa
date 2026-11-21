@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Avatar, CtaBand, FeatureCard, PageHero, QuoteCard, Section, type Tone } from '@/components/ui';
+import { Avatar, CtaBand, FeatureCard, FitImage, PageHero, QuoteCard, Section, type Tone } from '@/components/ui';
 
 const STOCK = 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80';
 
@@ -218,7 +218,7 @@ export default function CommunityPage() {
               <article className="card-soft card-media hover reveal">
                 <div className="media">
                   <span className="media-tag chip solid">{v.tag}</span>
-                  <img src={STOCK} alt="" loading="lazy" />
+                  <FitImage src={STOCK} loading="lazy" />
                 </div>
                 <div className="body">
                   <h3 className="h4">{v.title}</h3>

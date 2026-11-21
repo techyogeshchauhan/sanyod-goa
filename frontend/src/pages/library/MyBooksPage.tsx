@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { libraryApi } from '@/api/catalog';
 import { PageError } from '@/components/common/PageState';
-import { EmptyState, PageHero, Spinner } from '@/components/ui';
+import { EmptyState, FitImage, PageHero, Spinner } from '@/components/ui';
 import { useAuth } from '@/providers/AuthProvider';
 import { longDate } from '@/utils/format';
 
@@ -56,7 +56,7 @@ export default function MyBooksPage() {
                     <article className="card-soft book-card reveal d-flex gap-3">
                       <Link to={`/my-books/${book.slug}`} className="flex-shrink-0" style={{ width: 96 }}>
                         <div className="cover-frame">
-                          <img src={book.cover} alt="" />
+                          <FitImage src={book.cover} />
                         </div>
                       </Link>
                       <div className="d-flex flex-column min-w-0">

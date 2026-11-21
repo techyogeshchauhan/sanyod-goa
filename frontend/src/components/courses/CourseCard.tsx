@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import type { CourseSummary } from '@shared/types/course';
 import { formatRupees, previewByBytes } from '@shared/utils/text';
 
+import { FitImage } from '@/components/ui';
 /** Course card: image, title, short description, price and actions. */
 export function CourseCard({
   course,
@@ -19,9 +20,9 @@ export function CourseCard({
 }) {
   return (
     <article className="card-soft card-media hover reveal">
-      <Link to={`/courses/${course.slug}`} className="media" aria-label={course.title}>
+      <Link to={`/courses/${course.slug}`} className="media media-4x3" aria-label={course.title}>
         {tag && <span className="media-tag">{tag}</span>}
-        <img src={course.image} alt="" loading="lazy" />
+        <FitImage src={course.image} loading="lazy" />
       </Link>
       <div className="body">
         <div className="d-flex gap-2 flex-wrap mb-2">

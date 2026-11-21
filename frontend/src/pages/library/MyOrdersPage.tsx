@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import type { OrderSummary } from '@shared/types/catalog';
 import { ordersApi } from '@/api/catalog';
 import { PageError } from '@/components/common/PageState';
-import { EmptyState, PageHero, Spinner, StatusChip } from '@/components/ui';
+import { EmptyState, FitImage, PageHero, Spinner, StatusChip } from '@/components/ui';
 import { ORDER_STATUS_LABEL, PAYMENT_STATUS_LABEL, dateTime, rupees } from '@/utils/format';
 
 const TYPE_LABEL = { book_pdf: 'PDF Version', book_hardcopy: 'Hard Book', course: 'Online Course' } as const;
@@ -91,7 +91,7 @@ function OrderCard({ order: o }: { order: OrderSummary }) {
         {o.cover && (
           <div className="flex-shrink-0" style={{ width: 84 }}>
             <div className="cover-frame" style={{ aspectRatio: o.itemType === 'course' ? '4 / 3' : '3 / 4' }}>
-              <img src={o.cover} alt="" />
+              <FitImage src={o.cover} />
             </div>
           </div>
         )}

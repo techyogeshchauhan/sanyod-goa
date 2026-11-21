@@ -2,6 +2,7 @@ import { lazy, Suspense, type ReactNode } from 'react';
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { PublicLayout } from '@/layouts/PublicLayout';
 import NotFoundPage from '@/pages/NotFoundPage';
+import RouteErrorPage from '@/pages/RouteErrorPage';
 import { GuestOnly, RequireAuth } from '@/routes/guards';
 
 const LoginPage = lazy(() => import('@/pages/auth/LoginPage'));
@@ -60,6 +61,7 @@ const userOnly = (node: ReactNode) => (
 export const router = createBrowserRouter([
   {
     element: <PublicLayout />,
+    errorElement: <RouteErrorPage />,
     children: [
       { index: true, element: page(<HomePage />) },
       { path: 'programs', element: userOnly(<ProgramsPage />) },
@@ -126,5 +128,5 @@ export const router = createBrowserRouter([
     ],
   },
   // Admin panel: its own layout, session and bundle.
-  { path: 'admin/*', element: page(<AdminApp />) },
+  { path: 'admin/*', element: page(<AdminApp />), errorElement: <RouteErrorPage /> },
 ]);

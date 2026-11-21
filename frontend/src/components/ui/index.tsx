@@ -247,6 +247,30 @@ export function StatusChip({ status, label }: { status: string; label?: string }
   return <span className={`chip ${STATUS_TONE[status] ?? 'muted'}`}>{label ?? status.charAt(0).toUpperCase() + status.slice(1)}</span>;
 }
 
+/**
+ * An image shown whole (never cropped) inside a fixed-shape frame (.card-media .media,
+ * .split-media, .cover-frame, .doctor-photo-lg …). The space the image doesn't fill shows a soft,
+ * blurred copy of the same image instead of empty bars.
+ */
+export function FitImage({
+  src,
+  alt = '',
+  loading,
+  onError,
+}: {
+  src: string;
+  alt?: string;
+  loading?: 'lazy' | 'eager';
+  onError?: () => void;
+}) {
+  return (
+    <>
+      <span className="fit-backdrop" aria-hidden="true" style={{ backgroundImage: `url("${src.replace(/"/g, '%22')}")` }} />
+      <img className="fit-img" src={src} alt={alt} loading={loading} onError={onError} />
+    </>
+  );
+}
+
 /** Centered spinner for loading pages and sections. */
 export function Spinner({ label = 'Loading...' }: { label?: string }) {
   return (

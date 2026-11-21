@@ -31,14 +31,14 @@ export function AuthShell({
             {footer && <div className="auth-footer">{footer}</div>}
           </div>
           <aside className="auth-aside" aria-hidden="true">
+            {/* The chakra chart is shown whole, with the quote below it (not over it). */}
+            <div className="auth-aside-media">
+              <img src="/images/IMG-20250921-WA0003.jpg" alt="" />
+            </div>
             <div className="auth-aside-inner">
-              <div className="eyebrow-deva" style={{ color: '#f1b979' }}>
-                योगः कर्मसु कौशलम्
-              </div>
-              <p className="h3 text-white mb-2">“Yoga is skill in action.”</p>
-              <p className="mb-0" style={{ color: '#c9c2d6' }}>
-                Bhagavad Gita 2.50
-              </p>
+              <div className="eyebrow-deva">योगः कर्मसु कौशलम्</div>
+              <p className="h4 mb-1">“Yoga is skill in action.”</p>
+              <p className="small text-muted mb-0">Bhagavad Gita 2.50</p>
             </div>
           </aside>
         </div>

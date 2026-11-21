@@ -7,7 +7,7 @@ import type { Address, BookDetail, BookPurchaseStatus, PaymentSummary } from '@s
 import { ApiError } from '@/api/client';
 import { booksApi, paymentsApi, settingsApi } from '@/api/catalog';
 import { PageError } from '@/components/common/PageState';
-import { Spinner, StatusChip } from '@/components/ui';
+import { FitImage, Spinner, StatusChip } from '@/components/ui';
 import { useAuth } from '@/providers/AuthProvider';
 import NotFoundPage from '@/pages/NotFoundPage';
 import { ORDER_STATUS_LABEL, nl2lines, rupees } from '@/utils/format';
@@ -150,7 +150,7 @@ export default function BookDetailPage() {
           <div className="col-lg-4">
             <div className="sticky-aside">
               <div className="cover-frame mx-auto" style={{ maxWidth: 360 }}>
-                <img src={book.cover} alt={book.title} />
+                <FitImage src={book.cover} alt={book.title} />
               </div>
             </div>
           </div>

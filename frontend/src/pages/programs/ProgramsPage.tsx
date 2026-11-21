@@ -9,7 +9,7 @@ import type { EventCategory, EventSummary } from '@shared/types/catalog';
 import { eventsApi, settingsApi } from '@/api/catalog';
 import { FieldError } from '@/components/common/FieldError';
 import { PageError } from '@/components/common/PageState';
-import { EmptyState, PageHero, Spinner } from '@/components/ui';
+import { EmptyState, FitImage, PageHero, Spinner } from '@/components/ui';
 import { useAuth } from '@/providers/AuthProvider';
 import { applyApiError } from '@/utils/forms';
 import { rupeesGrouped } from '@/utils/format';
@@ -109,6 +109,7 @@ export default function ProgramsPage() {
 
 function EventCard({ ev, onBook }: { ev: EventSummary; onBook: (e: EventSummary) => void }) {
   const online = ev.category === 'online';
+  const [image, setImage] = useState(ev.image ?? PLACEHOLDER);
   const meta: { icon: string; text: string }[] = [];
   if (!online && ev.dateText) meta.push({ icon: 'far fa-calendar-alt', text: ev.dateText });
   if (online) {
@@ -123,17 +124,10 @@ function EventCard({ ev, onBook }: { ev: EventSummary; onBook: (e: EventSummary)
 
   return (
     <article className="card-soft card-media hover reveal">
-      <div className="media">
+      <div className="media media-4x3">
         {ev.badge && <span className="chip solid media-tag">{ev.badge}</span>}
-        <img
-          src={ev.image ?? PLACEHOLDER}
-          alt={ev.title}
-          loading="lazy"
-          onError={(e) => {
-            e.currentTarget.onerror = null;
-            e.currentTarget.src = PLACEHOLDER;
-          }}
-        />
+        {/* Event posters are square or portrait: shown whole. A missing file falls back to the placeholder. */}
+        <FitImage src={image} alt={ev.title} loading="lazy" onError={() => setImage(PLACEHOLDER)} />
       </div>
       <div className="body">
         <h3 className="h4">{ev.title}</h3>

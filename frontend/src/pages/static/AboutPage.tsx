@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
-import { CtaBand, PageHero } from '@/components/ui';
+import { CtaBand, FitImage, PageHero } from '@/components/ui';
 
 // about.php content (Hindi, unchanged) in alternating image/text sections.
 const BLOCKS: { title: string; image: string; icon: string; body: ReactNode }[] = [
@@ -130,7 +130,7 @@ export default function AboutPage() {
             <div className="row align-items-center g-5">
               <div className={`col-lg-6 ${i % 2 ? 'order-lg-2' : ''}`}>
                 <div className="split-media reveal">
-                  <img src={b.image} alt="" loading="lazy" />
+                  <FitImage src={b.image} loading="lazy" />
                 </div>
               </div>
               <div className="col-lg-6">

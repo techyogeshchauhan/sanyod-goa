@@ -3,7 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import { libraryApi } from '@/api/catalog';
 import { ApiError } from '@/api/client';
 import { PageError } from '@/components/common/PageState';
-import { Spinner } from '@/components/ui';
+import { FitImage, Spinner } from '@/components/ui';
 import { fileSize, longDate, nl2lines } from '@/utils/format';
 
 /** One purchased book (view_book.php design, filled with the real book). */
@@ -44,7 +44,7 @@ export default function BookViewPage() {
         <div className="row g-5">
           <div className="col-md-4">
             <div className="cover-frame mx-auto" style={{ maxWidth: 320 }}>
-              <img src={book.cover} alt={book.title} />
+              <FitImage src={book.cover} alt={book.title} />
             </div>
           </div>
           <div className="col-md-8">
@@ -96,7 +96,7 @@ export default function BookViewPage() {
                 <div className="col-6 col-md-3" key={b.id}>
                   <Link to={`/my-books/${b.slug}`} className="book-tile">
                     <div className="cover-frame">
-                      <img src={b.cover} alt="" />
+                      <FitImage src={b.cover} />
                     </div>
                     <h3 className="h6 mt-2 deva">{b.title}</h3>
                   </Link>
