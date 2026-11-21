@@ -24,6 +24,13 @@ const optionalText = (max: number) =>
     .max(max)
     .optional()
     .transform((v) => (v ? v : undefined));
+const optionalWebUrl = z
+  .string()
+  .trim()
+  .max(500)
+  .optional()
+  .transform((v) => v || undefined)
+  .refine((v) => v === undefined || /^https?:\/\//i.test(v), 'Enter a valid http or https URL');
 const slug = z
   .string()
   .trim()
@@ -106,8 +113,11 @@ export const updateOrderSchema = z.object({
 export const bookFormSchema = z.object({
   title: text(200).min(1, 'Title is required'),
   slug: optionalSlug,
-  author: optionalText(120),
+  author: z.string().trim().max(120).optional().default(''),
   description: z.string().max(20000).optional().default(''),
+  category: optionalText(100),
+  language: optionalText(80),
+  isFeatured: bool,
   pricePdf: rupees,
   priceHardcopy: rupees,
   hardcopyAvailable: bool,
@@ -230,11 +240,27 @@ export const grantEntitlementSchema = z.object({
 export const messageStatusSchema = z.object({ status: z.enum(MESSAGE_STATUSES) });
 
 export const settingsFormSchema = z.object({
-  upiIdDefault: text(100).min(3),
-  upiIdPdf: text(100).min(3),
-  upiIdHardcopy: text(100).min(3),
-  contactEmail: z.string().trim().email(),
-  contactPhone: text(30).min(5),
+  upiIdDefault: optionalText(100),
+  upiIdPdf: optionalText(100),
+  upiIdHardcopy: optionalText(100),
+  contactEmail: z.string().trim().email().or(z.literal('')).optional().transform((v) => v || undefined),
+  contactPhone: optionalText(30),
+  location: optionalText(200),
+  workingHours: z
+    .string()
+    .transform((v, ctx) => {
+      try {
+        return JSON.parse(v) as unknown;
+      } catch {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Invalid opening hours' });
+        return z.NEVER;
+      }
+    })
+    .pipe(z.array(z.object({ label: text(60).min(1), value: text(120).min(1) })).max(14)),
+  facebookUrl: optionalWebUrl,
+  twitterUrl: optionalWebUrl,
+  instagramUrl: optionalWebUrl,
+  linkedinUrl: optionalWebUrl,
   adminNotifyEmail: z
     .string()
     .trim()

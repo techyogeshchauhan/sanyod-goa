@@ -210,7 +210,9 @@ function BookingModal({ event, onClosed }: { event: EventSummary | null; onClose
     }
   });
 
-  const upiId = settings?.upiIdDefault ?? '6355034424@upi';
+  const upiId = settings?.upiIdDefault ?? '';
+  const qr = settings?.qrImageBooks ?? '';
+  const paymentConfigured = Boolean(upiId || qr);
 
   return (
     <div className="modal fade" id="bookingModal" tabIndex={-1} aria-hidden="true" aria-labelledby="bookingModalTitle" ref={ref}>
@@ -225,6 +227,7 @@ function BookingModal({ event, onClosed }: { event: EventSummary | null; onClose
           <div className="modal-body">
             <form id="bookingForm" onSubmit={onSubmit} noValidate>
               {status && <div className={`alert alert-${status.type}`}>{status.text}</div>}
+              {!paymentConfigured && <div className="alert alert-warning">Event payment details are not configured. Please contact the site administrator.</div>}
               <div className="row g-4">
                 <div className="col-md-6">
                   <div className="card-flat h-100" style={{ background: 'var(--surface-2)' }}>
@@ -248,13 +251,11 @@ function BookingModal({ event, onClosed }: { event: EventSummary | null; onClose
                       <span id="event_price">{event ? `₹${(event.price / 100).toFixed(2)}` : ''}</span>
                     </div>
                     <div className="text-center mt-3">
-                      <div className="qr-box">
-                        <img src={settings?.qrImageBooks ?? '/Books/QR.jpg'} alt="UPI QR code" />
-                      </div>
-                      <div className="upi-row mt-3">
+                      {qr && <div className="qr-box"><img src={qr} alt="UPI QR code" /></div>}
+                      {upiId && <div className="upi-row mt-3">
                         <span className="small text-muted">UPI ID</span>
                         <code>{upiId}</code>
-                      </div>
+                      </div>}
                     </div>
                   </div>
                 </div>
@@ -286,7 +287,7 @@ function BookingModal({ event, onClosed }: { event: EventSummary | null; onClose
                     />
                     <FieldError message={errors.phone?.message} />
                   </div>
-                  <button type="submit" className="btn btn-primary btn-lg w-100 mt-1" disabled={isSubmitting}>
+                  <button type="submit" className="btn btn-primary btn-lg w-100 mt-1" disabled={isSubmitting || !paymentConfigured}>
                     {isSubmitting ? (
                       <>
                         <span className="spinner-border spinner-border-sm" role="status"></span> Submitting...

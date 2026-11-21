@@ -6,7 +6,6 @@ import { Course, type CourseDoc } from '../../models/Course';
 import { CourseVideo, type CourseVideoDoc } from '../../models/CourseVideo';
 import { Entitlement } from '../../models/Entitlement';
 import { Payment } from '../../models/Payment';
-import { COURSE_DISCOUNT_DEFAULT, DEFAULT_AUTHOR } from '../../shared/constants';
 import {
   bookFormSchema,
   courseFormSchema,
@@ -37,8 +36,11 @@ function toAdminBook(b: BookDoc, sales: number): AdminBook {
     legacyId: b.legacyId ?? null,
     slug: b.slug,
     title: b.title,
-    author: b.author ?? DEFAULT_AUTHOR,
+    author: b.author ?? '',
     description: b.description ?? '',
+    category: b.category ?? '',
+    language: b.language ?? '',
+    isFeatured: b.isFeatured ?? false,
     pricePdf: b.pricePdf ?? null,
     priceHardcopy: b.priceHardcopy ?? null,
     hardcopyAvailable: b.hardcopyAvailable ?? true,
@@ -94,11 +96,14 @@ const bookUpload = uploadFields([imageField('cover'), pdfField('pdf')]);
 function bookFields(input: BookFormInput) {
   return defined({
     title: input.title,
-    author: input.author ?? DEFAULT_AUTHOR,
+    author: input.author ?? '',
     description: input.description,
+    category: input.category ?? '',
+    language: input.language ?? '',
+    isFeatured: input.isFeatured ?? false,
     pricePdf: input.pricePdf,
-    // Default hard copy price as on the PHP site: PDF price + ₹200.
-    priceHardcopy: input.priceHardcopy ?? (input.pricePdf != null ? input.pricePdf + 20_000 : null),
+    // Each format is priced explicitly in the catalogue; never infer a price from another format.
+    priceHardcopy: input.priceHardcopy,
     hardcopyAvailable: input.hardcopyAvailable,
     pages: input.pages ?? undefined,
     publishedYear: input.publishedYear ?? undefined,
@@ -188,9 +193,9 @@ function toAdminCourse(c: CourseDoc, students: number): AdminCourse {
     description: c.description ?? '',
     image: publicUrl(c.image) ?? '',
     price: c.price,
-    discountPercent: c.discountPercent ?? COURSE_DISCOUNT_DEFAULT,
-    level: c.level ?? 'All Levels',
-    hasCertificate: c.hasCertificate ?? true,
+    discountPercent: c.discountPercent ?? 0,
+    level: c.level ?? '',
+    hasCertificate: c.hasCertificate ?? false,
     popularRank: c.popularRank ?? null,
     videoCount: c.videoCount ?? 0,
     isPublished: c.isPublished ?? true,

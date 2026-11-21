@@ -11,10 +11,18 @@ export function toPublicSettings(s: SettingsDoc): PublicSettings {
     upiIdDefault: s.upiIdDefault ?? '',
     upiIdPdf: s.upiIdPdf ?? '',
     upiIdHardcopy: s.upiIdHardcopy ?? '',
-    qrImageBooks: publicUrl(s.qrImageBooks) ?? '/Books/QR.jpg',
-    qrImageCourses: publicUrl(s.qrImageCourses) ?? '/images/Qr.png',
+    qrImageBooks: publicUrl(s.qrImageBooks) ?? '',
+    qrImageCourses: publicUrl(s.qrImageCourses) ?? '',
     contactEmail: s.contactEmail ?? '',
     contactPhone: s.contactPhone ?? '',
+    location: s.location ?? '',
+    workingHours: (s.workingHours ?? []).map((item) => ({ label: item.label ?? '', value: item.value ?? '' })),
+    socialLinks: {
+      facebook: s.socialLinks?.facebook ?? '',
+      twitter: s.socialLinks?.twitter ?? '',
+      instagram: s.socialLinks?.instagram ?? '',
+      linkedin: s.socialLinks?.linkedin ?? '',
+    },
   };
 }
 

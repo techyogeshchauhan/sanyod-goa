@@ -15,10 +15,10 @@ import type {
   LibraryCourse,
   OrderSummary,
   PaymentCreated,
-  PaymentMethod,
   PaymentSummary,
   PublicSettings,
 } from '@shared/types/catalog';
+import type { CourseSummary } from '@shared/types/course';
 import { api, unwrap } from './client';
 
 type Message = { id: string; message: string };
@@ -28,7 +28,7 @@ export interface PaymentRequest {
   itemSlug: string;
   upiTransactionId: string;
   screenshot: File;
-  paymentMethod?: PaymentMethod;
+  paymentMethod?: 'upi';
   shippingAddress?: Address;
 }
 
@@ -37,8 +37,14 @@ export const settingsApi = {
 };
 
 export const booksApi = {
-  list: () => unwrap<BookSummary[]>(api.get('/books')),
+  list: (params?: { q?: string; category?: string; language?: string; featured?: boolean }) =>
+    unwrap<BookSummary[]>(api.get('/books', { params })),
+  filters: () => unwrap<{ categories: string[]; languages: string[] }>(api.get('/books/filters')),
   get: (slug: string) => unwrap<BookDetailResponse>(api.get(`/books/${encodeURIComponent(slug)}`)),
+};
+
+export const coursesApi = {
+  list: () => unwrap<CourseSummary[]>(api.get('/courses')),
 };
 
 export const paymentsApi = {

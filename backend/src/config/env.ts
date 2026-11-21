@@ -29,12 +29,6 @@ const envSchema = z.object({
   SMTP_USER: z.string().optional(),
   SMTP_PASS: z.string().optional(),
   MAIL_FROM: z.string().default('SANYOD <noreply@sanyod.in>'),
-  ADMIN_NOTIFY_EMAIL: z.string().email().default('sanyod@sanyod.in'),
-
-  UPI_ID_DEFAULT: z.string().default('6355034424@upi'),
-  UPI_ID_HARDCOPY: z.string().default('hardbook.6355034424@upi'),
-  HARDCOPY_SURCHARGE_PAISE: z.coerce.number().int().nonnegative().default(20_000),
-  COURSE_DISCOUNT_DEFAULT: z.coerce.number().min(0).max(100).default(40),
   MAX_IMAGE_UPLOAD_MB: z.coerce.number().positive().default(5),
   MAX_PDF_UPLOAD_MB: z.coerce.number().positive().default(50),
 

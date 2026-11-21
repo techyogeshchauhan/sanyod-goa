@@ -7,8 +7,6 @@ export const NAME_MAX_LENGTH = 100;
 
 export const RESET_TOKEN_TTL_MINUTES = 60;
 
-export const HARDCOPY_SURCHARGE_PAISE = 20_000; // ₹200
-export const COURSE_DISCOUNT_DEFAULT = 40; // percent
 export const ORDER_NUMBER_PREFIX = 'ORD';
 
 export const CSRF_COOKIE_NAME = 'sanyod.csrf';
@@ -26,7 +24,6 @@ export const EVENT_CATEGORIES = ['retreat', 'seminar', 'online'] as const;
 export const PREFERRED_TIMES = ['morning', 'afternoon', 'evening', 'any'] as const;
 export const CONSULTATION_STATUSES = ['pending', 'confirmed', 'completed', 'cancelled'] as const;
 export const BOOKING_STATUSES = ['pending', 'confirmed', 'cancelled'] as const;
-export const DEFAULT_AUTHOR = 'Sadhaka Jamwant';
 export const PAYMENT_METHODS = ['upi', 'card', 'netbanking', 'wallet'] as const;
 export const MESSAGE_STATUSES = ['new', 'read', 'replied'] as const;
 /** Labels of the "Preferred Consultation Time" select on doctor_detail.php. */

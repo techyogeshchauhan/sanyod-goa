@@ -127,8 +127,8 @@ function DoctorForm({ doctor, onClose }: { doctor: AdminDoctor | null; onClose: 
     fee: rupeesInput(doctor?.fee),
     bio: doctor?.bio ?? '',
     rating: doctor?.rating != null ? String(doctor.rating) : '',
-    isVerified: doctor?.isVerified ?? true,
-    availabilityText: doctor?.availabilityText ?? 'Available Today',
+    isVerified: doctor?.isVerified ?? false,
+    availabilityText: doctor?.availabilityText ?? '',
     isActive: doctor?.isActive ?? true,
     sortOrder: String(doctor?.sortOrder ?? 0),
   });

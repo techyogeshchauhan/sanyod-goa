@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { PAYMENT_METHODS, PREFERRED_TIMES } from '../constants';
+import { PREFERRED_TIMES } from '../constants';
 
 const trimmed = (label: string, min: number, max: number) =>
   z
@@ -48,7 +48,7 @@ export const createPaymentSchema = z
     itemType: z.enum(['book_pdf', 'book_hardcopy', 'course'], { errorMap: () => ({ message: 'Please select a purchase option' }) }),
     itemSlug: z.string().trim().min(1).max(200),
     upiTransactionId: transactionId,
-    paymentMethod: z.enum(PAYMENT_METHODS).default('upi'),
+    paymentMethod: z.literal('upi').default('upi'),
     shippingAddress: z
       .string()
       .optional()
@@ -86,7 +86,7 @@ export const consultationSchema = z.object({
   appointmentDate: z
     .string({ required_error: 'Appointment date is required' })
     .regex(/^\d{4}-\d{2}-\d{2}$/, 'Please choose a date')
-    .refine((v) => v >= new Date(Date.now() - 24 * 3600 * 1000).toISOString().slice(0, 10), 'Please choose today or a later date'),
+    .refine((v) => v >= new Date(Date.now() + 5.5 * 3600 * 1000).toISOString().slice(0, 10), 'Please choose today or a later date'),
   preferredTime: z.enum(PREFERRED_TIMES, { errorMap: () => ({ message: 'Please select a preferred time' }) }),
   symptoms: trimmed('Symptoms', 5, 5000),
   additionalNotes: z

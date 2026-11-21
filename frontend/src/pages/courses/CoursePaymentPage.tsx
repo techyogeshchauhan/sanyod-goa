@@ -1,7 +1,6 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState, type FormEvent } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import type { PaymentMethod } from '@shared/types/catalog';
 import { formatRupees } from '@shared/utils/text';
 import { courseDetailApi, paymentsApi, settingsApi } from '@/api/catalog';
 import { ApiError } from '@/api/client';
@@ -10,11 +9,8 @@ import { FitImage, Spinner } from '@/components/ui';
 import { useAuth } from '@/providers/AuthProvider';
 import NotFoundPage from '@/pages/NotFoundPage';
 
-const METHODS: { id: PaymentMethod; icon: string; name: string }[] = [
+const METHODS: { id: 'upi'; icon: string; name: string }[] = [
   { id: 'upi', icon: 'fa fa-mobile-alt', name: 'UPI' },
-  { id: 'card', icon: 'fa fa-credit-card', name: 'Card' },
-  { id: 'netbanking', icon: 'fa fa-university', name: 'Net banking' },
-  { id: 'wallet', icon: 'fa fa-wallet', name: 'Wallet' },
 ];
 
 /** Course purchase (payment.php): method, transaction ID and screenshot, approved by the admin. */
@@ -25,7 +21,7 @@ export default function CoursePaymentPage() {
   const queryClient = useQueryClient();
   const { data, isLoading, error } = useQuery({ queryKey: ['course', slug, true], queryFn: () => courseDetailApi.get(slug) });
   const { data: settings } = useQuery({ queryKey: ['settings'], queryFn: settingsApi.public, staleTime: 10 * 60 * 1000 });
-  const [method, setMethod] = useState<PaymentMethod | null>(null);
+  const [method, setMethod] = useState<'upi' | null>(null);
   const [transactionId, setTransactionId] = useState('');
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
@@ -37,7 +33,9 @@ export default function CoursePaymentPage() {
   if (error || !data) return <PageError error={error} />;
   const { course, purchase } = data;
   const amount = formatRupees(course.price, false);
-  const upi = settings?.upiIdDefault ?? '6355034424@upi';
+  const upi = settings?.upiIdDefault ?? '';
+  const qr = settings?.qrImageCourses ?? '';
+  const paymentConfigured = Boolean(upi || qr);
 
   function onFile(e: React.ChangeEvent<HTMLInputElement>) {
     const f = e.target.files?.[0];
@@ -57,6 +55,7 @@ export default function CoursePaymentPage() {
     e.preventDefault();
     setFormError(null);
     if (!method) return setFormError('Please select a payment method.');
+    if (!paymentConfigured) return setFormError('Payment details are not configured yet. Please contact the site administrator.');
     if (!transactionId.trim()) return setFormError('Please enter your Transaction ID.');
     if (!file) return setFormError('Please upload your payment screenshot.');
     setSubmitting(true);
@@ -147,6 +146,7 @@ export default function CoursePaymentPage() {
                     <i className="fa fa-exclamation-circle me-1"></i> {formError}
                   </div>
                 )}
+                {!paymentConfigured && <div className="alert alert-warning">Payment details are not configured yet. Please contact the site administrator.</div>}
                 <h2 className="h5 mb-3">1. Choose a payment method</h2>
                 <div className="row g-2 mb-4">
                   {METHODS.map((m) => (
@@ -170,31 +170,15 @@ export default function CoursePaymentPage() {
                   <>
                     <h2 className="h5 mb-3">2. Pay {amount}</h2>
                     <div id="paymentInstructions" className="mb-4">
-                      {method === 'upi' ? (
-                        <div className="d-flex gap-3 flex-wrap align-items-center">
-                          <div className="qr-box">
-                            <img src={settings?.qrImageCourses ?? '/images/Qr.png'} alt="UPI QR code" />
-                          </div>
-                          <ol className="small text-muted mb-0 ps-3">
-                            <li>Open Google Pay, PhonePe or Paytm.</li>
-                            <li>
-                              Send payment to: <strong className="text-ink">{upi}</strong>
-                            </li>
-                            <li>
-                              Enter amount: <strong className="text-ink">{amount}</strong>
-                            </li>
-                            <li>Complete the payment and take a screenshot.</li>
-                          </ol>
-                        </div>
-                      ) : (
+                      <div className="d-flex gap-3 flex-wrap align-items-center">
+                        {qr && <div className="qr-box"><img src={qr} alt="UPI QR code" /></div>}
                         <ol className="small text-muted mb-0 ps-3">
-                          <li>{{ card: 'Use your credit/debit card.', netbanking: 'Select your bank.', wallet: 'Open your wallet.' }[method]}</li>
-                          <li>
-                            Pay <strong className="text-ink">{amount}</strong> to <strong className="text-ink">{upi}</strong>.
-                          </li>
+                          <li>Open a UPI payment app.</li>
+                          {upi && <li>Send payment to: <strong className="text-ink">{upi}</strong></li>}
+                          <li>Enter amount: <strong className="text-ink">{amount}</strong></li>
                           <li>Complete the payment and take a screenshot.</li>
                         </ol>
-                      )}
+                      </div>
                     </div>
 
                     <h2 className="h5 mb-3">3. Confirm your payment</h2>
@@ -227,7 +211,7 @@ export default function CoursePaymentPage() {
                   </>
                 )}
 
-                <button type="submit" className="btn btn-primary btn-lg w-100" id="submitBtn" disabled={!method || submitting}>
+                <button type="submit" className="btn btn-primary btn-lg w-100" id="submitBtn" disabled={!method || submitting || !paymentConfigured}>
                   {submitting ? (
                     <>
                       <span className="spinner-border spinner-border-sm text-white" role="status"></span> Submitting…

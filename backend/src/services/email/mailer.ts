@@ -27,6 +27,7 @@ function getTransporter(): Transporter | null {
 
 /** Sends an email. Never throws: a failed email must not fail the user's request. */
 export async function sendMail(message: MailMessage): Promise<boolean> {
+  if (!message.to.trim()) return false;
   const transport = getTransporter();
   if (!transport) {
     outbox.push(message);

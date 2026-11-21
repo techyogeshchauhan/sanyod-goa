@@ -5,14 +5,14 @@ import { EmptyState, FitImage, PageHero, Spinner } from '@/components/ui';
 
 /** Books (books.php). Opening a book needs a login, as on live. */
 export default function BooksPage() {
-  const { data: books, isLoading } = useQuery({ queryKey: ['books'], queryFn: booksApi.list });
+  const { data: books, isLoading } = useQuery({ queryKey: ['books'], queryFn: () => booksApi.list() });
 
   return (
     <>
       <PageHero
         crumbs={[{ label: 'Books' }]}
         eyebrow="Books"
-        title="Books by Sadhaka Jamwant"
+        title="Books"
         lead="Read as a PDF on any device or order the printed book, delivered free across India."
       />
       <section className="section">

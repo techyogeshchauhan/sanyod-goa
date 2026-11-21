@@ -275,6 +275,14 @@ async function adminSettings(): Promise<AdminSettings> {
     qrImageCourses: publicUrl(s.qrImageCourses) ?? '',
     contactEmail: s.contactEmail ?? '',
     contactPhone: s.contactPhone ?? '',
+    location: s.location ?? '',
+    workingHours: (s.workingHours ?? []).map((item) => ({ label: item.label ?? '', value: item.value ?? '' })),
+    socialLinks: {
+      facebook: s.socialLinks?.facebook ?? '',
+      twitter: s.socialLinks?.twitter ?? '',
+      instagram: s.socialLinks?.instagram ?? '',
+      linkedin: s.socialLinks?.linkedin ?? '',
+    },
     adminNotifyEmail: s.adminNotifyEmail ?? '',
   };
 }
@@ -293,8 +301,23 @@ peopleRouter.put(
   asyncHandler(async (req, res) => {
     const input = req.body as SettingsFormInput;
     const s = await getSettings();
-    Object.assign(s, input);
-    if (!input.adminNotifyEmail) s.adminNotifyEmail = undefined;
+    const { facebookUrl, twitterUrl, instagramUrl, linkedinUrl, ...fields } = input;
+    Object.assign(s, fields, {
+      upiIdDefault: input.upiIdDefault ?? '',
+      upiIdPdf: input.upiIdPdf ?? '',
+      upiIdHardcopy: input.upiIdHardcopy ?? '',
+      contactEmail: input.contactEmail ?? '',
+      contactPhone: input.contactPhone ?? '',
+      location: input.location ?? '',
+      workingHours: input.workingHours,
+      socialLinks: {
+        facebook: facebookUrl ?? '',
+        twitter: twitterUrl ?? '',
+        instagram: instagramUrl ?? '',
+        linkedin: linkedinUrl ?? '',
+      },
+    });
+    s.adminNotifyEmail = input.adminNotifyEmail;
     for (const field of ['qrImageBooks', 'qrImageCourses'] as const) {
       const file = uploadedFile(req, field);
       if (!file) continue;

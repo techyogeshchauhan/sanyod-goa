@@ -199,7 +199,7 @@ async function migrateBooks(tables: Map<string, Row[]>) {
       author: str(pick(row, 'book_author', 'author')) || undefined,
       description: str(pick(row, 'description', 'book_description', 'book_desc', 'details')),
       pricePdf: price,
-      priceHardcopy: paise(pick(row, 'hardbook_price', 'hard_price', 'hardcopy_price')) ?? (price !== null ? price + 20_000 : null),
+      priceHardcopy: paise(pick(row, 'hardbook_price', 'hard_price', 'hardcopy_price')),
       pages: num(pick(row, 'pages', 'total_pages')) ?? undefined,
       publishedYear: num(pick(row, 'published_year', 'year')) ?? undefined,
       cover: coverFile ? await copyFile('public', 'books/legacy', withFolder(coverFile, 'Books'), r) : '/Books/QR.jpg',
@@ -243,7 +243,7 @@ async function migrateCourses(tables: Map<string, Row[]>) {
       description: str(pick(row, 'description', 'subject_description', 'details')),
       image: image ? await copyFile('public', 'courses/legacy', withFolder(image, 'Courses'), r) : (existing?.image ?? '/images/learn.png'),
       price,
-      discountPercent: num(pick(row, 'discount', 'discount_percent')) ?? 40,
+      discountPercent: num(pick(row, 'discount', 'discount_percent')) ?? 0,
       isPublished: !/^(0|inactive|hidden|draft)$/i.test(str(pick(row, 'status', 'is_active'))),
       ...(date(pick(row, 'created_at')) ? { createdAt: date(pick(row, 'created_at')) } : {}),
     };
@@ -473,10 +473,9 @@ async function migrateDoctors(tables: Map<string, Row[]>) {
       bio: str(pick(first, 'description', 'bio', 'about')),
       photo: photo ? await copyFile('public', 'doctors/legacy', withFolder(photo, 'uploads/doctors'), r) : undefined,
       cv: cv ? await copyFile('private', 'cvs/legacy', withFolder(cv, 'uploads/doctors'), r) : undefined,
-      rating: 4.7,
-      isVerified: true,
-      availabilityText: 'Available Today',
-      isActive: true,
+      rating: num(pick(first, 'rating', 'average_rating')) ?? undefined,
+      isVerified: ['1', 'true', 'yes'].includes(str(pick(first, 'is_verified', 'verified')).toLowerCase()),
+      availabilityText: str(pick(first, 'availability_text', 'availability')) || undefined,
     };
     if (dryRun) {
       r.written++;

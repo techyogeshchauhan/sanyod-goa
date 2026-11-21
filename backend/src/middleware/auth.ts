@@ -11,7 +11,7 @@ export const requireUser: RequestHandler = (req, _res, next) => {
     .then((found) => {
       if (found) return next();
       req.session.user = undefined;
-      next(new AppError(403, 'ACCOUNT_DISABLED', 'Your account has been deactivated. Please contact us at sanyod@sanyod.in.'));
+      next(new AppError(403, 'ACCOUNT_DISABLED', 'Your account has been deactivated. Please use the contact form on our website for assistance.'));
     })
     .catch(next);
 };

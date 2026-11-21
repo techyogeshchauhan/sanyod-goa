@@ -24,9 +24,6 @@ export function emailLayout(title: string, bodyHtml: string): string {
     <div style="background: #f9f9f9; padding: 30px; border-radius: 0 0 5px 5px;">
       ${bodyHtml}
     </div>
-    <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; text-align: center; color: #666; font-size: 13px;">
-      Mapusa, Goa · 8077641645 · sanyod@sanyod.in
-    </div>
   </div>
 </body>
 </html>`;

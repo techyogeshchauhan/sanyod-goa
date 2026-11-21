@@ -1,25 +1,38 @@
 import { Schema, model, type HydratedDocument, type InferSchemaType } from 'mongoose';
 
+const workingHourSchema = new Schema(
+  { label: { type: String, trim: true }, value: { type: String, trim: true } },
+  { _id: false },
+);
+
 /**
- * Site settings edited by the admin (one document, key "site"). Defaults are the values
- * hard-coded on the PHP pages.
+ * Site settings edited by the admin (one document, key "site"). Operational values are
+ * intentionally empty until configured in the admin panel.
  */
 const settingsSchema = new Schema(
   {
     key: { type: String, required: true, unique: true, default: 'site' },
     /** Shown first on books_details.php and on payment.php / programes.php. */
-    upiIdDefault: { type: String, trim: true, default: '6355034424@upi' },
+    upiIdDefault: { type: String, trim: true, default: '' },
     /** books_details.php after choosing the PDF option. */
-    upiIdPdf: { type: String, trim: true, default: 'pdf.6355034424@upi' },
+    upiIdPdf: { type: String, trim: true, default: '' },
     /** books_details.php after choosing the hard book option. */
-    upiIdHardcopy: { type: String, trim: true, default: 'hardbook.6355034424@upi' },
+    upiIdHardcopy: { type: String, trim: true, default: '' },
     /** QR code on book purchase and event booking (Books/QR.jpg). Public path or /media key. */
-    qrImageBooks: { type: String, default: '/Books/QR.jpg' },
+    qrImageBooks: { type: String, default: '' },
     /** QR code in the course payment instructions (images/Qr.png). */
-    qrImageCourses: { type: String, default: '/images/Qr.png' },
-    contactEmail: { type: String, trim: true, default: 'sanyod@sanyod.in' },
-    contactPhone: { type: String, trim: true, default: '8077641645' },
-    /** Admin notifications go here (falls back to ADMIN_NOTIFY_EMAIL). */
+    qrImageCourses: { type: String, default: '' },
+    contactEmail: { type: String, trim: true, default: '' },
+    contactPhone: { type: String, trim: true, default: '' },
+    location: { type: String, trim: true, default: '' },
+    workingHours: { type: [workingHourSchema], default: [] },
+    socialLinks: {
+      facebook: { type: String, trim: true, default: '' },
+      twitter: { type: String, trim: true, default: '' },
+      instagram: { type: String, trim: true, default: '' },
+      linkedin: { type: String, trim: true, default: '' },
+    },
+    /** Admin notifications go to this configured address; blank disables email notifications. */
     adminNotifyEmail: { type: String, trim: true },
   },
   { timestamps: true },

@@ -44,7 +44,7 @@ export async function authenticate(input: LoginInput): Promise<SessionUser> {
   }
   if (!ok) throw invalidCredentials();
   if (!user.isActive) {
-    throw new AppError(403, 'ACCOUNT_DISABLED', 'Your account has been deactivated. Please contact us at sanyod@sanyod.in.');
+    throw new AppError(403, 'ACCOUNT_DISABLED', 'Your account has been deactivated. Please use the contact form on our website for assistance.');
   }
 
   user.lastLoginAt = new Date();

@@ -107,8 +107,11 @@ function BookForm({ book, onClose }: { book: AdminBook | null; onClose: () => vo
   const [v, setV] = useState({
     title: book?.title ?? '',
     slug: book?.slug ?? '',
-    author: book?.author ?? 'Sadhaka Jamwant',
+    author: book?.author ?? '',
     description: book?.description ?? '',
+    category: book?.category ?? '',
+    language: book?.language ?? '',
+    isFeatured: book?.isFeatured ?? false,
     pricePdf: rupeesInput(book?.pricePdf),
     priceHardcopy: rupeesInput(book?.priceHardcopy),
     hardcopyAvailable: book?.hardcopyAvailable ?? true,
@@ -185,8 +188,18 @@ function BookForm({ book, onClose }: { book: AdminBook | null; onClose: () => vo
         </div>
         <div className="col-md-3">
           <label className="form-label fw-semibold">Hard copy price (₹)</label>
-          <input className="form-control" inputMode="decimal" value={v.priceHardcopy} onChange={set('priceHardcopy')} placeholder="PDF price + 200" />
+          <input className="form-control" inputMode="decimal" value={v.priceHardcopy} onChange={set('priceHardcopy')} placeholder="empty = not for sale" />
           {err('priceHardcopy')}
+        </div>
+        <div className="col-md-6">
+          <label className="form-label fw-semibold">Category</label>
+          <input className="form-control" value={v.category} onChange={set('category')} />
+          {err('category')}
+        </div>
+        <div className="col-md-6">
+          <label className="form-label fw-semibold">Language</label>
+          <input className="form-control" value={v.language} onChange={set('language')} />
+          {err('language')}
         </div>
         <div className="col-12">
           <label className="form-label fw-semibold">Description</label>
@@ -234,6 +247,10 @@ function BookForm({ book, onClose }: { book: AdminBook | null; onClose: () => vo
           <div className="form-check">
             <input className="form-check-input" type="checkbox" id="hc" checked={v.hardcopyAvailable} onChange={set('hardcopyAvailable')} />
             <label className="form-check-label" htmlFor="hc">Hard copy available</label>
+          </div>
+          <div className="form-check">
+            <input className="form-check-input" type="checkbox" id="featured" checked={v.isFeatured} onChange={set('isFeatured')} />
+            <label className="form-check-label" htmlFor="featured">Featured in Spiritual Library</label>
           </div>
         </div>
       </div>

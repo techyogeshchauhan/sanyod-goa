@@ -50,19 +50,15 @@ export default function BookDetailPage() {
   const pdfPrice = book.pricePdf;
   const hardPrice = book.priceHardcopy;
   const price = option === 'pdf' ? pdfPrice : hardPrice;
-  const upiId = !showPayment
-    ? (settings?.upiIdDefault ?? '6355034424@upi')
-    : option === 'pdf'
-      ? (settings?.upiIdPdf ?? 'pdf.6355034424@upi')
-      : (settings?.upiIdHardcopy ?? 'hardbook.6355034424@upi');
-  const qr = settings?.qrImageBooks ?? '/Books/QR.jpg';
+  const upiId = option === 'pdf' ? settings?.upiIdPdf ?? '' : settings?.upiIdHardcopy ?? '';
+  const qr = settings?.qrImageBooks ?? '';
+  const paymentConfigured = Boolean(upiId || qr);
 
   const pdfBlocked = Boolean(purchase?.canRead || purchase?.pdf === 'pending' || purchase?.pdf === 'approved');
-  const hardBlocked = purchase?.hardcopy === 'pending' || (purchase?.hardcopy === 'approved' && purchase.hardcopyOrderStatus !== 'delivered');
+  const hardBlocked = purchase?.hardcopy === 'pending' || purchase?.hardcopy === 'approved';
 
   function selectOption(next: Option) {
-    if (!book.purchasable) return;
-    if ((next === 'pdf' && pdfBlocked) || (next === 'hardbook' && (hardBlocked || !book.hardcopyAvailable))) return;
+    if ((next === 'pdf' && (pdfBlocked || pdfPrice == null)) || (next === 'hardbook' && (hardBlocked || hardPrice == null || !book.hardcopyAvailable))) return;
     setOption(next);
     setShowPayment(true);
     setFormError(null);
@@ -163,7 +159,7 @@ export default function BookDetailPage() {
             {!book.purchasable && (
               <div className="alert alert-warning">
                 <i className="fas fa-info-circle me-2"></i>This book will be available for purchase soon. Please contact us at{' '}
-                <a href={`mailto:${settings?.contactEmail ?? 'sanyod@sanyod.in'}`}>{settings?.contactEmail ?? 'sanyod@sanyod.in'}</a>.
+                {settings?.contactEmail ? <a href={`mailto:${settings.contactEmail}`}>{settings.contactEmail}</a> : 'the site administrator'}.
               </div>
             )}
             <div className="row g-3">
@@ -180,7 +176,7 @@ export default function BookDetailPage() {
                     <StatusBadge kind="pdf" purchase={purchase} />
                   </div>
                   <h3 className="h4 mb-1">PDF Version</h3>
-                  <div className="price my-2">{rupees(pdfPrice)}</div>
+                  <div className="price my-2">{pdfPrice != null ? rupees(pdfPrice) : <span className="small text-muted">Unavailable</span>}</div>
                   <ul className="check-list small mb-3">
                     <li>Instant download after approval</li>
                     <li>Read on any device</li>
@@ -195,7 +191,7 @@ export default function BookDetailPage() {
                     <button
                       type="button"
                       className={`btn w-100 ${option === 'pdf' && showPayment ? 'btn-primary' : 'btn-outline-primary'}`}
-                      disabled={pdfBlocked || !book.purchasable}
+                      disabled={pdfBlocked || pdfPrice == null}
                       onClick={(e) => {
                         e.stopPropagation();
                         selectOption('pdf');
@@ -204,6 +200,10 @@ export default function BookDetailPage() {
                       {purchase?.pdf === 'pending' ? (
                         <>
                           <i className="fas fa-clock"></i> Payment Pending Approval
+                        </>
+                      ) : pdfPrice == null ? (
+                        <>
+                          <i className="fas fa-ban"></i> Currently unavailable
                         </>
                       ) : (
                         <>
@@ -227,7 +227,7 @@ export default function BookDetailPage() {
                     <StatusBadge kind="hardbook" purchase={purchase} />
                   </div>
                   <h3 className="h4 mb-1">Hard Book (Physical Copy)</h3>
-                  <div className="price my-2">{rupees(hardPrice, false)}</div>
+                  <div className="price my-2">{hardPrice != null ? rupees(hardPrice, false) : <span className="small text-muted">Unavailable</span>}</div>
                   <ul className="check-list small mb-3">
                     <li>Printed paperback or hardcover</li>
                     <li>Free shipping across India</li>
@@ -237,13 +237,13 @@ export default function BookDetailPage() {
                   <button
                     type="button"
                     className={`btn w-100 ${option === 'hardbook' && showPayment ? 'btn-primary' : 'btn-outline-primary'}`}
-                    disabled={hardBlocked || !book.purchasable || !book.hardcopyAvailable}
+                    disabled={hardBlocked || hardPrice == null || !book.hardcopyAvailable}
                     onClick={(e) => {
                       e.stopPropagation();
                       selectOption('hardbook');
                     }}
                   >
-                    {!book.hardcopyAvailable ? (
+                    {!book.hardcopyAvailable || hardPrice == null ? (
                       <>
                         <i className="fas fa-ban"></i> Currently unavailable
                       </>
@@ -267,7 +267,7 @@ export default function BookDetailPage() {
 
             <PendingNotice purchase={purchase} />
 
-            {showPayment && price != null && pdfPrice != null && (
+            {showPayment && price != null && (
               <div ref={checkoutRef} className="mt-4" id="payment-section">
                 {option === 'hardbook' && (
                   <div className="card-flat mb-4" id="hardbook-address">
@@ -337,7 +337,7 @@ export default function BookDetailPage() {
                         <>
                           <div className="summary-line">
                             <span>PDF Version</span>
-                            <span>{rupees(pdfPrice, false)}</span>
+                            <span>{rupees(pdfPrice ?? price, false)}</span>
                           </div>
                           <div className="summary-line">
                             <span>Digital delivery</span>
@@ -352,7 +352,7 @@ export default function BookDetailPage() {
                           </div>
                           <div className="summary-line">
                             <span>Shipping (free across India)</span>
-                            <span>{rupees(price - pdfPrice, false)}</span>
+                            <span>{rupees(price - (pdfPrice ?? price), false)}</span>
                           </div>
                         </>
                       )}
@@ -371,16 +371,15 @@ export default function BookDetailPage() {
                     </div>
                     <div className="col-md-7">
                       <h3 className="h4">Pay via UPI</h3>
+                      {!paymentConfigured && <div className="alert alert-warning">Payment details are not configured yet. Please contact the site administrator.</div>}
                       <p className="text-muted small mb-3">
                         {option === 'pdf' ? 'Paying for PDF Version - Instant Digital Delivery' : 'Paying for Hard Book - Physical Delivery with Shipping'}
                       </p>
                       <div className="d-flex gap-3 flex-wrap align-items-center mb-3">
-                        <div className="qr-box">
-                          <img src={qr} alt={option === 'pdf' ? 'PDF payment QR code' : 'Hard book payment QR code'} />
-                        </div>
+                        {qr && <div className="qr-box"><img src={qr} alt={option === 'pdf' ? 'PDF payment QR code' : 'Hard book payment QR code'} /></div>}
                         <div className="flex-grow-1" style={{ minWidth: 200 }}>
-                          <p className="small text-muted mb-2">Scan with any UPI app, or pay to:</p>
-                          <div className="upi-row">
+                          <p className="small text-muted mb-2">{upiId ? (qr ? 'Scan with any UPI app, or pay to:' : 'Pay to:') : 'Scan with a UPI app:'}</p>
+                          {upiId && <div className="upi-row">
                             <code id="upi-id">{upiId}</code>
                             <button type="button" className={`btn btn-sm ${copied ? 'btn-success' : 'btn-light'}`} onClick={copyUpiId}>
                               {copied ? (
@@ -393,7 +392,7 @@ export default function BookDetailPage() {
                                 </>
                               )}
                             </button>
-                          </div>
+                          </div>}
                           <p className="mt-3 mb-0">
                             Amount: <strong className="price" style={{ fontSize: '1.3rem' }} id="payment-amount">{rupees(price, false)}</strong>
                           </p>
@@ -446,7 +445,7 @@ export default function BookDetailPage() {
                           />
                           <div className="form-text">A clear screenshot of the payment confirmation (max 5 MB).</div>
                         </div>
-                        <button type="submit" className="btn btn-primary btn-lg w-100" disabled={submitting}>
+                        <button type="submit" className="btn btn-primary btn-lg w-100" disabled={submitting || !paymentConfigured}>
                           {submitting ? (
                             <>
                               <span className="spinner-border spinner-border-sm text-white" role="status"></span> Submitting…
@@ -478,7 +477,7 @@ function BookInfo({ book }: { book: BookDetail }) {
     <div>
       <div className="eyebrow">Book</div>
       <h1 className="book-title deva mb-2">{book.title}</h1>
-      <p className="lead mb-3">by {book.author}</p>
+      {book.author && <p className="lead mb-3">by {book.author}</p>}
       <ul className="meta-list mb-3">
         {book.pages && (
           <li>
@@ -492,9 +491,8 @@ function BookInfo({ book }: { book: BookDetail }) {
             Published {book.publishedYear}
           </li>
         )}
-        <li>
-          <i className="fas fa-file-pdf"></i>PDF &amp; printed
-        </li>
+        {book.pricePdf != null && <li><i className="fas fa-file-pdf"></i>PDF edition</li>}
+        {book.hardcopyAvailable && book.priceHardcopy != null && <li><i className="fas fa-book"></i>Printed edition</li>}
         {book.rating != null && (
           <li>
             <span className="text-warning">

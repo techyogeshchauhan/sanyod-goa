@@ -49,7 +49,7 @@ export default function ReadBookPage() {
               <h2 className="h5">
                 <i className="fas fa-exclamation-triangle me-2"></i>PDF not available
               </h2>
-              <p className="mb-0">The PDF for this book is not available yet. Please contact us at sanyod@sanyod.in.</p>
+              <p className="mb-0">The PDF for this book is not available yet. Please use the <Link to="/contact">contact page</Link> for assistance.</p>
             </div>
           )}
         </div>

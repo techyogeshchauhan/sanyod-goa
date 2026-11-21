@@ -1,5 +1,7 @@
 import { useState, type FormEvent } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
+import { settingsApi } from '@/api/catalog';
 import { newsletterSchema } from '@shared/schemas/forms';
 import { formsApi } from '@/api/forms';
 import { SITE } from '@/config/site';
@@ -32,11 +34,12 @@ type SubscribeState = 'idle' | 'loading' | 'done' | 'error';
 
 /** Site footer: about, links, contact details, newsletter. */
 export function Footer() {
+  const { data: settings } = useQuery({ queryKey: ['settings'], queryFn: settingsApi.public });
   const [state, setState] = useState<SubscribeState>('idle');
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
-  // Social profiles are placeholders ("#") until the real links are provided (Q17).
-  const social = SOCIAL.filter((s) => SITE.social[s.key] && SITE.social[s.key] !== '#');
+  const social = SOCIAL.map((item) => ({ ...item, href: settings?.socialLinks[item.key] ?? '' }))
+    .filter((item) => /^https?:\/\//i.test(item.href));
 
   async function handleSubscribe(e: FormEvent) {
     e.preventDefault();
@@ -101,31 +104,20 @@ export function Footer() {
           <div className="col-md-4 col-lg-3">
             <h4>Get in touch</h4>
             <ul className="footer-links mb-4">
-              <li>
-                <i className="fas fa-map-marker-alt me-2 text-saffron"></i>
-                {SITE.location}
-              </li>
-              <li>
-                <a href={`mailto:${SITE.email}`}>
-                  <i className="fas fa-envelope me-2 text-saffron"></i>
-                  {SITE.email}
-                </a>
-              </li>
-              <li>
-                <a href={`tel:${SITE.phone}`}>
-                  <i className="fas fa-phone me-2 text-saffron"></i>
-                  {SITE.phone}
-                </a>
-              </li>
+              {settings?.location && <li><i className="fas fa-map-marker-alt me-2 text-saffron"></i>{settings.location}</li>}
+              {settings?.contactEmail && <li><a href={`mailto:${settings.contactEmail}`}><i className="fas fa-envelope me-2 text-saffron"></i>{settings.contactEmail}</a></li>}
+              {settings?.contactPhone && <li><a href={`tel:${settings.contactPhone}`}><i className="fas fa-phone me-2 text-saffron"></i>{settings.contactPhone}</a></li>}
             </ul>
-            <h4 className="mb-2">Opening hours</h4>
-            <ul className="footer-links small" style={{ gap: '0.25rem' }}>
-              {SITE.workingHours.map((h) => (
+            {!!settings?.workingHours.length && <>
+              <h4 className="mb-2">Opening hours</h4>
+              <ul className="footer-links small" style={{ gap: '0.25rem' }}>
+              {settings.workingHours.map((h) => (
                 <li key={h.label}>
                   <span className="text-white-50">{h.label.replace(':', '')}</span> · {h.value}
                 </li>
               ))}
-            </ul>
+              </ul>
+            </>}
           </div>
         </div>
 
@@ -166,7 +158,7 @@ export function Footer() {
             {social.length > 0 && (
               <div className="social d-flex gap-2">
                 {social.map((s) => (
-                  <a key={s.key} href={SITE.social[s.key]} target="_blank" rel="noopener" aria-label={s.label}>
+                  <a key={s.key} href={s.href} target="_blank" rel="noopener noreferrer" aria-label={s.label}>
                     <i className={s.icon}></i>
                   </a>
                 ))}

@@ -443,7 +443,8 @@ export function SettingsPage() {
     if (data) setV(data);
   }, [data]);
   if (!v) return <Loading />;
-  const set = (k: keyof AdminSettings) => (e: React.ChangeEvent<HTMLInputElement>) => setV((s) => (s ? { ...s, [k]: e.target.value } : s));
+  const set = (k: 'upiIdDefault' | 'upiIdPdf' | 'upiIdHardcopy' | 'contactEmail' | 'contactPhone' | 'location' | 'adminNotifyEmail') =>
+    (e: React.ChangeEvent<HTMLInputElement>) => setV((s) => (s ? { ...s, [k]: e.target.value } : s));
   const err = (k: string) => errors[k] && <div className="invalid-feedback d-block">{errors[k]}</div>;
 
   async function save() {
@@ -451,8 +452,19 @@ export function SettingsPage() {
     setBusy(true);
     setErrors({});
     try {
-      const { qrImageBooks: _b, qrImageCourses: _c, ...fields } = v;
-      await adminApi.form('put', '/settings', toFormData(fields, { qrImageBooks: qrBooks, qrImageCourses: qrCourses }));
+      const { qrImageBooks: _b, qrImageCourses: _c, socialLinks, workingHours, ...fields } = v;
+      await adminApi.form(
+        'put',
+        '/settings',
+        toFormData({
+          ...fields,
+          workingHours: JSON.stringify(workingHours),
+          facebookUrl: socialLinks.facebook,
+          twitterUrl: socialLinks.twitter,
+          instagramUrl: socialLinks.instagram,
+          linkedinUrl: socialLinks.linkedin,
+        }, { qrImageBooks: qrBooks, qrImageCourses: qrCourses }),
+      );
       toast('Settings saved');
       setQrBooks(null);
       setQrCourses(null);
@@ -471,9 +483,10 @@ export function SettingsPage() {
       <PageTitle title="Settings" icon="fas fa-cog" />
       <div className="admin-panel">
         <h5>Payments (UPI)</h5>
+        <p className="small text-muted">Only UPI payments with a transaction ID and proof are currently supported. Leave an ID or QR image empty to disable that payment route.</p>
         <div className="row g-3">
           <div className="col-md-4">
-            <label className="form-label fw-semibold">UPI ID (default: courses, events, first view)</label>
+            <label className="form-label fw-semibold">UPI ID for courses and events</label>
             <input className="form-control" value={v.upiIdDefault} onChange={set('upiIdDefault')} />
             {err('upiIdDefault')}
           </div>
@@ -496,7 +509,7 @@ export function SettingsPage() {
         </div>
       </div>
       <div className="admin-panel">
-        <h5>Contact and notifications</h5>
+        <h5>Contact details and opening hours</h5>
         <div className="row g-3">
           <div className="col-md-4">
             <label className="form-label fw-semibold">Contact email</label>
@@ -507,6 +520,39 @@ export function SettingsPage() {
             <label className="form-label fw-semibold">Contact phone</label>
             <input className="form-control" value={v.contactPhone} onChange={set('contactPhone')} />
           </div>
+          <div className="col-md-4">
+            <label className="form-label fw-semibold">Location</label>
+            <input className="form-control" value={v.location} onChange={set('location')} />
+          </div>
+        </div>
+        <div className="mt-4">
+          <div className="d-flex justify-content-between align-items-center mb-2">
+            <h6 className="mb-0">Opening hours</h6>
+            <button type="button" className="btn btn-sm btn-outline-primary" onClick={() => setV({ ...v, workingHours: [...v.workingHours, { label: '', value: '' }] })}>Add row</button>
+          </div>
+          {v.workingHours.map((hour, index) => (
+            <div className="row g-2 mb-2" key={index}>
+              <div className="col-md-4"><input className="form-control" aria-label="Opening hours label" placeholder="Day or label" value={hour.label} onChange={(e) => setV({ ...v, workingHours: v.workingHours.map((item, i) => i === index ? { ...item, label: e.target.value } : item) })} /></div>
+              <div className="col-md-6"><input className="form-control" aria-label="Opening hours" placeholder="Hours or closed" value={hour.value} onChange={(e) => setV({ ...v, workingHours: v.workingHours.map((item, i) => i === index ? { ...item, value: e.target.value } : item) })} /></div>
+              <div className="col-md-2"><button type="button" className="btn btn-outline-danger w-100" onClick={() => setV({ ...v, workingHours: v.workingHours.filter((_, i) => i !== index) })}>Remove</button></div>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="admin-panel">
+        <h5>Social profiles</h5>
+        <div className="row g-3">
+          {(['facebook', 'twitter', 'instagram', 'linkedin'] as const).map((network) => (
+            <div className="col-md-6" key={network}>
+              <label className="form-label fw-semibold">{network.charAt(0).toUpperCase() + network.slice(1)} URL</label>
+              <input className="form-control" type="url" value={v.socialLinks[network]} onChange={(e) => setV({ ...v, socialLinks: { ...v.socialLinks, [network]: e.target.value } })} />
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="admin-panel">
+        <h5>Notifications</h5>
+        <div className="row g-3">
           <div className="col-md-4">
             <label className="form-label fw-semibold">Send new-order alerts to</label>
             <input className="form-control" value={v.adminNotifyEmail} onChange={set('adminNotifyEmail')} placeholder="default from server config" />

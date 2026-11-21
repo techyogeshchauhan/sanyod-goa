@@ -1,5 +1,4 @@
 import { Schema, model, type HydratedDocument, type InferSchemaType } from 'mongoose';
-import { COURSE_DISCOUNT_DEFAULT } from '../shared/constants';
 import type { CourseSummary } from '../shared/types/course';
 import { originalPrice } from '../shared/utils/text';
 import { publicUrl } from '../services/storage';
@@ -13,9 +12,9 @@ const courseSchema = new Schema(
     /** Public path (frontend/public), e.g. /Courses/1769870100_109497.png */
     image: { type: String, required: true },
     price: { type: Number, required: true, min: 0 }, // paise
-    discountPercent: { type: Number, default: COURSE_DISCOUNT_DEFAULT, min: 0, max: 99 },
-    level: { type: String, default: 'All Levels' },
-    hasCertificate: { type: Boolean, default: true },
+    discountPercent: { type: Number, default: 0, min: 0, max: 99 },
+    level: { type: String, default: '' },
+    hasCertificate: { type: Boolean, default: false },
     /** Denormalised count of published videos. */
     videoCount: { type: Number, default: 0, min: 0 },
     /** Position in the home page "Most Popular" list (1 = first); null = not listed. */
@@ -41,10 +40,10 @@ export function toCourseSummary(c: CourseDoc): CourseSummary {
     description: c.description ?? '',
     image: publicUrl(c.image) ?? '',
     price: c.price,
-    discountPercent: c.discountPercent ?? COURSE_DISCOUNT_DEFAULT,
-    originalPrice: originalPrice(c.price, c.discountPercent ?? COURSE_DISCOUNT_DEFAULT),
+    discountPercent: c.discountPercent ?? 0,
+    originalPrice: originalPrice(c.price, c.discountPercent ?? 0),
     videoCount: c.videoCount ?? 0,
-    level: c.level ?? 'All Levels',
-    hasCertificate: c.hasCertificate ?? true,
+    level: c.level ?? '',
+    hasCertificate: c.hasCertificate ?? false,
   };
 }

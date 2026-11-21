@@ -4,6 +4,7 @@ import { formLimiter } from '../../middleware/rateLimit';
 import { validate } from '../../middleware/validate';
 import { Event } from '../../models/Event';
 import { EventBooking } from '../../models/EventBooking';
+import { getSettings } from '../../models/Settings';
 import { eventBookingSchema, type EventBookingInput } from '../../shared/schemas/purchases';
 import type { EventBookingSummary } from '../../shared/types/catalog';
 import { formatRupees } from '../../shared/utils/text';
@@ -12,7 +13,7 @@ import { adminNotificationEmail } from '../../services/email/templates/adminNoti
 import { eventBookingEmail } from '../../services/email/templates/orders';
 import { adminNotifyAddress } from '../../services/purchases';
 import { asyncHandler } from '../../utils/asyncHandler';
-import { conflict, notFound } from '../../utils/errors';
+import { badRequest, conflict, notFound } from '../../utils/errors';
 import { toEventSummary } from '../catalog/serializers';
 
 export const eventsRouter = Router();
@@ -38,6 +39,10 @@ eventBookingsRouter.post(
     const input = req.body as EventBookingInput;
     const event = await Event.findOne({ slug: input.eventSlug, isPublished: true });
     if (!event) throw notFound('Event not found');
+    const settings = await getSettings();
+    if (!settings.upiIdDefault?.trim() && !settings.qrImageBooks?.trim()) {
+      throw badRequest('Event payment details are not configured yet. Please contact the site administrator.');
+    }
     let booking;
     try {
       booking = await EventBooking.create({

@@ -1,6 +1,5 @@
 import { randomInt } from 'node:crypto';
 import type { Types } from 'mongoose';
-import { env } from '../config/env';
 import { Book } from '../models/Book';
 import { Course } from '../models/Course';
 import { Entitlement } from '../models/Entitlement';
@@ -27,7 +26,7 @@ import { deleteStored, saveUpload } from './storage';
 
 export async function adminNotifyAddress(): Promise<string> {
   const settings = await getSettings();
-  return settings.adminNotifyEmail || env.ADMIN_NOTIFY_EMAIL;
+  return settings.adminNotifyEmail?.trim() ?? '';
 }
 
 /** ORD + YYYYMMDDHHMMSS (India time) + 3 random digits, as generateOrderNumber() in PHP. */
@@ -50,7 +49,7 @@ async function priceItem(itemType: ItemType, slug: string) {
   const book = await Book.findOne({ slug, isPublished: true });
   if (!book) throw notFound('Book not found');
   const amount = itemType === 'book_pdf' ? book.pricePdf : book.priceHardcopy;
-  if (amount == null) throw badRequest('This book is not available for purchase yet. Please contact us.');
+  if (amount == null) throw badRequest('This book is not available for purchase yet.');
   if (itemType === 'book_hardcopy' && book.hardcopyAvailable === false) throw badRequest('The hard book is currently not available.');
   return { item: book._id, title: book.title, amount };
 }
@@ -79,9 +78,22 @@ export async function createPayment(
     throw conflict('ALREADY_PURCHASED', 'You already have access to this item.');
   }
 
-  const screenshotKey = await saveUpload('private', 'screenshots', screenshot, 'payment');
+  const settings = await getSettings();
+  const configuredUpi = input.itemType === 'course'
+    ? settings.upiIdDefault
+    : input.itemType === 'book_pdf'
+      ? settings.upiIdPdf
+      : settings.upiIdHardcopy;
+  const configuredQr = input.itemType === 'course' ? settings.qrImageCourses : settings.qrImageBooks;
+  if (!configuredUpi?.trim() && !configuredQr?.trim()) {
+    throw badRequest('Payment details are not configured yet. Please contact the site administrator.');
+  }
+
+  const activePurchaseKey = `${user.id}:${input.itemType}:${String(item)}`;
+  let screenshotKey: string | undefined;
   let payment: PaymentDoc | null = null;
   try {
+    screenshotKey = await saveUpload('private', 'screenshots', screenshot, 'payment');
     for (let attempt = 0; attempt < 3 && !payment; attempt++) {
       try {
         payment = await Payment.create({
@@ -92,6 +104,7 @@ export async function createPayment(
           paymentMethod: input.itemType === 'course' ? input.paymentMethod : 'upi',
           upiTransactionId: input.upiTransactionId,
           screenshot: screenshotKey,
+          activePurchaseKey,
           orderNumber: generateOrderNumber(),
           shippingAddress: input.itemType === 'book_hardcopy' ? input.shippingAddress : undefined,
         });
@@ -119,6 +132,9 @@ export async function createPayment(
   } catch (err) {
     if (payment) await Payment.deleteOne({ _id: payment._id });
     await deleteStored('private', screenshotKey);
+    if (isDuplicateKey(err) && err.keyPattern?.activePurchaseKey) {
+      throw conflict('PURCHASE_PENDING', 'A purchase for this item is already being processed. Please check your orders.');
+    }
     if (isDuplicateKey(err) && err.keyPattern?.upiTransactionId) {
       throw conflict('DUPLICATE_TRANSACTION', 'This transaction ID has already been submitted.', {
         upiTransactionId: 'This transaction ID has already been submitted.',
@@ -208,10 +224,18 @@ export async function approvePayment(paymentId: string, admin: SessionAdmin): Pr
   if (!payment) throw notFound('Payment not found');
   if (payment.status === 'approved') return payment;
   payment.status = 'approved';
+  payment.activePurchaseKey = `${String(payment.user)}:${payment.itemType}:${String(payment.item)}`;
   payment.reviewedBy = admin.id as unknown as Types.ObjectId;
   payment.reviewedAt = new Date();
   payment.rejectionReason = undefined;
-  await payment.save();
+  try {
+    await payment.save();
+  } catch (err) {
+    if (isDuplicateKey(err) && err.keyPattern?.activePurchaseKey) {
+      throw conflict('PURCHASE_ACTIVE', 'Another active purchase already exists for this item.');
+    }
+    throw err;
+  }
   await grantFor(payment);
   if (payment.order) {
     await Order.updateOne(
@@ -233,6 +257,7 @@ export async function rejectPayment(paymentId: string, admin: SessionAdmin, reas
   if (!payment) throw notFound('Payment not found');
   const wasApproved = payment.status === 'approved';
   payment.status = 'rejected';
+  payment.activePurchaseKey = undefined;
   payment.reviewedBy = admin.id as unknown as Types.ObjectId;
   payment.reviewedAt = new Date();
   payment.rejectionReason = reason || undefined;

@@ -74,6 +74,9 @@ export interface AdminBook {
   title: string;
   author: string;
   description: string;
+  category: string;
+  language: string;
+  isFeatured: boolean;
   pricePdf: number | null;
   priceHardcopy: number | null;
   hardcopyAvailable: boolean;
@@ -239,6 +242,9 @@ export interface AdminSettings {
   qrImageCourses: string;
   contactEmail: string;
   contactPhone: string;
+  location: string;
+  workingHours: { label: string; value: string }[];
+  socialLinks: { facebook: string; twitter: string; instagram: string; linkedin: string };
   adminNotifyEmail: string;
 }
 

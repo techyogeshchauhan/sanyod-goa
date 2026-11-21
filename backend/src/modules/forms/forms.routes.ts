@@ -1,5 +1,4 @@
 import { Router, type Request } from 'express';
-import { env } from '../../config/env';
 import { formLimiter } from '../../middleware/rateLimit';
 import { validate } from '../../middleware/validate';
 import { ContactMessage, GuidanceRequest, NewsletterSubscriber } from '../../models/FormSubmissions';
@@ -13,6 +12,7 @@ import {
 } from '../../shared/schemas/forms';
 import { sendMail } from '../../services/email/mailer';
 import { adminNotificationEmail } from '../../services/email/templates/adminNotification';
+import { adminNotifyAddress } from '../../services/purchases';
 import { asyncHandler } from '../../utils/asyncHandler';
 
 export const formsRouter = Router();
@@ -36,7 +36,7 @@ formsRouter.post(
       const { website: _ignored, ...input } = req.body as ContactInput;
       await ContactMessage.create({ ...input, ip: req.ip });
       await sendMail(
-        adminNotificationEmail(env.ADMIN_NOTIFY_EMAIL, 'New contact message', {
+        adminNotificationEmail(await adminNotifyAddress(), 'New contact message', {
           Name: input.name,
           Email: input.email,
           Phone: input.phone,
@@ -59,7 +59,7 @@ formsRouter.post(
       const { website: _ignored, ...input } = req.body as GuidanceRequestInput;
       await GuidanceRequest.create({ ...input, ip: req.ip });
       await sendMail(
-        adminNotificationEmail(env.ADMIN_NOTIFY_EMAIL, 'New free consultation request', {
+        adminNotificationEmail(await adminNotifyAddress(), 'New free consultation request', {
           Name: input.name,
           Email: input.email,
           'Preferred mentor': MENTOR_NAMES[input.preferredMentor],

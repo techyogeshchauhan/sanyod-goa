@@ -24,7 +24,7 @@ const formSchema = consultationSchema.omit({ doctorSlug: true });
 type FormInput = z.input<typeof formSchema>;
 type FormOutput = z.output<typeof formSchema>;
 
-const today = () => new Date().toISOString().slice(0, 10);
+const today = () => new Date(Date.now() + 5.5 * 60 * 60 * 1000).toISOString().slice(0, 10);
 
 /** Doctor profile + "Book Consultation" form (doctor_detail.php). */
 export default function DoctorDetailPage() {

@@ -33,7 +33,7 @@ const doctorSchema = new Schema(
     cv: { type: String },
     rating: { type: Number, min: 0, max: 5 },
     isVerified: { type: Boolean, default: false },
-    availabilityText: { type: String, trim: true }, // "Available Today"
+    availabilityText: { type: String, trim: true },
     isActive: { type: Boolean, default: true },
     sortOrder: { type: Number, default: 0 },
   },

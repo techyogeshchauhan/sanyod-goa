@@ -26,6 +26,8 @@ const paymentSchema = new Schema(
     upiTransactionId: { type: String, required: true, trim: true },
     /** Private storage key of the payment screenshot (PHP: uploads/<time>_<name>). */
     screenshot: { type: String, required: true },
+    /** Unique guard for a user's active purchase of a catalogue item. Cleared on rejection. */
+    activePurchaseKey: { type: String },
     status: { type: String, enum: PAYMENT_STATUSES, default: 'pending' },
     reviewedBy: { type: Schema.Types.ObjectId, ref: 'Admin' },
     reviewedAt: { type: Date },
@@ -44,6 +46,7 @@ const paymentSchema = new Schema(
 );
 
 paymentSchema.index({ user: 1, itemType: 1, item: 1, createdAt: -1 });
+paymentSchema.index({ activePurchaseKey: 1 }, { unique: true, sparse: true });
 paymentSchema.index({ status: 1, createdAt: -1 });
 // The same UPI transaction can't be claimed twice, unless the earlier claim was rejected.
 paymentSchema.index(

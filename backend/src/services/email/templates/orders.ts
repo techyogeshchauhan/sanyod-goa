@@ -6,7 +6,6 @@ import { emailLayout, escapeHtml } from './layout';
 // Customer emails for purchases, consultations and bookings. Wording follows the PHP
 // sendOrderNotification() emails (books_details.php), with SANYOD's own contact details.
 
-const SUPPORT = 'sanyod@sanyod.in';
 const site = () => env.APP_URL.replace(/\/$/, '');
 const fmtDate = (d: Date) =>
   d.toLocaleString('en-US', { month: 'long', day: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Kolkata' });
@@ -16,7 +15,7 @@ const box = (color: string, html: string) =>
 const notice = (bg: string, border: string, html: string) =>
   `<div style="background: ${bg}; border: 1px solid ${border}; padding: 15px; border-radius: 5px; margin: 15px 0;">${html}</div>`;
 const row = (k: string, v: string) => `<p style="margin: 4px 0;"><strong>${escapeHtml(k)}:</strong> ${escapeHtml(v)}</p>`;
-const footer = `<p>If you have any questions or need assistance, please contact us at <strong>${SUPPORT}</strong>.</p>
+const footer = `<p>If you have any questions or need assistance, please use the <a href="${site()}/contact">contact form on our website</a>.</p>
 <p>Best regards,<br><strong>SANYOD Team</strong></p>
 <p style="font-size: 12px; color: #999;">This is an automated email. Please do not reply to this message.</p>`;
 

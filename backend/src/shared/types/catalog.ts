@@ -40,6 +40,9 @@ export interface PublicSettings {
   qrImageCourses: string;
   contactEmail: string;
   contactPhone: string;
+  location: string;
+  workingHours: { label: string; value: string }[];
+  socialLinks: { facebook: string; twitter: string; instagram: string; linkedin: string };
 }
 
 // ---- Books -------------------------------------------------------------
@@ -51,6 +54,9 @@ export interface BookSummary {
   title: string;
   author: string;
   cover: string;
+  category: string;
+  language: string;
+  isFeatured: boolean;
 }
 
 export interface BookDetail extends BookSummary {
@@ -62,7 +68,7 @@ export interface BookDetail extends BookSummary {
   publishedYear: number | null;
   rating: number | null;
   reviewCount: number | null;
-  /** False when no price is set: the book can't be bought yet. */
+  /** True when at least one available format has a price. */
   purchasable: boolean;
 }
 

@@ -4,7 +4,6 @@ import type { DoctorDoc } from '../../models/Doctor';
 import type { EventDoc } from '../../models/Event';
 import type { OrderDoc } from '../../models/Order';
 import type { PaymentDoc } from '../../models/Payment';
-import { DEFAULT_AUTHOR } from '../../shared/constants';
 import type {
   Address,
   BookDetail,
@@ -25,8 +24,11 @@ export function toBookSummary(b: BookDoc): BookSummary {
     legacyId: b.legacyId ?? null,
     slug: b.slug,
     title: b.title,
-    author: b.author ?? DEFAULT_AUTHOR,
+    author: b.author ?? '',
     cover: publicUrl(b.cover) ?? '',
+    category: b.category ?? '',
+    language: b.language ?? '',
+    isFeatured: b.isFeatured ?? false,
   };
 }
 
@@ -41,7 +43,7 @@ export function toBookDetail(b: BookDoc): BookDetail {
     publishedYear: b.publishedYear ?? null,
     rating: b.rating ?? null,
     reviewCount: b.reviewCount ?? null,
-    purchasable: b.pricePdf != null,
+    purchasable: b.pricePdf != null || (b.hardcopyAvailable !== false && b.priceHardcopy != null),
   };
 }
 

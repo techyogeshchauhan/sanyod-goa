@@ -1,5 +1,4 @@
 import { Schema, model, type HydratedDocument, type InferSchemaType } from 'mongoose';
-import { DEFAULT_AUTHOR } from '../shared/constants';
 
 /** MySQL `books`: id, book_title, book_author, price, description, cover, pdf. */
 const bookSchema = new Schema(
@@ -7,11 +6,14 @@ const bookSchema = new Schema(
     legacyId: { type: Number, unique: true, sparse: true }, // books_details.php?books=26
     slug: { type: String, required: true, unique: true, trim: true, lowercase: true },
     title: { type: String, required: true, trim: true },
-    author: { type: String, default: DEFAULT_AUTHOR, trim: true },
+    author: { type: String, trim: true, default: '' },
     description: { type: String, default: '' },
+    category: { type: String, trim: true, default: '' },
+    language: { type: String, trim: true, default: '' },
+    isFeatured: { type: Boolean, default: false },
     /** paise; null = price not set yet, the book can't be bought. */
     pricePdf: { type: Number, min: 0, default: null },
-    /** paise; the PHP site charges pricePdf + ₹200. */
+    /** paise; set explicitly for this book (null = not for sale). */
     priceHardcopy: { type: Number, min: 0, default: null },
     hardcopyAvailable: { type: Boolean, default: true },
     pages: { type: Number, min: 1 },
