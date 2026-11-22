@@ -127,6 +127,23 @@ export function EmptyRow({ cols, text = 'Nothing found.' }: { cols: number; text
   );
 }
 
+/** A failed load: the reason and a Retry button (instead of an empty table or an endless spinner). */
+export function QueryError({ error, onRetry }: { error: unknown; onRetry?: () => void }) {
+  return (
+    <div className="alert alert-danger d-flex justify-content-between align-items-center gap-2 flex-wrap" role="alert">
+      <span>
+        <i className="fas fa-exclamation-triangle me-2"></i>
+        {errorMessage(error)}
+      </span>
+      {onRetry && (
+        <button type="button" className="btn btn-sm btn-outline-danger" onClick={onRetry}>
+          Retry
+        </button>
+      )}
+    </div>
+  );
+}
+
 export const errorMessage = (err: unknown) => (err instanceof ApiError ? err.message : 'Something went wrong. Please try again.');
 
 export function toast(message: string, icon: 'success' | 'error' = 'success') {
@@ -146,20 +163,32 @@ export async function confirmAction(title: string, text: string, confirmText = '
 }
 
 /** Paginated admin list with search/filter state. */
-export function useAdminList<T>(key: string, path: string, extra: ListParams = {}, pageSize = 25) {
+export function useAdminList<T>(key: string, path: string, extra: ListParams = {}, pageSize = 25, initialStatus = '') {
   const [page, setPage] = useState(1);
   const [q, setQ] = useState('');
-  const [status, setStatus] = useState('');
+  const [status, setStatus] = useState(initialStatus);
   const params: ListParams = { page, pageSize, q: q || undefined, status: status || undefined, ...extra };
   const query = useQuery<Paginated<T>>({
     queryKey: ['admin', key, params],
     queryFn: () => adminApi.list<T>(path, params),
     placeholderData: keepPreviousData,
   });
+  // After deleting the last row of the last page, step back to the new last page.
+  const total = query.data?.total;
+  useEffect(() => {
+    if (total === undefined || query.isPlaceholderData) return;
+    const last = Math.max(1, Math.ceil(total / pageSize));
+    if (page > last) setPage(last);
+  }, [total, page, pageSize, query.isPlaceholderData]);
   return {
     ...query,
     page,
     setPage,
+    /** Back to page 1 with no search (e.g. when switching tabs). */
+    reset: () => {
+      setQ('');
+      setPage(1);
+    },
     q,
     setQ: (v: string) => {
       setQ(v);
@@ -249,6 +278,26 @@ export function AdminModal({
           {footer && <div className="modal-footer">{footer}</div>}
         </div>
       </div>
+    </div>
+  );
+}
+
+/**
+ * Server field errors that have no inline message next to an input (e.g. "workingHours.0.label"),
+ * so the "check the highlighted fields" toast never points at nothing.
+ */
+export function FormErrors({ errors, shown = [], labels = {} }: { errors: Record<string, string>; shown?: string[]; labels?: Record<string, string> }) {
+  const rest = Object.entries(errors).filter(([k]) => !shown.includes(k));
+  if (rest.length === 0) return null;
+  return (
+    <div className="alert alert-danger small" role="alert">
+      <ul className="mb-0 ps-3">
+        {rest.map(([k, message]) => (
+          <li key={k}>
+            <strong>{labels[k] ?? k}:</strong> {message}
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

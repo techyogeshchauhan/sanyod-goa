@@ -28,15 +28,20 @@ async function fileSize(key: string | null | undefined): Promise<number | null> 
   }
 }
 
-async function libraryBook(book: BookDoc, grantedAt: Date, paymentId: unknown): Promise<LibraryBook> {
-  const payment = paymentId ? await Payment.findById(paymentId, 'orderNumber') : null;
-  const withPdf = await Book.findById(book._id).select('+pdf');
+/** `book` must have been loaded with `+pdf`; `orderNumber` comes from the grant's payment. */
+async function libraryBook(book: BookDoc, grantedAt: Date, orderNumber: string | null): Promise<LibraryBook> {
   return {
     ...toBookDetail(book),
     purchasedAt: grantedAt.toISOString(),
-    orderNumber: payment?.orderNumber ?? null,
-    fileSizeBytes: await fileSize(withPdf?.pdf),
+    orderNumber,
+    fileSizeBytes: await fileSize(book.pdf),
   };
+}
+
+async function orderNumberOf(paymentId: unknown): Promise<string | null> {
+  if (!paymentId) return null;
+  const payment = await Payment.findById(paymentId, 'orderNumber').lean();
+  return payment?.orderNumber ?? null;
 }
 
 /** my_books.php: books the user may read. */
@@ -44,14 +49,21 @@ libraryRouter.get(
   '/books',
   asyncHandler(async (req, res) => {
     const grants = await Entitlement.find({ user: sessionUser(req).id, itemType: 'book_pdf', ...active() }).sort({ grantedAt: -1 });
-    const books = await Book.find({ _id: { $in: grants.map((g) => g.item) } });
-    const byId = new Map(books.map((b) => [String(b._id), b]));
-    const data: LibraryBook[] = [];
-    for (const g of grants) {
-      const book = byId.get(String(g.item));
-      if (book) data.push(await libraryBook(book, g.grantedAt ?? new Date(), g.payment));
-    }
-    res.json({ data });
+    // Books (with their PDF key) and payments in two parallel queries, not two per book.
+    const paymentIds = grants.map((g) => g.payment).filter(Boolean);
+    const [books, payments] = await Promise.all([
+      Book.find({ _id: { $in: grants.map((g) => g.item) } }).select('+pdf'),
+      paymentIds.length ? Payment.find({ _id: { $in: paymentIds } }, 'orderNumber').lean() : Promise.resolve([]),
+    ]);
+    const bookById = new Map(books.map((b) => [String(b._id), b]));
+    const orderById = new Map(payments.map((p) => [String(p._id), p.orderNumber ?? null]));
+    const data = await Promise.all(
+      grants.flatMap((g) => {
+        const book = bookById.get(String(g.item));
+        return book ? [libraryBook(book, g.grantedAt ?? new Date(), orderById.get(String(g.payment)) ?? null)] : [];
+      }),
+    );
+    res.json({ data: data satisfies LibraryBook[] });
   }),
 );
 
@@ -68,7 +80,7 @@ libraryRouter.get(
   '/books/:slug',
   asyncHandler(async (req, res) => {
     const { book, grant } = await entitledBook(sessionUser(req).id, String(req.params.slug));
-    res.json({ data: await libraryBook(book, grant.grantedAt ?? new Date(), grant.payment) });
+    res.json({ data: await libraryBook(book, grant.grantedAt ?? new Date(), await orderNumberOf(grant.payment)) });
   }),
 );
 

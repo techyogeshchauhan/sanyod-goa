@@ -8,6 +8,7 @@ import { AuthShell } from '@/components/auth/AuthShell';
 import { FieldError } from '@/components/common/FieldError';
 import { useAuth } from '@/providers/AuthProvider';
 import { applyApiError } from '@/utils/forms';
+import { PasswordInput } from '@/components/common/PasswordInput';
 
 /** User registration (register.php). Returns the same next step for existing and new email addresses. */
 export default function RegisterPage() {
@@ -76,10 +77,8 @@ export default function RegisterPage() {
           <label htmlFor="password" className="form-label">
             Password
           </label>
-          <input
-            type="password"
+          <PasswordInput
             id="password"
-            className="form-control"
             placeholder={`At least ${PASSWORD_MIN_LENGTH} characters`}
             autoComplete="new-password"
             {...register('password')}

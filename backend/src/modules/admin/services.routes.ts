@@ -99,14 +99,15 @@ function doctorFields(input: DoctorFormInput) {
     name: input.name,
     categories: input.categories,
     qualification: input.qualification ?? '',
-    experienceYears: input.experienceYears ?? undefined,
+    // An emptied optional field is null, which clears it (defined() keeps nulls).
+    experienceYears: input.experienceYears,
     fee: input.fee ?? undefined,
     bio: input.bio,
-    rating: input.rating ?? undefined,
+    rating: input.rating,
     isVerified: input.isVerified,
     availabilityText: input.availabilityText ?? '',
     isActive: input.isActive,
-    sortOrder: input.sortOrder ?? undefined,
+    sortOrder: input.sortOrder ?? 0,
   });
 }
 
@@ -119,14 +120,18 @@ servicesRouter.post(
     const slug = await uniqueSlug(Doctor, input.slug ?? slugify(input.name, 'doctor'));
     const photo = uploadedFile(req, 'photo');
     const cv = uploadedFile(req, 'cv');
-    const doctor = await Doctor.create({
-      ...doctorFields(input),
-      slug,
-      photo: photo ? await saveUpload('public', 'doctors', photo, 'doctor') : undefined,
-      cv: cv ? await saveUpload('private', 'cvs', cv, 'cv') : undefined,
-    });
-    await audit(req, 'doctor.create', 'Doctor', doctor._id, { name: doctor.name });
-    res.status(201).json({ data: toAdminDoctor(doctor) });
+    const photoKey = photo ? await saveUpload('public', 'doctors', photo, 'doctor') : undefined;
+    const cvKey = cv ? await saveUpload('private', 'cvs', cv, 'cv') : undefined;
+    try {
+      const doctor = await Doctor.create({ ...doctorFields(input), slug, photo: photoKey, cv: cvKey });
+      await audit(req, 'doctor.create', 'Doctor', doctor._id, { name: doctor.name });
+      res.status(201).json({ data: toAdminDoctor(doctor) });
+    } catch (err) {
+      // Don't leave orphan files behind when the record can't be saved.
+      await deleteStored('public', photoKey);
+      await deleteStored('private', cvKey);
+      throw err;
+    }
   }),
 );
 
@@ -222,7 +227,8 @@ servicesRouter.patch(
     if (!c) throw notFound('Consultation not found');
     const changed = c.status !== status;
     c.status = status;
-    if (adminNotes !== undefined) c.adminNotes = adminNotes;
+    // An empty note clears it; an omitted one leaves it unchanged.
+    if (adminNotes !== undefined) c.adminNotes = adminNotes || undefined;
     await c.save();
     if (changed && notify !== false && status !== 'pending') {
       const doctorName = (c.doctor as unknown as { name?: string } | null)?.name ?? '';
@@ -298,12 +304,13 @@ function eventFields(input: EventFormInput) {
     durationText: input.durationText ?? '',
     location: input.location ?? '',
     price: input.price ?? undefined,
-    capacity: input.capacity ?? undefined,
-    enrolledCount: input.enrolledCount ?? undefined,
-    rating: input.rating ?? undefined,
+    // Emptied fields: optional ones clear (null), counters fall back to 0.
+    capacity: input.capacity,
+    enrolledCount: input.enrolledCount ?? 0,
+    rating: input.rating,
     ctaLabel: input.ctaLabel,
     isPublished: input.isPublished,
-    sortOrder: input.sortOrder ?? undefined,
+    sortOrder: input.sortOrder ?? 0,
   });
 }
 
@@ -414,8 +421,9 @@ servicesRouter.patch(
     const ev = b.event as unknown as EventDoc | null;
     if (ev && previous !== status) {
       // Keep the "N enrolled" counter in step with confirmations.
-      const delta = status === 'confirmed' ? 1 : previous === 'confirmed' ? -1 : 0;
-      if (delta) await Event.updateOne({ _id: ev._id }, { $inc: { enrolledCount: delta } });
+      if (status === 'confirmed') await Event.updateOne({ _id: ev._id }, { $inc: { enrolledCount: 1 } });
+      // Never below 0 (the count can also be edited by hand).
+      else if (previous === 'confirmed') await Event.updateOne({ _id: ev._id, enrolledCount: { $gt: 0 } }, { $inc: { enrolledCount: -1 } });
       if (notify !== false && status !== 'pending') {
         await sendMail(
           eventBookingEmail({

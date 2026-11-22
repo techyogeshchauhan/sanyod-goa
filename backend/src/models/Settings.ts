@@ -1,4 +1,5 @@
 import { Schema, model, type HydratedDocument, type InferSchemaType } from 'mongoose';
+import { cached } from '../services/cache';
 
 const workingHourSchema = new Schema(
   { label: { type: String, trim: true }, value: { type: String, trim: true } },
@@ -43,6 +44,14 @@ export type SettingsDoc = HydratedDocument<SettingsAttrs>;
 export const Settings = model('Settings', settingsSchema);
 
 /** The site settings, created with defaults on first use. */
+/**
+ * Read-only site settings, cached (see services/cache): payment screens and the footer read them
+ * on most page views. Use getSettings() to change and save them.
+ */
+export function getSettingsCached(): Promise<Readonly<SettingsAttrs>> {
+  return cached('settings', async () => (await getSettings()).toObject() as SettingsAttrs);
+}
+
 export async function getSettings(): Promise<SettingsDoc> {
   return Settings.findOneAndUpdate({ key: 'site' }, { $setOnInsert: { key: 'site' } }, { upsert: true, new: true });
 }

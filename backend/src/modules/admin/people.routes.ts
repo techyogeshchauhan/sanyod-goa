@@ -165,7 +165,30 @@ peopleRouter.delete(
   asyncHandler(async (req, res) => {
     const grant = await Entitlement.findByIdAndDelete(req.params.id);
     if (!grant) throw notFound('Access record not found');
-    await audit(req, 'entitlement.revoke', 'Entitlement', grant._id, { user: String(grant.user), item: String(grant.item) });
+    // Keep the payment record consistent with the removed access, otherwise the user would still
+    // show as "purchased" and be refused a new purchase (ALREADY_PURCHASED).
+    const payment = await Payment.findById(grant.payment);
+    let paymentEffect: 'deleted' | 'revoked' | 'kept' = 'kept';
+    if (payment && payment.status === 'approved' && payment.itemType === grant.itemType) {
+      if (payment.amount === 0 && payment.upiTransactionId.startsWith('MANUAL-')) {
+        await payment.deleteOne(); // the ₹0 record existed only to log the manual grant
+        paymentEffect = 'deleted';
+      } else {
+        payment.status = 'rejected';
+        payment.rejectionReason = 'Access revoked by admin';
+        payment.activePurchaseKey = undefined;
+        payment.reviewedBy = sessionAdmin(req).id as unknown as Types.ObjectId;
+        payment.reviewedAt = new Date();
+        await payment.save();
+        paymentEffect = 'revoked';
+      }
+    }
+    // An approved hard copy also unlocked this PDF: that order and payment stay as they are.
+    await audit(req, 'entitlement.revoke', 'Entitlement', grant._id, {
+      user: String(grant.user),
+      item: String(grant.item),
+      payment: paymentEffect,
+    });
     res.status(204).end();
   }),
 );
@@ -295,14 +318,16 @@ peopleRouter.get(
   }),
 );
 
+/** Settings decide where customers send money: super admins only (docs/03 §3.2). */
 peopleRouter.put(
   '/settings',
+  requireSuperAdmin,
   uploadFields([imageField('qrImageBooks'), imageField('qrImageCourses')]),
   validate({ body: settingsFormSchema }),
   asyncHandler(async (req, res) => {
     const input = req.body as SettingsFormInput;
     const s = await getSettings();
-    const { facebookUrl, twitterUrl, instagramUrl, linkedinUrl, ...fields } = input;
+    const { facebookUrl, twitterUrl, instagramUrl, linkedinUrl, removeQrImageBooks, removeQrImageCourses, ...fields } = input;
     Object.assign(s, fields, {
       upiIdDefault: input.upiIdDefault ?? '',
       upiIdPdf: input.upiIdPdf ?? '',
@@ -319,14 +344,18 @@ peopleRouter.put(
       },
     });
     s.adminNotifyEmail = input.adminNotifyEmail;
+    const remove = { qrImageBooks: removeQrImageBooks, qrImageCourses: removeQrImageCourses };
+    const replaced: string[] = [];
     for (const field of ['qrImageBooks', 'qrImageCourses'] as const) {
       const file = uploadedFile(req, field);
-      if (!file) continue;
+      if (!file && !remove[field]) continue;
       const old = s[field];
-      s[field] = await saveUpload('public', 'settings', file, 'qr');
-      if (old && !old.startsWith('/')) await deleteStored('public', old);
+      // A new upload replaces the QR; "remove" clears it (that payment route then needs a UPI ID).
+      s[field] = file ? await saveUpload('public', 'settings', file, 'qr') : '';
+      if (old && !old.startsWith('/')) replaced.push(old);
     }
     await s.save();
+    for (const old of replaced) await deleteStored('public', old);
     await audit(req, 'settings.update', 'Settings', s._id);
     res.json({ data: await adminSettings() });
   }),
@@ -437,6 +466,7 @@ peopleRouter.get(
       action: a.action,
       entity: a.entity,
       entityId: a.entityId ? String(a.entityId) : null,
+      details: (a.details as Record<string, unknown> | undefined) ?? null,
       createdAt: createdAt(a),
     }));
     res.json(paged(data, total, q));

@@ -1,10 +1,13 @@
 // Global CSS: icon fonts, Bootstrap 5 (grid, utilities, components), then the SANYOD design
 // system that restyles it. Page-specific CSS (*.page.css) is scoped to body.page-<name>.
 import '@fortawesome/fontawesome-free/css/all.min.css';
-import 'bootstrap-icons/font/bootstrap-icons.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './styles/theme.css';
-import 'bootstrap'; // Bootstrap JS data API (collapse, dropdown, modal)
+// Bootstrap JS: only the components the site uses (each registers its data-bs-* API on import).
+// The full bundle also shipped carousel, tooltip, popover, scrollspy, toast, offcanvas…
+import 'bootstrap/js/dist/collapse';
+import 'bootstrap/js/dist/dropdown';
+import 'bootstrap/js/dist/modal';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { StrictMode } from 'react';

@@ -36,19 +36,21 @@ describe('CSRF protection', () => {
 });
 
 describe('user registration and login', () => {
-  it('registers, auto-logs in and normalises the email', async () => {
+  // SEC-04: registration answers generically and does not create a session.
+  it('registers without signing in and normalises the email', async () => {
     const c = await csrfAgent(app);
-    const res = await c.post('/api/auth/register', user).expect(201);
-    expect(res.body.data.user).toMatchObject({ name: 'Test Seeker', email: 'seeker@example.com' });
-    const me = await c.agent.get('/api/auth/me').expect(200);
-    expect(me.body.data.user.email).toBe('seeker@example.com');
+    const res = await c.post('/api/auth/register', user).expect(200);
+    expect(res.body.data.message).toMatch(/If this address was available/);
+    expect((await c.agent.get('/api/auth/me')).body.data.user).toBeNull();
+    const login = await c.post('/api/auth/login', { email: user.email, password: user.password }).expect(200);
+    expect(login.body.data.user).toMatchObject({ name: 'Test Seeker', email: 'seeker@example.com' });
   });
 
-  it('rejects a duplicate email with 409', async () => {
+  it('answers a duplicate email the same way and keeps one account', async () => {
     const c = await csrfAgent(app);
-    const res = await c.post('/api/auth/register', { ...user, email: 'seeker@example.com' });
-    expect(res.status).toBe(409);
-    expect(res.body.error.code).toBe('EMAIL_TAKEN');
+    const res = await c.post('/api/auth/register', { ...user, email: 'seeker@example.com' }).expect(200);
+    expect(res.body.data.message).toMatch(/If this address was available/);
+    expect(await User.countDocuments({ email: 'seeker@example.com' })).toBe(1);
   });
 
   it('returns field errors for invalid input', async () => {
@@ -71,7 +73,8 @@ describe('user registration and login', () => {
     expect((await c.agent.get('/api/auth/me')).body.data.user).toBeNull();
   });
 
-  it('upgrades legacy MD5 hashes to bcrypt on first login', async () => {
+  // SEC-01: weak legacy hashes are not credentials; those users must reset their password.
+  it('refuses legacy MD5 hashes', async () => {
     await User.create({
       name: 'Legacy User',
       email: 'legacy@example.com',
@@ -79,10 +82,7 @@ describe('user registration and login', () => {
       legacyAlgo: 'md5',
     });
     const c = await csrfAgent(app);
-    await c.post('/api/auth/login', { email: 'legacy@example.com', password: 'oldpass1' }).expect(200);
-    const stored = await User.findOne({ email: 'legacy@example.com' }).select('+passwordHash +legacyPasswordHash');
-    expect(stored?.passwordHash).toMatch(/^\$2[aby]\$/);
-    expect(stored?.legacyPasswordHash).toBeUndefined();
+    await c.post('/api/auth/login', { email: 'legacy@example.com', password: 'oldpass1' }).expect(401);
   });
 
   it('accepts PHP password_hash ($2y$) hashes', async () => {
@@ -118,7 +118,8 @@ describe('password reset', () => {
     const stored = await User.findOne({ email: 'seeker@example.com' }).select('+passwordResetTokenHash');
     expect(stored?.passwordResetTokenHash).not.toBe(token); // only the hash is stored
 
-    const valid = await request(app).post('/api/auth/reset-password/validate').send({ token }).expect(200);
+    // SEC-03: the token travels in a POST body (CSRF-protected), never in a URL.
+    const valid = await c.post('/api/auth/reset-password/validate', { token }).expect(200);
     expect(valid.body.data).toEqual({ valid: true, email: 'seeker@example.com' });
 
     const mismatch = await c.post('/api/auth/reset-password', { token, password: 'newpass12', confirmPassword: 'other' });

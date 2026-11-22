@@ -56,6 +56,11 @@ export default function BookDetailPage() {
 
   const pdfBlocked = Boolean(purchase?.canRead || purchase?.pdf === 'pending' || purchase?.pdf === 'approved');
   const hardBlocked = purchase?.hardcopy === 'pending' || purchase?.hardcopy === 'approved';
+  // Lowest price still on offer, for the phone / tablet purchase bar.
+  const offers = [!pdfBlocked ? pdfPrice : null, !hardBlocked && book.hardcopyAvailable ? hardPrice : null].filter(
+    (p): p is number => p != null,
+  );
+  const fromPrice = offers.length > 0 ? Math.min(...offers) : null;
 
   function selectOption(next: Option) {
     if ((next === 'pdf' && (pdfBlocked || pdfPrice == null)) || (next === 'hardbook' && (hardBlocked || hardPrice == null || !book.hardcopyAvailable))) return;
@@ -143,19 +148,21 @@ export default function BookDetailPage() {
         {success && <SuccessAlert anchorRef={successRef} result={success} email={user?.email ?? ''} onClose={() => setSuccess(null)} />}
 
         <div className="row g-5">
-          <div className="col-lg-4">
+          <div className="col-md-5 col-lg-4">
             <div className="sticky-aside">
-              <div className="cover-frame mx-auto" style={{ maxWidth: 360 }}>
+              <div className="cover-frame book-cover-main mx-auto">
                 <FitImage src={book.cover} alt={book.title} />
               </div>
             </div>
           </div>
 
-          <div className="col-lg-8">
+          <div className="col-md-7 col-lg-8">
             <BookInfo book={book} />
 
             {/* Purchase options */}
-            <h2 className="h3 mt-5 mb-3">Choose your format</h2>
+            <h2 className="h3 mt-4 mb-3" id="formats">
+              Choose your format
+            </h2>
             {!book.purchasable && (
               <div className="alert alert-warning">
                 <i className="fas fa-info-circle me-2"></i>This book will be available for purchase soon. Please contact us at{' '}
@@ -466,6 +473,18 @@ export default function BookDetailPage() {
           </div>
         </div>
       </div>
+      {/* Phones and tablets: the formats sit below the long description; keep a way to them in reach. */}
+      {book.purchasable && fromPrice != null && !showPayment && !success && (
+        <div className="mobile-cta-bar" role="region" aria-label="Purchase">
+          <div className="min-w-0">
+            <span className="cta-label">{offers.length > 1 ? 'Formats from' : 'Price'}</span>
+            <span className="price">{rupees(fromPrice, false)}</span>
+          </div>
+          <a href="#formats" className="btn btn-primary">
+            <i className="fas fa-shopping-cart"></i> Choose format
+          </a>
+        </div>
+      )}
     </section>
   );
 }

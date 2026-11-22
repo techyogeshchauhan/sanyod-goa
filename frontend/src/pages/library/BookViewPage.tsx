@@ -89,7 +89,7 @@ export default function BookViewPage() {
         </div>
 
         {others.length > 0 && (
-          <div className="mt-5 pt-3">
+          <div className="mt-4">
             <h2 className="h3 mb-4">More from your library</h2>
             <div className="row g-4">
               {others.map((b) => (

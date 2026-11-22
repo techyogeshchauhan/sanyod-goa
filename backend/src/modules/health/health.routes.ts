@@ -10,6 +10,7 @@ import type { ConsultationSummary } from '../../shared/types/catalog';
 import { sendMail } from '../../services/email/mailer';
 import { adminNotificationEmail } from '../../services/email/templates/adminNotification';
 import { consultationReceivedEmail } from '../../services/email/templates/orders';
+import { browserCache, cached } from '../../services/cache';
 import { adminNotifyAddress } from '../../services/purchases';
 import { sendPrivateFile } from '../../services/storage';
 import { asyncHandler } from '../../utils/asyncHandler';
@@ -22,18 +23,26 @@ export const consultationsRouter = Router();
 /** health.php: active doctors (the page groups them by category). */
 doctorsRouter.get(
   '/',
+  browserCache(),
   asyncHandler(async (_req, res) => {
-    const doctors = await Doctor.find({ isActive: true }).sort({ sortOrder: 1, createdAt: 1 });
-    res.json({ data: doctors.map(toDoctorSummary) });
+    const data = await cached('doctors:list', async () =>
+      (await Doctor.find({ isActive: true }).sort({ sortOrder: 1, createdAt: 1 })).map(toDoctorSummary),
+    );
+    res.json({ data });
   }),
 );
 
 doctorsRouter.get(
   '/:slug',
+  browserCache(),
   asyncHandler(async (req, res) => {
-    const doctor = await Doctor.findOne({ slug: req.params.slug, isActive: true });
-    if (!doctor) throw notFound('Doctor not found');
-    res.json({ data: toDoctorDetail(doctor) });
+    const slug = req.params.slug ?? '';
+    const data = await cached(`doctor:${slug}`, async () => {
+      const doctor = await Doctor.findOne({ slug, isActive: true });
+      return doctor ? toDoctorDetail(doctor) : null;
+    });
+    if (!data) throw notFound('Doctor not found');
+    res.json({ data });
   }),
 );
 

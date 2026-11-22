@@ -105,12 +105,13 @@ function bookFields(input: BookFormInput) {
     // Each format is priced explicitly in the catalogue; never infer a price from another format.
     priceHardcopy: input.priceHardcopy,
     hardcopyAvailable: input.hardcopyAvailable,
-    pages: input.pages ?? undefined,
-    publishedYear: input.publishedYear ?? undefined,
-    rating: input.rating ?? undefined,
-    reviewCount: input.reviewCount ?? undefined,
+    // An emptied optional field is null, which clears it (defined() keeps nulls).
+    pages: input.pages,
+    publishedYear: input.publishedYear,
+    rating: input.rating,
+    reviewCount: input.reviewCount,
     isPublished: input.isPublished,
-    sortOrder: input.sortOrder ?? undefined,
+    sortOrder: input.sortOrder ?? 0,
     legacyId: input.legacyId ?? undefined,
   });
 }
@@ -148,7 +149,6 @@ catalogRouter.patch(
     const book = await Book.findById(req.params.id).select('+pdf');
     if (!book) throw notFound('Book not found');
     Object.assign(book, bookFields(input));
-    if (input.pricePdf === null) book.pricePdf = null;
     if (input.slug && input.slug !== book.slug) book.slug = await uniqueSlug(Book, input.slug, book._id);
     const cover = uploadedFile(req, 'cover');
     const pdf = uploadedFile(req, 'pdf');
@@ -252,12 +252,13 @@ function courseFields(input: CourseFormInput) {
     title: input.title,
     description: input.description,
     price: input.price ?? undefined,
-    discountPercent: input.discountPercent ?? undefined,
-    level: input.level,
+    // Emptied fields fall back to their defaults instead of keeping the old value.
+    discountPercent: input.discountPercent ?? 0,
+    level: input.level ?? '',
     hasCertificate: input.hasCertificate,
     popularRank: input.popularRank,
     isPublished: input.isPublished,
-    sortOrder: input.sortOrder ?? undefined,
+    sortOrder: input.sortOrder ?? 0,
     legacyId: input.legacyId ?? undefined,
   });
 }
@@ -380,7 +381,8 @@ catalogRouter.patch(
     video.youtubeId = input.youtube;
     video.isFree = input.isFree;
     video.isPublished = input.isPublished;
-    if (input.durationMinutes != null) video.durationSec = Math.round(input.durationMinutes * 60);
+    // An empty duration clears it.
+    video.durationSec = input.durationMinutes != null ? Math.round(input.durationMinutes * 60) : undefined;
     if (input.sortOrder != null) video.sortOrder = input.sortOrder;
     await video.save();
     await refreshVideoCount(video.course);

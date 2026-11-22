@@ -24,15 +24,18 @@ import {
   errorMessage,
   fieldErrors,
   FilterSelect,
+  FormErrors,
   ImageInput,
   Loading,
   PageTitle,
   Pagination,
+  QueryError,
   SearchBox,
   StatusBadge,
   toast,
   useAdminList,
 } from '../ui';
+import { PasswordInput } from '@/components/common/PasswordInput';
 
 const TYPE = { book_pdf: 'Book (PDF)', book_hardcopy: 'Book (Hard copy)', course: 'Course' } as const;
 
@@ -48,6 +51,7 @@ export function UsersPage() {
           <SearchBox value={list.q} onChange={list.setQ} placeholder="Name or email…" />
           <FilterSelect value={list.status} onChange={list.setStatus} options={['active', 'inactive']} all="All users" />
         </div>
+        {list.isError && <QueryError error={list.error} onRetry={() => void list.refetch()} />}
         {list.isLoading ? (
           <Loading />
         ) : (
@@ -92,15 +96,27 @@ export function UsersPage() {
 export function UserDetailPage() {
   const { id = '' } = useParams();
   const qc = useQueryClient();
-  const { data: u, isLoading } = useQuery({ queryKey: ['admin', 'user', id], queryFn: () => adminApi.get<AdminUserDetail>(`/users/${id}`) });
+  const { data: u, isLoading, error, refetch } = useQuery({ queryKey: ['admin', 'user', id], queryFn: () => adminApi.get<AdminUserDetail>(`/users/${id}`) });
   const [granting, setGranting] = useState(false);
+  if (error && !u) {
+    return (
+      <>
+        <PageTitle title="User" icon="fas fa-user">
+          <Link to="/admin/users" className="btn btn-outline-secondary">
+            <i className="fas fa-arrow-left"></i> Users
+          </Link>
+        </PageTitle>
+        <QueryError error={error} onRetry={() => void refetch()} />
+      </>
+    );
+  }
   if (isLoading || !u) return <Loading />;
 
   async function toggleActive() {
     if (!u) return;
     const ok = await confirmAction(
       u.isActive ? 'Deactivate this account?' : 'Activate this account?',
-      u.isActive ? 'The user is logged out of purchases and cannot log in.' : 'The user can log in again.',
+      u.isActive ? 'The user can no longer log in, buy, or open their books and courses.' : 'The user can log in again.',
       u.isActive ? 'Deactivate' : 'Activate',
       u.isActive,
     );
@@ -115,7 +131,13 @@ export function UserDetailPage() {
   }
 
   async function revoke(grantId: string, title: string) {
-    if (!(await confirmAction('Remove access?', `The user will no longer be able to open "${title}".`, 'Remove', true))) return;
+    const ok = await confirmAction(
+      'Remove access?',
+      `The user will no longer be able to open "${title}". A manual grant's ₹0 record is deleted; a paid purchase is marked "Access revoked by admin" so the user can buy it again. Hard-copy orders are not changed.`,
+      'Remove',
+      true,
+    );
+    if (!ok) return;
     try {
       await adminApi.del(`/entitlements/${grantId}`);
       toast('Access removed');
@@ -283,6 +305,13 @@ export function MessagesPage() {
     }
   }
 
+  // Each tab starts on page 1 with no search (the other tab's page may not exist here).
+  function switchKind(next: 'contact' | 'guidance') {
+    if (next === kind) return;
+    list.reset();
+    setKind(next);
+  }
+
   function view(m: AdminMessage) {
     setOpen(m);
     if (m.status === 'new') void mark(m, 'read');
@@ -294,16 +323,17 @@ export function MessagesPage() {
       <div className="admin-panel">
         <ul className="nav nav-tabs mb-3">
           <li className="nav-item">
-            <button className={`nav-link${kind === 'contact' ? ' active' : ''}`} onClick={() => setKind('contact')}>Contact form</button>
+            <button className={`nav-link${kind === 'contact' ? ' active' : ''}`} onClick={() => switchKind('contact')}>Contact form</button>
           </li>
           <li className="nav-item">
-            <button className={`nav-link${kind === 'guidance' ? ' active' : ''}`} onClick={() => setKind('guidance')}>Free consultation requests</button>
+            <button className={`nav-link${kind === 'guidance' ? ' active' : ''}`} onClick={() => switchKind('guidance')}>Free consultation requests</button>
           </li>
         </ul>
         <div className="d-flex flex-wrap gap-2 mb-3">
           <SearchBox value={list.q} onChange={list.setQ} placeholder="Name, email, text…" />
           <FilterSelect value={list.status} onChange={list.setStatus} options={MESSAGE_STATUSES} all="All" />
         </div>
+        {list.isError && <QueryError error={list.error} onRetry={() => void list.refetch()} />}
         {list.isLoading ? (
           <Loading />
         ) : (
@@ -386,7 +416,11 @@ export function NewsletterPage() {
   return (
     <>
       <PageTitle title="Newsletter Subscribers" icon="fas fa-paper-plane">
-        <a className="btn btn-admin" href={adminApi.fileUrl('/newsletter-subscribers?format=csv')}>
+        <a
+          className="btn btn-admin"
+          href={adminApi.fileUrl(`/newsletter-subscribers?format=csv${list.q ? `&q=${encodeURIComponent(list.q)}` : ''}`)}
+          title={list.q ? 'Exports the active subscribers matching the search' : 'Exports all active subscribers'}
+        >
           <i className="fas fa-file-csv"></i> Export CSV
         </a>
       </PageTitle>
@@ -394,6 +428,7 @@ export function NewsletterPage() {
         <div className="mb-3">
           <SearchBox value={list.q} onChange={list.setQ} placeholder="Email…" />
         </div>
+        {list.isError && <QueryError error={list.error} onRetry={() => void list.refetch()} />}
         {list.isLoading ? (
           <Loading />
         ) : (
@@ -433,15 +468,21 @@ export function NewsletterPage() {
 
 export function SettingsPage() {
   const qc = useQueryClient();
-  const { data } = useQuery({ queryKey: ['admin', 'settings'], queryFn: () => adminApi.get<AdminSettings>('/settings') });
+  const { admin: me } = useAdminAuth();
+  const isSuper = me?.role === 'superadmin';
+  const { data, error, refetch } = useQuery({ queryKey: ['admin', 'settings'], queryFn: () => adminApi.get<AdminSettings>('/settings'), enabled: isSuper });
   const [v, setV] = useState<AdminSettings | null>(null);
   const [qrBooks, setQrBooks] = useState<File | null>(null);
   const [qrCourses, setQrCourses] = useState<File | null>(null);
+  const [removeQr, setRemoveQr] = useState({ books: false, courses: false });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
   useEffect(() => {
     if (data) setV(data);
   }, [data]);
+  // Settings decide where customers send money (docs/03 §3.2): the API refuses other admins too.
+  if (!isSuper) return <div className="alert alert-warning">Only a super admin can change the site settings.</div>;
+  if (error && !v) return <QueryError error={error} onRetry={() => void refetch()} />;
   if (!v) return <Loading />;
   const set = (k: 'upiIdDefault' | 'upiIdPdf' | 'upiIdHardcopy' | 'contactEmail' | 'contactPhone' | 'location' | 'adminNotifyEmail') =>
     (e: React.ChangeEvent<HTMLInputElement>) => setV((s) => (s ? { ...s, [k]: e.target.value } : s));
@@ -463,11 +504,14 @@ export function SettingsPage() {
           twitterUrl: socialLinks.twitter,
           instagramUrl: socialLinks.instagram,
           linkedinUrl: socialLinks.linkedin,
+          removeQrImageBooks: !qrBooks && removeQr.books,
+          removeQrImageCourses: !qrCourses && removeQr.courses,
         }, { qrImageBooks: qrBooks, qrImageCourses: qrCourses }),
       );
       toast('Settings saved');
       setQrBooks(null);
       setQrCourses(null);
+      setRemoveQr({ books: false, courses: false });
       await qc.invalidateQueries({ queryKey: ['admin', 'settings'] });
       await qc.invalidateQueries({ queryKey: ['settings'] });
     } catch (e) {
@@ -481,6 +525,7 @@ export function SettingsPage() {
   return (
     <>
       <PageTitle title="Settings" icon="fas fa-cog" />
+      <FormErrors errors={errors} shown={SETTINGS_INLINE} labels={settingsErrorLabels(v.workingHours.length)} />
       <div className="admin-panel">
         <h5>Payments (UPI)</h5>
         <p className="small text-muted">Only UPI payments with a transaction ID and proof are currently supported. Leave an ID or QR image empty to disable that payment route.</p>
@@ -501,10 +546,24 @@ export function SettingsPage() {
             {err('upiIdHardcopy')}
           </div>
           <div className="col-md-6">
-            <ImageInput label="QR code: books and events" current={v.qrImageBooks} file={qrBooks} onFile={setQrBooks} />
+            <ImageInput label="QR code: books and events" current={removeQr.books ? null : v.qrImageBooks} file={qrBooks} onFile={setQrBooks} />
+            {v.qrImageBooks && !qrBooks && (
+              <div className="form-check mb-2" style={{ marginTop: "-0.5rem" }}>
+                <input className="form-check-input" type="checkbox" id="rmqrb" checked={removeQr.books} onChange={(e) => setRemoveQr({ ...removeQr, books: e.target.checked })} />
+                <label className="form-check-label small" htmlFor="rmqrb">Remove this QR code</label>
+              </div>
+            )}
+            {err('qrImageBooks')}
           </div>
           <div className="col-md-6">
-            <ImageInput label="QR code: course payments" current={v.qrImageCourses} file={qrCourses} onFile={setQrCourses} />
+            <ImageInput label="QR code: course payments" current={removeQr.courses ? null : v.qrImageCourses} file={qrCourses} onFile={setQrCourses} />
+            {v.qrImageCourses && !qrCourses && (
+              <div className="form-check mb-2" style={{ marginTop: "-0.5rem" }}>
+                <input className="form-check-input" type="checkbox" id="rmqrc" checked={removeQr.courses} onChange={(e) => setRemoveQr({ ...removeQr, courses: e.target.checked })} />
+                <label className="form-check-label small" htmlFor="rmqrc">Remove this QR code</label>
+              </div>
+            )}
+            {err('qrImageCourses')}
           </div>
         </div>
       </div>
@@ -519,10 +578,12 @@ export function SettingsPage() {
           <div className="col-md-4">
             <label className="form-label fw-semibold">Contact phone</label>
             <input className="form-control" value={v.contactPhone} onChange={set('contactPhone')} />
+            {err('contactPhone')}
           </div>
           <div className="col-md-4">
             <label className="form-label fw-semibold">Location</label>
             <input className="form-control" value={v.location} onChange={set('location')} />
+            {err('location')}
           </div>
         </div>
         <div className="mt-4">
@@ -546,6 +607,7 @@ export function SettingsPage() {
             <div className="col-md-6" key={network}>
               <label className="form-label fw-semibold">{network.charAt(0).toUpperCase() + network.slice(1)} URL</label>
               <input className="form-control" type="url" value={v.socialLinks[network]} onChange={(e) => setV({ ...v, socialLinks: { ...v.socialLinks, [network]: e.target.value } })} />
+              {err(`${network}Url`)}
             </div>
           ))}
         </div>
@@ -555,7 +617,8 @@ export function SettingsPage() {
         <div className="row g-3">
           <div className="col-md-4">
             <label className="form-label fw-semibold">Send new-order alerts to</label>
-            <input className="form-control" value={v.adminNotifyEmail} onChange={set('adminNotifyEmail')} placeholder="default from server config" />
+            <input className="form-control" value={v.adminNotifyEmail} onChange={set('adminNotifyEmail')} placeholder="empty = no email alerts" />
+            <div className="form-text">New orders, messages and requests are emailed here. Leave it empty to turn the alerts off.</div>
             {err('adminNotifyEmail')}
           </div>
         </div>
@@ -567,14 +630,33 @@ export function SettingsPage() {
   );
 }
 
+/** Settings fields with an inline error; the rest (opening hours rows) are listed at the top. */
+const SETTINGS_INLINE = [
+  'upiIdDefault', 'upiIdPdf', 'upiIdHardcopy', 'qrImageBooks', 'qrImageCourses', 'contactEmail', 'contactPhone', 'location',
+  'facebookUrl', 'twitterUrl', 'instagramUrl', 'linkedinUrl', 'adminNotifyEmail',
+];
+function settingsErrorLabels(rows: number): Record<string, string> {
+  const labels: Record<string, string> = { workingHours: 'Opening hours' };
+  for (let i = 0; i < rows; i++) {
+    labels[`workingHours.${i}.label`] = `Opening hours, row ${i + 1} (day)`;
+    labels[`workingHours.${i}.value`] = `Opening hours, row ${i + 1} (hours)`;
+  }
+  return labels;
+}
+
 // ---- Admin accounts (super admin) -------------------------------------------------------------------
 
 export function AdminsPage() {
   const qc = useQueryClient();
   const { admin: me } = useAdminAuth();
-  const { data, isLoading } = useQuery({ queryKey: ['admin', 'admins'], queryFn: () => adminApi.get<AdminAccount[]>('/admins') });
+  const isSuper = me?.role === 'superadmin';
+  const { data, isLoading, error, refetch } = useQuery({
+    queryKey: ['admin', 'admins'],
+    queryFn: () => adminApi.get<AdminAccount[]>('/admins'),
+    enabled: isSuper,
+  });
   const [editing, setEditing] = useState<AdminAccount | 'new' | null>(null);
-  if (me?.role !== 'superadmin') return <div className="alert alert-warning">Only a super admin can manage admin accounts.</div>;
+  if (!isSuper || !me) return <div className="alert alert-warning">Only a super admin can manage admin accounts.</div>;
 
   return (
     <>
@@ -584,6 +666,7 @@ export function AdminsPage() {
         </button>
       </PageTitle>
       <div className="admin-panel">
+        {error && <QueryError error={error} onRetry={() => void refetch()} />}
         {isLoading ? (
           <Loading />
         ) : (
@@ -617,14 +700,18 @@ export function AdminsPage() {
         <AdminForm
           account={editing === 'new' ? null : editing}
           onClose={() => setEditing(null)}
-          onSaved={() => qc.invalidateQueries({ queryKey: ['admin', 'admins'] })}
+          onSaved={(id) => {
+            void qc.invalidateQueries({ queryKey: ['admin', 'admins'] });
+            // Editing yourself: refresh the name shown in the top bar.
+            if (id === me.id) void qc.invalidateQueries({ queryKey: ['admin', 'me'] });
+          }}
         />
       )}
     </>
   );
 }
 
-function AdminForm({ account, onClose, onSaved }: { account: AdminAccount | null; onClose: () => void; onSaved: () => void }) {
+function AdminForm({ account, onClose, onSaved }: { account: AdminAccount | null; onClose: () => void; onSaved: (id: string) => void }) {
   const [v, setV] = useState({
     username: account?.username ?? '',
     name: account?.name ?? '',
@@ -639,10 +726,11 @@ function AdminForm({ account, onClose, onSaved }: { account: AdminAccount | null
     setBusy(true);
     setErrors({});
     try {
-      if (account) await adminApi.patch(`/admins/${account.id}`, { name: v.name, email: v.email, role: v.role, isActive: v.isActive, password: v.password || undefined });
-      else await adminApi.post('/admins', { username: v.username, name: v.name, email: v.email, role: v.role, password: v.password });
+      const saved = account
+        ? await adminApi.patch<AdminAccount>(`/admins/${account.id}`, { name: v.name, email: v.email, role: v.role, isActive: v.isActive, password: v.password || undefined })
+        : await adminApi.post<AdminAccount>('/admins', { username: v.username, name: v.name, email: v.email, role: v.role, password: v.password });
       toast('Admin saved');
-      onSaved();
+      onSaved(saved.id);
       onClose();
     } catch (e) {
       setErrors(fieldErrors(e));
@@ -687,7 +775,7 @@ function AdminForm({ account, onClose, onSaved }: { account: AdminAccount | null
         </div>
         <div className="col-md-6">
           <label className="form-label fw-semibold">{account ? 'New password (leave empty to keep)' : 'Password'}</label>
-          <input type="password" className="form-control" autoComplete="new-password" value={v.password} onChange={(e) => setV({ ...v, password: e.target.value })} />
+          <PasswordInput autoComplete="new-password" value={v.password} onChange={(e) => setV({ ...v, password: e.target.value })} />
           {err('password')}
         </div>
         {account && (
@@ -714,6 +802,7 @@ export function ActivityPage() {
         <div className="mb-3">
           <SearchBox value={list.q} onChange={list.setQ} placeholder="Action, admin…" />
         </div>
+        {list.isError && <QueryError error={list.error} onRetry={() => void list.refetch()} />}
         {list.isLoading ? (
           <Loading />
         ) : (
@@ -732,7 +821,16 @@ export function ActivityPage() {
                   <td className="small">{dateTime(a.createdAt)}</td>
                   <td>{a.adminUsername}</td>
                   <td><code>{a.action}</code></td>
-                  <td className="small text-muted">{a.entity} {a.entityId}</td>
+                  <td className="small text-muted">
+                    {a.entity} {a.entityId}
+                    {a.details && Object.keys(a.details).length > 0 && (
+                      <div className="text-body">
+                        {Object.entries(a.details)
+                          .map(([k, val]) => `${k}: ${typeof val === 'object' ? JSON.stringify(val) : String(val)}`)
+                          .join(' · ')}
+                      </div>
+                    )}
+                  </td>
                 </tr>
               ))}
               {list.data?.data.length === 0 && <EmptyRow cols={4} text="No activity yet." />}
@@ -778,13 +876,13 @@ export function AccountPage() {
       <PageTitle title="My Password" icon="fas fa-key" />
       <form className="admin-panel" style={{ maxWidth: 480 }} onSubmit={save}>
         <label className="form-label fw-semibold">Current password</label>
-        <input type="password" className="form-control mb-1" autoComplete="current-password" value={current} onChange={(e) => setCurrent(e.target.value)} />
+        <PasswordInput wrapperClassName="mb-1" autoComplete="current-password" value={current} onChange={(e) => setCurrent(e.target.value)} />
         {errors.currentPassword && <div className="invalid-feedback d-block">{errors.currentPassword}</div>}
         <label className="form-label fw-semibold mt-2">New password</label>
-        <input type="password" className="form-control mb-1" autoComplete="new-password" value={next} onChange={(e) => setNext(e.target.value)} />
+        <PasswordInput wrapperClassName="mb-1" autoComplete="new-password" value={next} onChange={(e) => setNext(e.target.value)} />
         {errors.newPassword && <div className="invalid-feedback d-block">{errors.newPassword}</div>}
         <label className="form-label fw-semibold mt-2">Confirm new password</label>
-        <input type="password" className="form-control mb-1" autoComplete="new-password" value={confirm} onChange={(e) => setConfirm(e.target.value)} />
+        <PasswordInput wrapperClassName="mb-1" autoComplete="new-password" value={confirm} onChange={(e) => setConfirm(e.target.value)} />
         {errors.confirm && <div className="invalid-feedback d-block">{errors.confirm}</div>}
         <button className="btn btn-admin mt-3" disabled={busy}>Change password</button>
       </form>

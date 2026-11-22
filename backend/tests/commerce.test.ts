@@ -8,6 +8,7 @@ import { Book } from '../src/models/Book';
 import { Entitlement } from '../src/models/Entitlement';
 import { Order } from '../src/models/Order';
 import { Payment } from '../src/models/Payment';
+import { getSettings } from '../src/models/Settings';
 import { User } from '../src/models/User';
 import { seedBooks, seedCourses, seedCourseVideos, seedDoctors, seedEvents } from '../src/scripts/seed';
 import { outbox } from '../src/services/email/mailer';
@@ -32,6 +33,10 @@ beforeAll(async () => {
   mkdirSync(path.join(PRIVATE_DIR, 'Books_pdf'), { recursive: true });
   writeFileSync(path.join(PRIVATE_DIR, key), '%PDF-1.4 test');
   await Admin.create({ username: 'boss', passwordHash: await hashPassword('admin-pass-1'), role: 'superadmin' });
+  // Checkout and event booking refuse until the admin configures where payments go.
+  const settings = await getSettings();
+  Object.assign(settings, { upiIdDefault: 'test@upi', upiIdPdf: 'test@upi', upiIdHardcopy: 'test@upi' });
+  await settings.save();
 });
 
 afterAll(async () => {
@@ -40,7 +45,9 @@ afterAll(async () => {
 
 async function loggedInUser(email: string) {
   const c = await csrfAgent(app);
-  await c.post('/api/auth/register', { name: 'Reader One', email, password: 'secret123' }).expect(201);
+  // Registration does not sign in (SEC-04): register, then log in.
+  await c.post('/api/auth/register', { name: 'Reader One', email, password: 'secret123' }).expect(200);
+  await c.post('/api/auth/login', { email, password: 'secret123' }).expect(200);
   return c;
 }
 
@@ -283,7 +290,7 @@ describe('admin API', () => {
       .attach('cover', PNG, { filename: 'cover.png', contentType: 'image/png' })
       .attach('pdf', Buffer.from('%PDF-1.4 new'), { filename: 'book.pdf', contentType: 'application/pdf' });
     expect(created.status).toBe(201);
-    expect(created.body.data).toMatchObject({ slug: 'yoga-darshan-notes', pricePdf: 14_900, priceHardcopy: 34_900, hasPdf: true });
+    expect(created.body.data).toMatchObject({ slug: 'yoga-darshan-notes', pricePdf: 14_900, priceHardcopy: null, hasPdf: true });
     expect(created.body.data.cover).toMatch(/^\/media\/books\/cover_/);
     const cover = await request(app).get(created.body.data.cover).expect(200);
     expect(cover.headers['content-type']).toBe('image/png');

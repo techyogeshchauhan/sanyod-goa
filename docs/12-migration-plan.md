@@ -311,6 +311,36 @@ Environment variables are specified per project: backend in [08-backend-architec
 | Monitoring | Uptime monitor, pino logs → file/Logtail, error alerts by email |
 | CI/CD | GitHub Actions: lint, type-check, unit tests, Playwright visual tests, build, deploy |
 
+### Static file caching (Nginx)
+
+Repeat visits and reloads depend on these headers. Vite puts a content hash in every JS/CSS file
+name, so those can be cached for a year; `index.html` must always be revalidated so a new deploy
+is picked up at once. Web-sized images are in `/_img/` (made by `npm run images` in `frontend/`).
+
+```nginx
+gzip on;
+gzip_types text/css application/javascript application/json image/svg+xml;
+
+location /assets/ {                      # hashed JS, CSS, fonts
+  add_header Cache-Control "public, max-age=31536000, immutable";
+  try_files $uri =404;
+}
+location ~ ^/(_img|Books|Courses|images|uploads)/ {
+  add_header Cache-Control "public, max-age=2592000";   # 30 days
+  try_files $uri =404;
+}
+location = /index.html {
+  add_header Cache-Control "no-cache";
+}
+location / {
+  try_files $uri /index.html;            # SPA fallback
+}
+```
+
+The API already compresses JSON, caches public catalogue reads in memory (cleared on every admin
+write) and sends `Cache-Control: public, max-age=30` on public lists. Host the API in the same
+region as MongoDB Atlas: every query is a network round trip.
+
 ---
 
 ## 12. Phased delivery plan

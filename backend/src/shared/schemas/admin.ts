@@ -103,10 +103,13 @@ export const idParamSchema = z.object({ id: z.string().regex(/^[a-f0-9]{24}$/i, 
 export const rejectPaymentSchema = z.object({ reason: optionalText(500) });
 export const paymentStatusFilter = z.enum(PAYMENT_STATUSES);
 
+// Text a form can empty: '' is kept (it clears the value), undefined means "unchanged".
+const clearableText = (max: number) => z.string().trim().max(max).optional();
+
 export const updateOrderSchema = z.object({
   status: z.enum(ORDER_STATUSES),
-  courier: optionalText(100),
-  trackingNumber: optionalText(100),
+  courier: clearableText(100),
+  trackingNumber: clearableText(100),
   notify: z.boolean().optional(),
 });
 
@@ -161,7 +164,8 @@ export const videoFormSchema = z.object({
   title: text(300).min(1, 'Title is required'),
   youtube: youtubeIdSchema,
   isFree: z.boolean().optional().default(false),
-  durationMinutes: z.coerce.number().min(0).max(1000).optional(),
+  /** Empty or null clears the duration. */
+  durationMinutes: z.preprocess((v) => (v === '' || v === null ? undefined : v), z.coerce.number().min(0).max(1000).optional()),
   isPublished: z.boolean().optional().default(true),
   sortOrder: z.coerce.number().int().min(0).max(100000).optional(),
 });
@@ -200,7 +204,7 @@ export const doctorFormSchema = z.object({
 
 export const updateConsultationSchema = z.object({
   status: z.enum(CONSULTATION_STATUSES),
-  adminNotes: optionalText(3000),
+  adminNotes: clearableText(3000),
   notify: z.boolean().optional(),
 });
 
@@ -267,6 +271,9 @@ export const settingsFormSchema = z.object({
     .optional()
     .transform((v) => v || undefined)
     .pipe(z.string().email().optional()),
+  /** Clear a QR image (no new file uploaded for it). */
+  removeQrImageBooks: bool,
+  removeQrImageCourses: bool,
 });
 
 export const createAdminSchema = z.object({

@@ -101,7 +101,7 @@ export default function CommunityPage() {
           </>
         }
       >
-        <div className="stat-row mt-5 mx-auto" style={{ maxWidth: 560 }}>
+        <div className="stat-row mt-4 mx-auto" style={{ maxWidth: 560 }}>
           {[
             ['5,000+', 'Community members'],
             ['100+', 'Weekly satsangs'],
@@ -116,9 +116,9 @@ export default function CommunityPage() {
       </PageHero>
 
       <Section deva="सामुदायिक लाभ" title="Why join our spiritual community?" lead="Experience the collective energy of spiritual seekers on the same path.">
-        <div className="row g-4">
+        <div className="row g-3 g-md-4 grid-compact">
           {WHY.map((w) => (
-            <div className="col-sm-6 col-lg-3" key={w.title}>
+            <div className="col-6 col-lg-3" key={w.title}>
               <FeatureCard icon={w.icon} title={w.title} text={w.text} tone={w.tone} />
             </div>
           ))}
@@ -150,7 +150,7 @@ export default function CommunityPage() {
             </div>
           ))}
         </div>
-        <div className="text-center mt-5">
+        <div className="text-center mt-4">
           <Link to="/programs" className="btn btn-ink">
             <i className="fas fa-calendar"></i> View full calendar
           </Link>
@@ -173,7 +173,7 @@ export default function CommunityPage() {
       </Section>
 
       <Section tone="alt" deva="भजन कीर्तन" title="Divine music & chanting" lead="Experience the ecstasy of devotional singing and sacred chanting.">
-        <div className="row g-4">
+        <div className="row g-3 g-md-4 list-compact">
           {MUSIC.map((m) => (
             <div className="col-md-4" key={m.title}>
               <FeatureCard icon={m.icon} title={m.title} text={m.text} tone={m.tone}>

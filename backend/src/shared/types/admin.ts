@@ -265,5 +265,7 @@ export interface AuditEntry {
   action: string;
   entity: string;
   entityId: string | null;
+  /** What changed (e.g. { status: 'approved' }); null for older entries. */
+  details: Record<string, unknown> | null;
   createdAt: string;
 }

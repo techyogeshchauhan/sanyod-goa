@@ -5,7 +5,10 @@ import type { AdminOrder } from '@shared/types/admin';
 import type { OrderStatus } from '@shared/types/catalog';
 import { dateTime, rupees } from '@/utils/format';
 import { adminApi } from '../api';
-import { AdminModal, EmptyRow, errorMessage, FilterSelect, Loading, PageTitle, Pagination, SearchBox, StatusBadge, toast, useAdminList } from '../ui';
+import { AdminModal, EmptyRow, errorMessage, FilterSelect, Loading, PageTitle, Pagination, QueryError, SearchBox, StatusBadge, toast, useAdminList } from '../ui';
+
+/** These need an approved payment (the API refuses them otherwise). */
+const NEEDS_PAYMENT: OrderStatus[] = ['processing', 'shipped', 'delivered'];
 
 /** Hard copy orders: shipping progress, courier and tracking number. */
 export default function OrdersPage() {
@@ -20,6 +23,7 @@ export default function OrdersPage() {
           <SearchBox value={list.q} onChange={list.setQ} placeholder="Order, name, phone, tracking…" />
           <FilterSelect value={list.status} onChange={list.setStatus} options={ORDER_STATUSES} all="All statuses" />
         </div>
+        {list.isError && <QueryError error={list.error} onRetry={() => void list.refetch()} />}
         {list.isLoading ? (
           <Loading />
         ) : (
@@ -87,6 +91,7 @@ function OrderModal({ order, onClose }: { order: AdminOrder; onClose: () => void
   const [notify, setNotify] = useState(true);
   const [busy, setBusy] = useState(false);
   const a = order.shippingAddress;
+  const paid = order.paymentStatus === 'approved';
 
   async function save() {
     setBusy(true);
@@ -112,8 +117,11 @@ function OrderModal({ order, onClose }: { order: AdminOrder; onClose: () => void
         </>
       }
     >
-      {order.paymentStatus !== 'approved' && (
-        <div className="alert alert-warning small">The payment for this order is {order.paymentStatus}. Approve it in Payments before shipping.</div>
+      {!paid && (
+        <div className="alert alert-warning small">
+          {order.paymentStatus ? `The payment for this order is ${order.paymentStatus}.` : 'This order has no payment record.'} Approve the payment in
+          Payments before processing or shipping it.
+        </div>
       )}
       <div className="row g-3">
         <div className="col-md-6">
@@ -132,7 +140,9 @@ function OrderModal({ order, onClose }: { order: AdminOrder; onClose: () => void
           <label className="form-label fw-semibold">Status</label>
           <select className="form-select mb-3" value={status} onChange={(e) => setStatus(e.target.value as OrderStatus)}>
             {ORDER_STATUSES.map((s) => (
-              <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>
+              <option key={s} value={s} disabled={!paid && s !== order.status && NEEDS_PAYMENT.includes(s)}>
+                {s.charAt(0).toUpperCase() + s.slice(1)}
+              </option>
             ))}
           </select>
           <label className="form-label fw-semibold">Courier</label>

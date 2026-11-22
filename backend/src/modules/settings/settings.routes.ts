@@ -1,12 +1,13 @@
 import { Router } from 'express';
-import { getSettings, type SettingsDoc } from '../../models/Settings';
+import { getSettingsCached, type SettingsAttrs } from '../../models/Settings';
 import type { PublicSettings } from '../../shared/types/catalog';
 import { publicUrl } from '../../services/storage';
+import { browserCache } from '../../services/cache';
 import { asyncHandler } from '../../utils/asyncHandler';
 
 export const settingsRouter = Router();
 
-export function toPublicSettings(s: SettingsDoc): PublicSettings {
+export function toPublicSettings(s: Readonly<SettingsAttrs>): PublicSettings {
   return {
     upiIdDefault: s.upiIdDefault ?? '',
     upiIdPdf: s.upiIdPdf ?? '',
@@ -29,7 +30,8 @@ export function toPublicSettings(s: SettingsDoc): PublicSettings {
 /** UPI IDs and QR images shown on the payment screens. */
 settingsRouter.get(
   '/public',
+  browserCache(),
   asyncHandler(async (_req, res) => {
-    res.json({ data: toPublicSettings(await getSettings()) });
+    res.json({ data: toPublicSettings(await getSettingsCached()) });
   }),
 );

@@ -88,7 +88,9 @@ describe('MySQL → MongoDB migration', () => {
     expect(await verifyBcrypt('x', ravi?.passwordHash ?? '')).toBe(false);
 
     const book = await Book.findOne({ legacyId: 26 }).select('+pdf');
-    expect(book).toMatchObject({ pricePdf: 10_000, priceHardcopy: 30_000, pdf: 'Books_pdf/bookpdf_6944e136963a3.pdf' });
+    // The dump has no hard-copy price: prices are explicit, never inferred from the PDF price.
+    expect(book?.priceHardcopy ?? null).toBeNull();
+    expect(book).toMatchObject({ pricePdf: 10_000, pdf: 'Books_pdf/bookpdf_6944e136963a3.pdf' });
 
     const pdf = await Payment.findOne({ legacyId: 1 });
     expect(pdf).toMatchObject({ itemType: 'book_pdf', status: 'approved', amount: 10_000, orderNumber: 'ORD20251126101010123' });

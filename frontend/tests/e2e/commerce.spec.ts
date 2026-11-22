@@ -7,6 +7,10 @@ import { expect, test, type Browser, type Page } from '@playwright/test';
 
 const ADMIN_USER = process.env.E2E_ADMIN_USER;
 const ADMIN_PASSWORD = process.env.E2E_ADMIN_PASSWORD;
+// UPI IDs come from the admin Settings of the database under test: give E2E_UPI_ID to check an exact
+// value (when every route uses the same ID), otherwise any UPI ID is accepted.
+const UPI_ID = process.env.E2E_UPI_ID;
+const upiPattern = UPI_ID ? new RegExp(UPI_ID.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')) : /\S+@\S+/;
 
 // 1x1 PNG used as the payment screenshot.
 const PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==', 'base64');
@@ -23,6 +27,12 @@ async function registerCustomer(page: Page) {
   await page.fill('#email', email);
   await page.fill('#password', 'secret123');
   await page.click('button:has-text("Register")');
+  // Registration does not sign in (SEC-04): it answers generically, then the customer signs in.
+  await expect(page.locator('.alert-success')).toContainText('If this address was available');
+  await page.click('.alert-success a:has-text("Sign in")');
+  await page.fill('#email', email);
+  await page.fill('#password', 'secret123');
+  await page.click('button:has-text("Login")');
   await expect(page).toHaveURL(/\/$/);
   return email;
 }
@@ -55,7 +65,7 @@ test('book PDF: buy → admin approves → read online', async ({ page, browser 
   await expect(page.locator('.book-title')).toHaveText('Patience in Life');
   await page.getByRole('button', { name: 'Select PDF Version' }).click();
   await expect(page.locator('#payment-section')).toBeVisible();
-  await expect(page.locator('#upi-id')).toHaveText('pdf.6355034424@upi');
+  await expect(page.locator('#upi-id')).toHaveText(upiPattern);
   await expect(page.locator('#payment-amount')).toHaveText('₹100');
   await page.fill('#transaction_id', utr());
   await page.setInputFiles('#screenshot', screenshot);
@@ -120,7 +130,7 @@ test('course: buy → admin approves → videos play', async ({ page, browser })
   await page.locator('.swal2-confirm', { hasText: 'Proceed to Payment' }).click();
   await expect(page).toHaveURL(/\/courses\/emotional-command\/payment$/);
   await page.locator('.payment-method[data-method="upi"]').click();
-  await expect(page.locator('#paymentInstructions')).toContainText('6355034424@upi');
+  await expect(page.locator('#paymentInstructions')).toContainText(upiPattern);
   await page.fill('#transaction_id', utr());
   await page.setInputFiles('#screenshot', screenshot);
   await page.getByRole('button', { name: /Submit Payment for Approval/ }).click();

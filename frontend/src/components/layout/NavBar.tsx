@@ -1,10 +1,11 @@
-import { Collapse } from 'bootstrap';
+import Collapse from 'bootstrap/js/dist/collapse';
 import { useEffect, useRef } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { Avatar } from '@/components/ui';
 import { SITE } from '@/config/site';
 import { useScrollY } from '@/hooks/useScrollY';
 import { useAuth } from '@/providers/AuthProvider';
+import { optimizedSrc } from '@/utils/images';
 
 const MENU = [
   { to: '/', label: 'Home', end: true },
@@ -58,7 +59,7 @@ export function NavBar() {
         {/* xl: below 1200px the logo, nine items and the account menu don't fit on one line. */}
         <nav className="navbar navbar-expand-xl p-0" aria-label="Main">
           <Link to="/" className="brand me-3">
-            <img src={SITE.logo} alt="" />
+            <img src={optimizedSrc(SITE.logo)} alt="" width={92} height={46} />
             <span>
               <span className="brand-name">{SITE.name}</span>
               <span className="brand-tagline">{SITE.tagline}</span>

@@ -13,13 +13,17 @@
   --adm-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   --adm-transition: all 0.3s ease;
   --sidebar-width: 250px;
+  /* Height of the sticky top bar: the desktop sidebar sits right under it. */
+  --admin-topbar-h: 71px;
 }
 
 body {
   background: linear-gradient(135deg, #f9f9f9 0%, #eaeaea 100%);
   font-family: 'Poppins', sans-serif;
   color: var(--adm-text);
-  overflow-x: hidden;
+  /* clip, not hidden: with <html> clipped too (theme.css), "hidden" made <body> its own scroll box,
+     which broke position: sticky (top bar and desktop sidebar scrolled away with the page). */
+  overflow-x: clip;
   min-height: 100vh;
 }
 
@@ -89,7 +93,7 @@ body {
 /* Sidebar */
 .admin-shell {
   display: flex;
-  min-height: calc(100vh - 62px);
+  min-height: calc(100vh - var(--admin-topbar-h));
 }
 
 .admin-sidebar {
@@ -97,7 +101,30 @@ body {
   flex-shrink: 0;
   background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%);
   box-shadow: 5px 0 15px rgba(0, 0, 0, 0.1);
-  padding: 15px 0 30px;
+  padding: 10px 0 16px;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.25) transparent;
+}
+
+/* Desktop: the sidebar stays in view under the top bar and scrolls on its own when the screen
+   is shorter than the menu, instead of running past the bottom of the page. */
+@media (min-width: 992px) {
+  .admin-sidebar {
+    position: sticky;
+    top: var(--admin-topbar-h);
+    align-self: flex-start;
+    height: calc(100vh - var(--admin-topbar-h));
+    overflow-y: auto;
+  }
+}
+
+.admin-sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+.admin-sidebar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 3px;
 }
 
 .admin-sidebar .nav-section {
@@ -105,16 +132,16 @@ body {
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 1px;
-  padding: 14px 30px 4px;
+  padding: 10px 27px 3px;
 }
 
 .admin-sidebar a {
   display: flex;
   align-items: center;
-  margin: 4px 15px;
+  margin: 1px 12px;
   border-radius: 8px;
   color: #ecf0f1;
-  padding: 11px 15px;
+  padding: 7px 15px;
   font-weight: 500;
   font-size: 14px;
   text-decoration: none;
@@ -175,6 +202,36 @@ body {
   }
   .pppht {
     font-size: 20px;
+  }
+  /* Tap outside the open sidebar to close it. */
+  .admin-backdrop {
+    position: fixed;
+    inset: 62px 0 0 0;
+    z-index: 1019;
+    background: rgba(0, 0, 0, 0.35);
+  }
+  .admin-panel {
+    padding: 15px;
+  }
+  .admin-page-title h1 {
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .admin-topbar {
+    padding: 8px 12px;
+  }
+  .admin-topbar .admin-user {
+    gap: 0.5rem !important;
+  }
+  /* Detail tables (label / value) in panels and modals: let long emails and ids wrap. */
+  :not(.table-responsive) > .admin-table td {
+    overflow-wrap: anywhere;
+  }
+  .form-control,
+  .form-select {
+    font-size: 16px;
   }
 }
 
@@ -257,6 +314,8 @@ body {
 }
 
 .admin-thumb {
+  /* Contains a photo's blurred backdrop (FitImage .fit-backdrop is absolutely positioned). */
+  position: relative;
   width: 48px;
   height: 48px;
   object-fit: cover;
@@ -288,19 +347,386 @@ body {
   border: 1px solid #ddd;
 }
 
-/* Login */
-.login-panel {
-  margin-top: 12vh;
-  border: none;
-  border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
-  overflow: hidden;
+/* Login: a brand panel in the sidebar's colours beside the sign-in form; stacked on phones. */
+.admin-login {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 16px;
+  background:
+    radial-gradient(circle at 12% 18%, rgba(211, 47, 47, 0.08), transparent 42%),
+    radial-gradient(circle at 88% 85%, rgba(255, 171, 0, 0.08), transparent 40%),
+    linear-gradient(135deg, #f9f9f9 0%, #eaeaea 100%);
 }
 
-.login-panel .panel-heading {
-  background: linear-gradient(45deg, var(--adm-primary), var(--adm-primary-light));
+.admin-login-card {
+  display: grid;
+  grid-template-columns: 1.05fr 1fr;
+  width: 100%;
+  max-width: 940px;
+  background: #fff;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 24px 60px rgba(44, 62, 80, 0.18), 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+.admin-login-brand {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  padding: 40px;
+  color: #ecf0f1;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(211, 47, 47, 0.35), transparent 45%),
+    radial-gradient(circle at 0% 100%, rgba(255, 171, 0, 0.18), transparent 40%),
+    linear-gradient(160deg, #2c3e50 0%, #34495e 100%);
+}
+
+.admin-login-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
   color: #fff;
+  text-decoration: none;
+  align-self: flex-start;
+}
+.admin-login-logo:hover {
+  color: #fff;
+}
+.admin-login-logo .logo-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 10px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
+}
+.admin-login-logo .logo-chip img {
+  display: block;
+  width: 64px;
+  height: auto;
+}
+.admin-login-logo .logo-name {
+  display: block;
+  font-family: 'Paytone One', sans-serif;
+  font-size: 20px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  line-height: 1.1;
+}
+.admin-login-logo .logo-tag {
+  display: block;
+  font-size: 12px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--adm-accent);
+}
+
+.admin-login-pitch {
+  margin-top: 0;
+}
+
+/* Decorative console preview filling the brand panel between the logo and the heading. */
+.admin-login-art {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 190px;
+  padding: 4px 18px 14px 0;
+}
+.art-window {
+  width: 100%;
+  max-width: 360px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(6px);
+  overflow: hidden;
+  transform: rotate(-2deg);
+}
+.art-titlebar {
+  display: flex;
+  gap: 6px;
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+.art-titlebar span {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.25);
+}
+.art-titlebar span:first-child {
+  background: var(--adm-primary-light);
+}
+.art-titlebar span:nth-child(2) {
+  background: var(--adm-accent);
+}
+.art-body {
+  display: grid;
+  grid-template-columns: 70px 1fr;
+  gap: 12px;
+  padding: 12px;
+}
+.art-side {
+  display: grid;
+  gap: 8px;
+  align-content: start;
+}
+.art-line {
+  display: block;
+  height: 8px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.16);
+}
+.art-line.short {
+  width: 60%;
+}
+.art-line.is-active {
+  background: var(--adm-primary);
+  box-shadow: 0 2px 8px rgba(211, 47, 47, 0.5);
+}
+.art-main {
+  display: grid;
+  gap: 12px;
+}
+.art-tiles {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+.art-tile {
+  display: grid;
+  gap: 6px;
+  padding: 9px;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.09);
+}
+.art-tile i {
+  font-size: 13px;
+  color: var(--adm-accent);
+}
+.art-tile:first-child i {
+  color: var(--adm-primary-light);
+}
+.art-tile b,
+.art-tile s {
+  display: block;
+  height: 7px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.3);
+  text-decoration: none;
+}
+.art-tile s {
+  width: 60%;
+  background: rgba(255, 255, 255, 0.14);
+}
+.art-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 7px;
+  height: 64px;
+  padding: 8px 10px 0;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.05);
+}
+.art-chart span {
+  flex: 1;
+  border-radius: 4px 4px 0 0;
+  background: linear-gradient(180deg, rgba(255, 171, 0, 0.85), rgba(211, 47, 47, 0.7));
+}
+.art-chip {
+  position: absolute;
+  right: 0;
+  bottom: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: #fff;
+  color: #2c3e50;
+  font-size: 12px;
   font-weight: 600;
-  font-size: 18px;
-  padding: 15px 20px;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.25);
+}
+.art-chip i {
+  color: #2e7d32;
+  font-size: 14px;
+}
+.admin-login-pitch h1 {
+  font-size: 26px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: #fff;
+  margin-bottom: 22px;
+}
+.admin-login-pitch ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 14px;
+}
+.admin-login-pitch li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+  color: rgba(236, 240, 241, 0.9);
+}
+.admin-login-pitch .pitch-icon {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.admin-login-note {
+  margin: 0;
+  font-size: 12px;
+  color: rgba(236, 240, 241, 0.6);
+}
+.admin-login-note i {
+  margin-right: 6px;
+}
+
+.admin-login-form {
+  padding: 44px 44px 36px;
+  display: flex;
+  flex-direction: column;
+}
+.admin-login-form .form-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  color: var(--adm-primary);
+  background: rgba(211, 47, 47, 0.1);
+  margin-bottom: 18px;
+}
+.admin-login-form h2 {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 4px;
+  color: #2c3e50;
+}
+.admin-login-form .form-lead {
+  color: var(--adm-muted);
+  margin-bottom: 26px;
+}
+.admin-login-form .form-label {
+  font-weight: 600;
+  font-size: 14px;
+  color: #2c3e50;
+}
+.admin-login-form .form-control {
+  height: 48px;
+  border-radius: 10px;
+  border-color: #dfe3e8;
+  background-color: #fafbfc;
+}
+.admin-login-form .form-control:focus {
+  border-color: var(--adm-primary);
+  background-color: #fff;
+  box-shadow: 0 0 0 0.2rem rgba(211, 47, 47, 0.15);
+}
+.admin-login-form .form-check-input:checked {
+  background-color: var(--adm-primary);
+  border-color: var(--adm-primary);
+}
+.admin-login-form .form-check-input:focus {
+  box-shadow: 0 0 0 0.2rem rgba(211, 47, 47, 0.15);
+}
+
+/* A leading icon inside an input (also wraps PasswordInput, whose eye button sits on the right). */
+.input-icon {
+  position: relative;
+}
+.input-icon > i {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9aa5b1;
+  pointer-events: none;
+  z-index: 2;
+  font-size: 14px;
+}
+.input-icon .form-control {
+  padding-left: 44px;
+}
+.input-icon:focus-within > i {
+  color: var(--adm-primary);
+}
+
+.admin-login-submit {
+  height: 50px;
+  font-weight: 600;
+  font-size: 16px;
+  letter-spacing: 0.3px;
+  box-shadow: 0 8px 20px rgba(211, 47, 47, 0.25);
+}
+
+.admin-login-help {
+  margin: 18px 0 0;
+  font-size: 13px;
+  color: var(--adm-muted);
+  text-align: center;
+}
+
+.admin-login-back {
+  margin-top: 16px;
+  align-self: center;
+  font-size: 14px;
+  font-weight: 500;
+  color: #2c3e50;
+  text-decoration: none;
+}
+.admin-login-back:hover {
+  color: var(--adm-primary);
+}
+.admin-login-back i {
+  margin-right: 6px;
+}
+
+@media (max-width: 767.98px) {
+  .admin-login {
+    align-items: flex-start;
+    padding: 16px 12px;
+  }
+  .admin-login-card {
+    grid-template-columns: 1fr;
+    border-radius: 16px;
+  }
+  /* Phones: the brand panel shrinks to a header strip above the form. */
+  .admin-login-brand {
+    padding: 20px 22px;
+    gap: 0;
+  }
+  .admin-login-pitch,
+  .admin-login-note,
+  .admin-login-art {
+    display: none;
+  }
+  .admin-login-form {
+    padding: 28px 22px 24px;
+  }
+  .admin-login-form h2 {
+    font-size: 24px;
+  }
 }

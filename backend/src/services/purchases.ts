@@ -5,7 +5,7 @@ import { Course } from '../models/Course';
 import { Entitlement } from '../models/Entitlement';
 import { Order } from '../models/Order';
 import { Payment, type PaymentDoc } from '../models/Payment';
-import { getSettings } from '../models/Settings';
+import { getSettingsCached } from '../models/Settings';
 import { User } from '../models/User';
 import { ORDER_NUMBER_PREFIX } from '../shared/constants';
 import type { CreatePaymentInput } from '../shared/schemas/purchases';
@@ -25,7 +25,7 @@ import {
 import { deleteStored, saveUpload } from './storage';
 
 export async function adminNotifyAddress(): Promise<string> {
-  const settings = await getSettings();
+  const settings = await getSettingsCached();
   return settings.adminNotifyEmail?.trim() ?? '';
 }
 
@@ -78,7 +78,7 @@ export async function createPayment(
     throw conflict('ALREADY_PURCHASED', 'You already have access to this item.');
   }
 
-  const settings = await getSettings();
+  const settings = await getSettingsCached();
   const configuredUpi = input.itemType === 'course'
     ? settings.upiIdDefault
     : input.itemType === 'book_pdf'
@@ -284,6 +284,13 @@ export async function updateOrderStatus(
   const order = await Order.findById(orderId);
   if (!order) throw notFound('Order not found');
   const changed = order.status !== update.status;
+  // Only a paid order may be prepared, shipped or delivered.
+  if (changed && ['processing', 'shipped', 'delivered'].includes(update.status)) {
+    const payment = await Payment.findById(order.payment, 'status');
+    if (payment?.status !== 'approved') {
+      throw conflict('PAYMENT_NOT_APPROVED', 'Approve the payment for this order before processing or shipping it.');
+    }
+  }
   order.status = update.status;
   if (update.courier !== undefined) order.courier = update.courier || undefined;
   if (update.trackingNumber !== undefined) order.trackingNumber = update.trackingNumber || undefined;

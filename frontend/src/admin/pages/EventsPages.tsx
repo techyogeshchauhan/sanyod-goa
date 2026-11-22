@@ -13,10 +13,12 @@ import {
   errorMessage,
   fieldErrors,
   FilterSelect,
+  FormErrors,
   ImageInput,
   Loading,
   PageTitle,
   Pagination,
+  QueryError,
   rupeesInput,
   SearchBox,
   StatusBadge,
@@ -63,6 +65,7 @@ export function EventsPage() {
             all="All categories"
           />
         </div>
+        {list.isError && <QueryError error={list.error} onRetry={() => void list.refetch()} />}
         {list.isLoading ? (
           <Loading />
         ) : (
@@ -113,6 +116,9 @@ export function EventsPage() {
     </>
   );
 }
+
+/** Fields that show their error next to the input; any other error is listed above the form. */
+const EVENT_INLINE = ['title', 'badge', 'startDate', 'dateText', 'timeText', 'durationText', 'location', 'price', 'capacity', 'image', 'enrolledCount', 'rating', 'sortOrder'];
 
 function EventForm({ event, onClose }: { event: AdminEvent | null; onClose: () => void }) {
   const qc = useQueryClient();
@@ -172,6 +178,7 @@ function EventForm({ event, onClose }: { event: AdminEvent | null; onClose: () =
         </>
       }
     >
+      <FormErrors errors={errors} shown={EVENT_INLINE} labels={{ description: 'Description', ctaLabel: 'Button', category: 'Category' }} />
       <div className="row g-3">
         <div className="col-md-6">
           <label className="form-label fw-semibold">Title *</label>
@@ -189,6 +196,7 @@ function EventForm({ event, onClose }: { event: AdminEvent | null; onClose: () =
         <div className="col-md-3">
           <label className="form-label fw-semibold">Badge</label>
           <input className="form-control" value={v.badge} onChange={set('badge')} placeholder="Featured, Popular, New…" />
+          {err('badge')}
         </div>
         <div className="col-12">
           <label className="form-label fw-semibold">Short description</label>
@@ -197,22 +205,27 @@ function EventForm({ event, onClose }: { event: AdminEvent | null; onClose: () =
         <div className="col-md-3">
           <label className="form-label fw-semibold">Start date</label>
           <input type="date" className="form-control" value={v.startDate} onChange={set('startDate')} />
+          {err('startDate')}
         </div>
         <div className="col-md-3">
           <label className="form-label fw-semibold">Date text (shown)</label>
           <input className="form-control" value={v.dateText} onChange={set('dateText')} placeholder="October 15, 2026 / Online - Anytime" />
+          {err('dateText')}
         </div>
         <div className="col-md-3">
           <label className="form-label fw-semibold">Time text</label>
           <input className="form-control" value={v.timeText} onChange={set('timeText')} placeholder="9:00 AM - 5:00 PM / Flexible" />
+          {err('timeText')}
         </div>
         <div className="col-md-3">
           <label className="form-label fw-semibold">Duration</label>
           <input className="form-control" value={v.durationText} onChange={set('durationText')} placeholder="3 Days" />
+          {err('durationText')}
         </div>
         <div className="col-md-5">
           <label className="form-label fw-semibold">Location</label>
           <input className="form-control" value={v.location} onChange={set('location')} />
+          {err('location')}
         </div>
         <div className="col-md-2">
           <label className="form-label fw-semibold">Price (₹) *</label>
@@ -222,6 +235,7 @@ function EventForm({ event, onClose }: { event: AdminEvent | null; onClose: () =
         <div className="col-md-2">
           <label className="form-label fw-semibold">Capacity</label>
           <input className="form-control" inputMode="numeric" value={v.capacity} onChange={set('capacity')} />
+          {err('capacity')}
         </div>
         <div className="col-md-3">
           <label className="form-label fw-semibold">Button</label>
@@ -237,14 +251,17 @@ function EventForm({ event, onClose }: { event: AdminEvent | null; onClose: () =
         <div className="col-md-2">
           <label className="form-label fw-semibold">Enrolled</label>
           <input className="form-control" inputMode="numeric" value={v.enrolledCount} onChange={set('enrolledCount')} />
+          {err('enrolledCount')}
         </div>
         <div className="col-md-2">
           <label className="form-label fw-semibold">Rating</label>
           <input className="form-control" inputMode="decimal" value={v.rating} onChange={set('rating')} />
+          {err('rating')}
         </div>
         <div className="col-md-2">
           <label className="form-label fw-semibold">Sort</label>
           <input className="form-control" inputMode="numeric" value={v.sortOrder} onChange={set('sortOrder')} />
+          {err('sortOrder')}
         </div>
         <div className="col-12">
           <div className="form-check">
@@ -295,6 +312,7 @@ export function BookingsPage() {
             all="All programmes"
           />
         </div>
+        {list.isError && <QueryError error={list.error} onRetry={() => void list.refetch()} />}
         {list.isLoading ? (
           <Loading />
         ) : (

@@ -26,8 +26,18 @@ const envSchema = z.object({
 
   SMTP_HOST: z.string().optional().transform((v) => v || undefined),
   SMTP_PORT: z.coerce.number().int().positive().default(587),
-  SMTP_USER: z.string().optional(),
-  SMTP_PASS: z.string().optional(),
+  /**
+   * starttls (port 587: plain connection upgraded with STARTTLS, which is then required),
+   * ssl / tls (port 465: TLS from the start), none (no TLS, local relays only).
+   * Unset: TLS from the start on port 465, otherwise STARTTLS when the server offers it.
+   */
+  SMTP_SECURITY: z
+    .string()
+    .optional()
+    .transform((v) => v?.trim().toLowerCase() || undefined)
+    .pipe(z.enum(['starttls', 'ssl', 'tls', 'none']).optional()),
+  SMTP_USER: z.string().optional().transform((v) => v?.trim() || undefined),
+  SMTP_PASS: z.string().optional().transform((v) => v || undefined),
   MAIL_FROM: z.string().default('SANYOD <noreply@sanyod.in>'),
   MAX_IMAGE_UPLOAD_MB: z.coerce.number().positive().default(5),
   MAX_PDF_UPLOAD_MB: z.coerce.number().positive().default(50),
@@ -43,7 +53,25 @@ const envSchema = z.object({
   LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent']).default('info'),
 });
 
-const parsed = envSchema.safeParse(process.env);
+/**
+ * Accepted alternative spellings (the names many hosting panels and older .env files use).
+ * The canonical name wins when both are set; an empty value counts as unset.
+ */
+const ALIASES: Record<string, string> = {
+  SMTP_USER: 'SMTP_USERNAME',
+  SMTP_PASS: 'SMTP_PASSWORD',
+  MAIL_FROM: 'SMTP_FROM',
+};
+
+export function withAliases(source: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
+  const out = { ...source };
+  for (const [name, alias] of Object.entries(ALIASES)) {
+    if (!out[name] && out[alias]) out[name] = out[alias];
+  }
+  return out;
+}
+
+const parsed = envSchema.safeParse(withAliases(process.env));
 if (!parsed.success) {
   const issues = parsed.error.issues.map((i) => `  - ${i.path.join('.')}: ${i.message}`).join('\n');
   // eslint-disable-next-line no-console

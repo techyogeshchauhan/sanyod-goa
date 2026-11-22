@@ -2,8 +2,10 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import type { HomeCourses } from '@shared/types/course';
+import { YouTubeFacade } from '@/components/common/YouTubeFacade';
 import { CourseCard } from '@/components/courses/CourseCard';
 import { FeatureCard, Section, StatRow, type Tone } from '@/components/ui';
+import { optimizedSrc } from '@/utils/images';
 
 const WHY: { icon: string; title: string; text: string; tone: Tone }[] = [
   { icon: 'fas fa-video', title: 'Recorded Sessions', text: 'Learn at your pace with vibrant video classes', tone: 'saffron' },
@@ -70,7 +72,7 @@ export default function HomeContent({ courses, loggedIn }: { courses?: HomeCours
       <section className="home-hero">
         <div className="container">
           <div className="row align-items-center g-5">
-            <div className="col-lg-6">
+            <div className="col-md-7">
               <div className="eyebrow-deva">सांख्य · योग · दर्शन</div>
               <h1 className="display-title">
                 Learn Sanskrit &amp; Indian Wisdom <span className="accent">online, in Hindi</span>
@@ -91,9 +93,9 @@ export default function HomeContent({ courses, loggedIn }: { courses?: HomeCours
                 Thousands of <RotatingWord words={SEEKERS} /> have chosen wisdom.
               </p>
             </div>
-            <div className="col-lg-6">
+            <div className="col-md-5">
               <div className="hero-visual">
-                <img src="/images/SanYod.jpg" alt="Sadhaka Jamwant, founder of SANYOD" />
+                <img src={optimizedSrc('/images/SanYod.jpg')} alt="Sadhaka Jamwant, founder of SANYOD" width={853} height={1280} fetchPriority="high" />
                 <div className="hero-float card-soft">
                   <span className="icon-badge sage mb-0">
                     <i className="fas fa-star"></i>
@@ -121,13 +123,7 @@ export default function HomeContent({ courses, loggedIn }: { courses?: HomeCours
         <div className="row justify-content-center">
           <div className="col-lg-10 reveal">
             <div className="ratio ratio-16x9 rounded-xl overflow-hidden shadow-soft">
-              <iframe
-                src="https://www.youtube.com/embed/ey3lX6OpVps?autoplay=0&rel=0"
-                title="SANYOD introduction"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-                loading="lazy"
-              ></iframe>
+              <YouTubeFacade id="ey3lX6OpVps" title="SANYOD introduction" />
             </div>
             <div className="text-center mt-4">
               <Link to="/courses" className="btn btn-ink">
@@ -140,9 +136,9 @@ export default function HomeContent({ courses, loggedIn }: { courses?: HomeCours
 
       {/* Why SANYOD */}
       <Section tone="alt" eyebrow="Why SANYOD" title="Everything you need to learn with joy" lead="Discover the advantages of learning with us.">
-        <div className="row g-4">
+        <div className="row g-3 g-sm-4 grid-compact">
           {WHY.map((f) => (
-            <div className="col-sm-6 col-lg-3" key={f.title}>
+            <div className="col-6 col-lg-3" key={f.title}>
               <FeatureCard icon={f.icon} title={f.title} text={f.text} tone={f.tone} />
             </div>
           ))}
@@ -156,7 +152,7 @@ export default function HomeContent({ courses, loggedIn }: { courses?: HomeCours
             <h3 className="h4 mb-4 reveal">
               <i className="fas fa-seedling text-sage me-2"></i>New arrivals
             </h3>
-            <div className="row g-4 mb-5">
+            <div className="row g-4 mb-4">
               {courses.newArrivals.map((c) => (
                 <div className="col-md-6 col-lg-4" key={c.id}>
                   <CourseCard course={c} tag={<span className="chip solid">NEW</span>}>
@@ -187,7 +183,7 @@ export default function HomeContent({ courses, loggedIn }: { courses?: HomeCours
             </div>
           </>
         )}
-        <div className="text-center mt-5">
+        <div className="text-center mt-4">
           <Link to={loggedIn ? '/courses' : '/login'} className="btn btn-outline-primary">
             {loggedIn ? 'View all courses' : 'Log in to view all courses'} <i className="fas fa-arrow-right"></i>
           </Link>
@@ -196,9 +192,9 @@ export default function HomeContent({ courses, loggedIn }: { courses?: HomeCours
 
       {/* Quick access */}
       <Section tone="alt" eyebrow="Quick access" title="Where would you like to go?" lead="Direct access to all our important sections.">
-        <div className="row g-4 justify-content-center">
+        <div className="row g-3 g-sm-4 justify-content-center grid-compact">
           {QUICK.map((q) => (
-            <div className="col-sm-6 col-lg-3" key={q.to}>
+            <div className="col-6 col-lg-3" key={q.to}>
               <Link to={q.to} className="card-soft hover reveal text-decoration-none">
                 <span className={`icon-badge ${q.tone === 'saffron' ? '' : q.tone}`}>
                   <i className={q.icon}></i>
@@ -263,7 +259,7 @@ export default function HomeContent({ courses, loggedIn }: { courses?: HomeCours
                 <source src="/images/videos/video.mp4" type="video/mp4" />
               </video>
             </div>
-            <p className="text-center h3 mt-5 mb-0">
+            <p className="text-center h3 mt-4 mb-0">
               <RotatingWord words={COUNTRIES} interval={2000} /> students learn with SANYOD.
             </p>
           </div>

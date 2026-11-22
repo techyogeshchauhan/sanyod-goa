@@ -10,10 +10,12 @@ import {
   errorMessage,
   fieldErrors,
   FilterSelect,
+  FormErrors,
   ImageInput,
   Loading,
   PageTitle,
   Pagination,
+  QueryError,
   rupeesInput,
   SearchBox,
   StatusBadge,
@@ -49,6 +51,7 @@ export default function BooksPage() {
           <SearchBox value={list.q} onChange={list.setQ} placeholder="Title or author…" />
           <FilterSelect value={list.status} onChange={list.setStatus} options={['published', 'draft']} all="All" />
         </div>
+        {list.isError && <QueryError error={list.error} onRetry={() => void list.refetch()} />}
         {list.isLoading ? (
           <Loading />
         ) : (
@@ -75,7 +78,15 @@ export default function BooksPage() {
                       <div className="small text-muted">/books/{b.slug}{b.legacyId ? ` · old id ${b.legacyId}` : ''}</div>
                     </td>
                     <td>{b.pricePdf == null ? <span className="text-danger">not set</span> : rupees(b.pricePdf, false)}</td>
-                    <td>{b.hardcopyAvailable ? rupees(b.priceHardcopy, false) : <span className="text-muted">unavailable</span>}</td>
+                    <td>
+                      {!b.hardcopyAvailable ? (
+                        <span className="text-muted">unavailable</span>
+                      ) : b.priceHardcopy == null ? (
+                        <span className="text-danger">not set</span>
+                      ) : (
+                        rupees(b.priceHardcopy, false)
+                      )}
+                    </td>
                     <td>{b.hasPdf ? <i className="fas fa-check text-success"></i> : <span className="text-danger">missing</span>}</td>
                     <td>{b.sales}</td>
                     <td><StatusBadge status={b.isPublished ? 'published' : 'draft'} /></td>
@@ -101,6 +112,10 @@ export default function BooksPage() {
     </>
   );
 }
+
+/** Fields that show their error next to the input; any other error is listed above the form. */
+const BOOK_INLINE = ['title', 'author', 'slug', 'pricePdf', 'priceHardcopy', 'category', 'language', 'pages', 'publishedYear', 'rating', 'reviewCount', 'cover', 'pdf', 'sortOrder'];
+const BOOK_LABELS: Record<string, string> = { description: 'Description', isPublished: 'Published', hardcopyAvailable: 'Hard copy available', isFeatured: 'Featured' };
 
 function BookForm({ book, onClose }: { book: AdminBook | null; onClose: () => void }) {
   const qc = useQueryClient();
@@ -163,6 +178,7 @@ function BookForm({ book, onClose }: { book: AdminBook | null; onClose: () => vo
         </>
       }
     >
+      <FormErrors errors={errors} shown={BOOK_INLINE} labels={BOOK_LABELS} />
       <div className="row g-3">
         <div className="col-md-8">
           <label className="form-label fw-semibold">Title *</label>
@@ -172,6 +188,7 @@ function BookForm({ book, onClose }: { book: AdminBook | null; onClose: () => vo
         <div className="col-md-4">
           <label className="form-label fw-semibold">Author</label>
           <input className="form-control" value={v.author} onChange={set('author')} />
+          {err('author')}
         </div>
         <div className="col-md-6">
           <label className="form-label fw-semibold">URL slug</label>
@@ -224,6 +241,7 @@ function BookForm({ book, onClose }: { book: AdminBook | null; onClose: () => vo
         <div className="col-md-3">
           <label className="form-label fw-semibold">Review count</label>
           <input className="form-control" inputMode="numeric" value={v.reviewCount} onChange={set('reviewCount')} />
+          {err('reviewCount')}
         </div>
         <div className="col-md-6">
           <ImageInput label="Cover image" required={!book} current={book?.cover} file={cover} onFile={setCover} />
@@ -238,6 +256,7 @@ function BookForm({ book, onClose }: { book: AdminBook | null; onClose: () => vo
         <div className="col-md-3">
           <label className="form-label fw-semibold">Sort order</label>
           <input className="form-control" inputMode="numeric" value={v.sortOrder} onChange={set('sortOrder')} />
+          {err('sortOrder')}
         </div>
         <div className="col-md-9 d-flex align-items-end gap-4 flex-wrap">
           <div className="form-check">

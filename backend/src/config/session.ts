@@ -29,6 +29,10 @@ function store(mongoUrl: string, collectionName: string, ttlSeconds: number) {
     ttl: ttlSeconds,
     autoRemove: 'native',
     stringify: false,
+    // rolling: true refreshes the cookie on every response; without this the store was also
+    // rewritten on every request (a database round trip the response waited for). The stored
+    // expiry is now refreshed at most once an hour, well inside the 7- / 30-day lifetimes.
+    touchAfter: 60 * 60,
   });
   openStores.push(created);
   return created;

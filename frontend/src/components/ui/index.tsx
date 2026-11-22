@@ -1,6 +1,7 @@
 // Building blocks of the SANYOD design system (styles in src/styles/theme.css).
 import { useEffect, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
+import { optimizedSrc, thumbSrc } from '@/utils/images';
 
 /**
  * Gently fades `.reveal` elements in as they scroll into view. Mounted once in the layout; a
@@ -263,10 +264,13 @@ export function FitImage({
   loading?: 'lazy' | 'eager';
   onError?: () => void;
 }) {
+  // The backdrop is blurred, so a 32 px copy looks the same and doesn't download the full image
+  // (CSS backgrounds ignore loading="lazy").
+  const backdrop = thumbSrc(src) ?? src;
   return (
     <>
-      <span className="fit-backdrop" aria-hidden="true" style={{ backgroundImage: `url("${src.replace(/"/g, '%22')}")` }} />
-      <img className="fit-img" src={src} alt={alt} loading={loading} onError={onError} />
+      <span className="fit-backdrop" aria-hidden="true" style={{ backgroundImage: `url("${backdrop.replace(/"/g, '%22')}")` }} />
+      <img className="fit-img" src={optimizedSrc(src)} alt={alt} loading={loading} decoding="async" onError={onError} />
     </>
   );
 }

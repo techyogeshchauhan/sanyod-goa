@@ -16,10 +16,14 @@ let transporter: Transporter | null = null;
 
 function getTransporter(): Transporter | null {
   if (!env.SMTP_HOST) return null;
+  const security = env.SMTP_SECURITY;
   transporter ??= nodemailer.createTransport({
     host: env.SMTP_HOST,
     port: env.SMTP_PORT,
-    secure: env.SMTP_PORT === 465,
+    // TLS from the first byte (465), or a plain connection that STARTTLS upgrades (587).
+    secure: security === 'ssl' || security === 'tls' || (!security && env.SMTP_PORT === 465),
+    requireTLS: security === 'starttls',
+    ignoreTLS: security === 'none',
     auth: env.SMTP_USER ? { user: env.SMTP_USER, pass: env.SMTP_PASS } : undefined,
   });
   return transporter;

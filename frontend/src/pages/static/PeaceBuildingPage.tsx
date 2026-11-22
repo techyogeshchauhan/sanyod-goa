@@ -69,7 +69,7 @@ export default function PeaceBuildingPage() {
         }
       />
       <Section id="pillars" eyebrow="Our approach" title="Our peacebuilding pillars" lead="These foundational approaches guide our work in creating sustainable peace and fostering global collaboration.">
-        <div className="row g-4">
+        <div className="row g-3 g-md-4 list-compact">
           {PILLARS.map((p) => (
             <div className="col-md-4" key={p.title}>
               <FeatureCard icon={p.icon} title={p.title} text={p.text} tone={p.tone} />
@@ -78,7 +78,7 @@ export default function PeaceBuildingPage() {
         </div>
       </Section>
       <Section id="initiatives" tone="alt" eyebrow="Initiatives" title="Global initiatives" lead="Our programs and projects that actively promote peacebuilding and international collaboration across the world.">
-        <div className="row g-4">
+        <div className="row g-3 g-md-4 list-compact">
           {INITIATIVES.map((p) => (
             <div className="col-md-4" key={p.title}>
               <FeatureCard icon={p.icon} title={p.title} text={p.text} tone={p.tone} />

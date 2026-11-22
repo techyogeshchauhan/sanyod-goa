@@ -71,7 +71,7 @@ export default function ContactPage() {
               </div>
             </div>
           </div>
-          {settings?.location && <div className="mt-5 reveal">
+          {settings?.location && <div className="mt-4 reveal">
             <div className="rounded-xl overflow-hidden shadow-soft" style={{ height: 380 }}>
               <iframe
                 title="SANYOD on the map"

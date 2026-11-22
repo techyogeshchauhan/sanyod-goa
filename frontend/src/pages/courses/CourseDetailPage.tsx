@@ -66,7 +66,7 @@ export default function CourseDetailPage() {
             <span>{course.title}</span>
           </nav>
           <div className="row g-5 align-items-center">
-            <div className="col-lg-7">
+            <div className="col-md-7">
               <div className="eyebrow">Course</div>
               <h1 className="deva">{course.title}</h1>
               <ul className="meta-list mt-3">
@@ -88,7 +88,7 @@ export default function CourseDetailPage() {
                 </li>
               </ul>
             </div>
-            <div className="col-lg-5">
+            <div className="col-md-5">
               <div className="split-media" style={{ aspectRatio: '16 / 10' }}>
                 <FitImage src={course.image} />
               </div>
@@ -222,6 +222,40 @@ export default function CourseDetailPage() {
           </div>
         </div>
       </section>
+      {/* Phones and tablets: the purchase card sits below the long description, so keep the main action in reach. */}
+      <div className="mobile-cta-bar" role="region" aria-label="Purchase">
+        {purchase?.canWatch ? (
+          <>
+            <span className="fw-600 text-ink small">
+              <i className="fa fa-check-circle text-sage me-1"></i>You own this course
+            </span>
+            <button type="button" className="btn btn-success" onClick={() => setPlaylist({})}>
+              <i className="fa fa-play-circle"></i> Continue learning
+            </button>
+          </>
+        ) : (
+          <>
+            <div className="min-w-0">
+              <span className="cta-label">{purchase?.status === 'pending' ? 'Payment pending approval' : 'One-time payment'}</span>
+              <span className="price">{priceText}</span>
+              {course.discountPercent > 0 && <span className="price-old ms-2">{formatRupees(course.originalPrice, false)}</span>}
+            </div>
+            {!user ? (
+              <Link to="/login" state={{ from: { pathname: `/courses/${course.slug}` } }} className="btn btn-primary">
+                <i className="fa fa-shopping-cart"></i> Log in to buy
+              </Link>
+            ) : purchase?.status === 'pending' ? (
+              <button type="button" className="btn btn-light" onClick={() => setPlaylist({})}>
+                <i className="fa fa-play-circle text-saffron"></i> Playlist
+              </button>
+            ) : (
+              <button type="button" className="btn btn-primary" onClick={onBuy}>
+                <i className="fa fa-shopping-cart"></i> Enroll now
+              </button>
+            )}
+          </>
+        )}
+      </div>
       <PlaylistModal course={modalCourse} onClose={onClose} onPurchase={() => goPay()} />
     </>
   );

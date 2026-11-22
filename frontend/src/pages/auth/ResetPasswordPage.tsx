@@ -8,6 +8,7 @@ import { AuthShell } from '@/components/auth/AuthShell';
 import { PasswordStrengthMeter } from '@/components/auth/PasswordStrengthMeter';
 import { Spinner } from '@/components/ui';
 import { useAuth } from '@/providers/AuthProvider';
+import { PasswordInput } from '@/components/common/PasswordInput';
 
 function Requirement({ met, label, metLabel }: { met: boolean; label: string; metLabel?: string }) {
   return (
@@ -31,30 +32,21 @@ function PasswordField({
   onChange: (v: string) => void;
   autoFocus?: boolean;
 }) {
-  const [show, setShow] = useState(false);
   return (
     <>
       <label htmlFor={id} className="form-label">
         {label}
       </label>
-      <div className="input-group">
-        <input
-          type={show ? 'text' : 'password'}
-          name={id}
-          id={id}
-          className="form-control"
-          style={{ borderRight: 0 }}
-          required
-          minLength={PASSWORD_MIN_LENGTH}
-          autoComplete="new-password"
-          autoFocus={autoFocus}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-        />
-        <button className="btn btn-light" style={{ borderRadius: '0 12px 12px 0' }} type="button" onClick={() => setShow((v) => !v)} aria-label="Show or hide password">
-          <i className={`fas ${show ? 'fa-eye-slash' : 'fa-eye'}`}></i>
-        </button>
-      </div>
+      <PasswordInput
+        name={id}
+        id={id}
+        required
+        minLength={PASSWORD_MIN_LENGTH}
+        autoComplete="new-password"
+        autoFocus={autoFocus}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+      />
     </>
   );
 }

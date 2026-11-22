@@ -152,9 +152,9 @@ export default function PersonalGuidancePage() {
       </PageHero>
 
       <Section deva="मार्गदर्शन मार्ग" title="Your spiritual guidance path" lead="Discover how personalized guidance can accelerate your spiritual growth.">
-        <div className="row g-4">
+        <div className="row g-3 g-md-4 grid-compact">
           {PATH.map((p) => (
-            <div className="col-sm-6 col-lg-3" key={p.title}>
+            <div className="col-6 col-lg-3" key={p.title}>
               <FeatureCard icon={p.icon} title={p.title} text={p.text} tone={p.tone} />
             </div>
           ))}
@@ -188,7 +188,7 @@ export default function PersonalGuidancePage() {
             </div>
           ))}
         </div>
-        <div className="text-center mt-5">
+        <div className="text-center mt-4">
           <button type="button" className="btn btn-light" onClick={book({ mentor: 'any' })}>
             <i className="fas fa-users text-saffron"></i> Any available mentor
           </button>
@@ -263,7 +263,7 @@ export default function PersonalGuidancePage() {
             </details>
           ))}
         </div>
-        <div className="text-center mt-5">
+        <div className="text-center mt-4">
           <button type="button" className="btn btn-ink" onClick={book({})}>
             <i className="fas fa-comment-alt"></i> Ask your question
           </button>

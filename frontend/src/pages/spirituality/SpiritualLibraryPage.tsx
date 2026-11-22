@@ -94,7 +94,7 @@ export default function SpiritualLibraryPage() {
         }
       >
         {books && filters && (
-          <div className="mx-auto mt-5" style={{ maxWidth: 560 }}>
+          <div className="mx-auto mt-4" style={{ maxWidth: 560 }}>
             <StatRow items={[{ value: String(books.length), label: 'Books' }, { value: String(filters.categories.length), label: 'Categories' }, { value: String(filters.languages.length), label: 'Languages' }]} />
           </div>
         )}
@@ -104,9 +104,9 @@ export default function SpiritualLibraryPage() {
         {filtersLoading && <Spinner />}
         {booksError && <PageError error={booksError} />}
         {!filtersLoading && filters?.categories.length === 0 && <EmptyState icon="fas fa-book" title="No categories yet" text="Categories will appear when books are added to the catalogue." />}
-        <div className="row g-4">
+        <div className="row g-3 g-md-4 grid-compact">
           {filters?.categories.map((item) => (
-            <div className="col-sm-6 col-lg-3" key={item}>
+            <div className="col-6 col-lg-3" key={item}>
               <FeatureCard icon="fas fa-book" title={item} text={`${books?.filter((book) => book.category === item).length ?? 0} books in this category`} tone="indigo">
                 <button type="button" className="btn btn-light btn-sm mt-2" onClick={() => { setCategory(item); setApplied({ category: item }); }}>
                   Explore <i className="fas fa-arrow-right ms-1"></i>
@@ -131,7 +131,7 @@ export default function SpiritualLibraryPage() {
       </Section>
 
       <Section tone="alt" deva="आभासीपुस्तकालयः" title="Digital access" lead="Access books and courses available in the catalogue.">
-        <div className="row g-4">
+        <div className="row g-3 g-md-4 list-compact">
           {DIGITAL.map((item) => (
             <div className="col-md-4" key={item.title}>
               <FeatureCard icon={item.icon} title={item.title} text={item.text} tone={item.tone}>

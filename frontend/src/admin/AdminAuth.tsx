@@ -1,9 +1,9 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { createContext, useCallback, useContext, useMemo, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, type ReactNode } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import type { AdminLoginInput } from '@shared/schemas/auth';
 import type { SessionAdmin } from '@shared/types/auth';
-import { adminApi } from './api';
+import { adminApi, setSessionExpiredHandler } from './api';
 
 const ADMIN_ME = ['admin', 'me'] as const;
 
@@ -28,11 +28,22 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
     },
     [qc],
   );
-  const logout = useCallback(async () => {
-    await adminApi.logout().catch(() => undefined);
+  const clear = useCallback(() => {
     qc.removeQueries({ predicate: (q) => q.queryKey[0] === 'admin' && q.queryKey[1] !== 'me' });
     qc.setQueryData(ADMIN_ME, { admin: null });
   }, [qc]);
+
+  const logout = useCallback(async () => {
+    await adminApi.logout().catch(() => undefined);
+    clear();
+  }, [clear]);
+
+  // Session expired, revoked (password/role change) or account deactivated: back to the login page,
+  // which returns to the current page afterwards (RequireAdmin keeps `from`).
+  useEffect(() => {
+    setSessionExpiredHandler(clear);
+    return () => setSessionExpiredHandler(null);
+  }, [clear]);
 
   const value = useMemo(() => ({ admin: data?.admin ?? null, isLoading, login, logout }), [data, isLoading, login, logout]);
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

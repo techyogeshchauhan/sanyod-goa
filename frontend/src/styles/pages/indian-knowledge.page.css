@@ -1,0 +1,394 @@
+/* Indian Spiritual Knowledge page. Scoped to body.page-indian-knowledge. */
+
+/* In-page jumps land below the header AND the sticky section bar. */
+html {
+  scroll-padding-top: calc(var(--header-h) + 76px);
+}
+
+/* ---- Hero verse ---------------------------------------------------------------- */
+.ik-hero-verse {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: baseline;
+  gap: 0.25rem 0.6rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+.ik-hero-verse .deva {
+  font-size: 1.05rem;
+  color: var(--saffron-600);
+}
+
+/* ---- Sticky section bar --------------------------------------------------------- */
+.ik-jump {
+  position: sticky;
+  top: var(--header-h);
+  z-index: 1020;
+  background: rgba(251, 248, 243, 0.9);
+  backdrop-filter: saturate(150%) blur(12px);
+  -webkit-backdrop-filter: saturate(150%) blur(12px);
+  border-bottom: 1px solid var(--line);
+}
+.ik-jump-track {
+  position: relative;
+  display: flex;
+  gap: 0.4rem;
+  padding: 0.6rem 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+  scroll-snap-type: x proximity;
+}
+.ik-jump-track::-webkit-scrollbar {
+  display: none;
+}
+/* Centred when the chips fit, scrollable from the first chip when they don't
+   (justify-content: center would cut off the start of an overflowing row). */
+.ik-jump-link:first-child {
+  margin-left: auto;
+}
+.ik-jump-link:last-child {
+  margin-right: auto;
+}
+.ik-jump-link {
+  flex-shrink: 0;
+  scroll-snap-align: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.45rem 0.95rem;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.88rem;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: all 0.2s var(--ease);
+}
+.ik-jump-link i {
+  color: var(--saffron);
+  font-size: 0.8rem;
+}
+.ik-jump-link:hover {
+  border-color: var(--saffron-100);
+  color: var(--ink);
+}
+.ik-jump-link.active {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: #fff;
+}
+.ik-jump-link.active i {
+  color: #f1b979;
+}
+
+/* ---- Four paths ------------------------------------------------------------------ */
+.ik-path {
+  display: flex;
+  flex-direction: column;
+}
+.ik-path-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.1rem;
+}
+.ik-path-num {
+  font-family: var(--font-serif);
+  font-size: 2rem;
+  line-height: 1;
+  font-weight: 600;
+  color: var(--surface-3);
+}
+.ik-path-deva {
+  color: var(--saffron-600);
+  font-size: 0.98rem;
+  margin-bottom: 0.6rem;
+}
+
+/* ---- Scriptures: typographic "covers" ------------------------------------------- */
+.ik-scripture {
+  padding: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.ik-cover {
+  --c1: #f3c48e;
+  --c2: #c86a1c;
+  position: relative;
+  aspect-ratio: 16 / 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  color: #fff;
+  background:
+    radial-gradient(120% 90% at 0% 0%, rgba(255, 255, 255, 0.28), transparent 55%),
+    linear-gradient(135deg, var(--c1), var(--c2));
+}
+.ik-cover.indigo {
+  --c1: #8c89d6;
+  --c2: #2f2c70;
+}
+.ik-cover.rose {
+  --c1: #eea39b;
+  --c2: #9c3029;
+}
+.ik-cover.sage {
+  --c1: #a9d0b2;
+  --c2: #3b6e49;
+}
+/* Thin inner frame, like a manuscript border. */
+.ik-cover::before {
+  content: '';
+  position: absolute;
+  inset: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 12px;
+  pointer-events: none;
+}
+.ik-cover-deva {
+  position: relative;
+  font-size: clamp(1.9rem, 3vw, 2.4rem);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.18);
+  text-align: center;
+  padding: 0 1rem;
+  line-height: 1.25;
+}
+.ik-cover-om {
+  position: absolute;
+  right: -0.1em;
+  bottom: -0.25em;
+  font-size: 7rem;
+  line-height: 1;
+  opacity: 0.12;
+}
+.ik-cover-tag {
+  position: absolute;
+  top: 18px;
+  left: 18px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  background: rgba(0, 0, 0, 0.22);
+  padding: 0.25rem 0.6rem;
+  border-radius: var(--r-pill);
+}
+.ik-scripture-body {
+  padding: clamp(18px, 2vw, 22px);
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+.ik-facts {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--saffron-600);
+  letter-spacing: 0.02em;
+  margin-bottom: 0.6rem;
+}
+
+/* ---- Meditation ------------------------------------------------------------------ */
+.ik-practice-cta {
+  font-weight: 600;
+  font-size: 0.92rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.ik-practice-cta i {
+  font-size: 0.75rem;
+  transition: transform 0.2s var(--ease);
+}
+.ik-practice:hover .ik-practice-cta i {
+  transform: translateX(3px);
+}
+
+/* ---- Teachers -------------------------------------------------------------------- */
+.ik-teacher {
+  display: flex;
+  gap: 1.25rem;
+  align-items: flex-start;
+}
+.ik-teacher-mono {
+  width: 76px;
+  height: 76px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.9rem;
+  font-weight: 700;
+  color: var(--indigo);
+  background: linear-gradient(135deg, var(--indigo-50), var(--saffron-50));
+  border: 1.5px solid var(--saffron-100);
+}
+.ik-teacher-deva {
+  color: var(--saffron-600);
+  margin-bottom: 0.5rem;
+}
+
+/* ---- Quotes: grid on tablets and up, swipe row on phones ------------------------- */
+.ik-quotes {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.5rem;
+}
+.ik-quote {
+  height: 100%;
+}
+.ik-swipe-hint {
+  text-align: center;
+  color: var(--faint);
+  font-size: 0.8rem;
+  margin: 0.75rem 0 0;
+}
+
+/* ---- Phones ----------------------------------------------------------------------- */
+@media (max-width: 767.98px) {
+  .ik-hero-verse {
+    flex-direction: column;
+    align-items: center;
+    font-size: 0.82rem;
+  }
+  .ik-jump-track {
+    /* Bleed to the screen edges so chips scroll under them, not under the container padding. */
+    margin-inline: calc(var(--bs-gutter-x, 1.5rem) * -0.5);
+    padding-inline: calc(var(--bs-gutter-x, 1.5rem) * 0.5);
+    scroll-padding-inline: calc(var(--bs-gutter-x, 1.5rem) * 0.5);
+  }
+  .ik-jump-link {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.84rem;
+  }
+
+  /* Paths: compact two-up cards. */
+  .ik-path {
+    padding: 16px;
+    border-radius: var(--r);
+  }
+  .ik-path .icon-badge {
+    width: 42px;
+    height: 42px;
+    font-size: 1.05rem;
+    border-radius: 12px;
+  }
+  .ik-path-top {
+    margin-bottom: 0.8rem;
+  }
+  .ik-path-num {
+    font-size: 1.5rem;
+  }
+  .ik-path h3 {
+    font-size: 1.02rem;
+  }
+  .ik-path-deva {
+    font-size: 0.88rem;
+    margin-bottom: 0.4rem;
+  }
+  .ik-path p {
+    font-size: 0.84rem;
+    line-height: 1.5;
+  }
+
+  /* Meditation: icon beside the text. */
+  .ik-practice {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+    padding: 18px;
+  }
+  .ik-practice .icon-badge {
+    margin-bottom: 0;
+    width: 46px;
+    height: 46px;
+    font-size: 1.1rem;
+    border-radius: 14px;
+  }
+  .ik-practice h3 {
+    font-size: 1.08rem;
+    margin-bottom: 0.3rem;
+  }
+  .ik-practice p {
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+  }
+
+  /* Quotes: one card at a time, swipe sideways, next card peeks in. */
+  .ik-quotes {
+    display: flex;
+    gap: 0.85rem;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    margin-inline: calc(var(--bs-gutter-x, 1.5rem) * -0.5);
+    padding: 0.25rem calc(var(--bs-gutter-x, 1.5rem) * 0.5) 0.5rem;
+    scroll-padding-inline: calc(var(--bs-gutter-x, 1.5rem) * 0.5);
+  }
+  .ik-quotes::-webkit-scrollbar {
+    display: none;
+  }
+  .ik-quote {
+    flex: 0 0 86%;
+    scroll-snap-align: start;
+    height: auto;
+  }
+  .ik-quote blockquote {
+    font-size: 1.08rem;
+  }
+}
+
+@media (max-width: 575.98px) {
+  /* Scriptures: cover beside the text, so four books don't take four screens. */
+  .ik-scripture {
+    flex-direction: row;
+    border-radius: var(--r);
+  }
+  .ik-cover {
+    aspect-ratio: auto;
+    flex: 0 0 104px;
+    min-height: 150px;
+  }
+  .ik-cover::before {
+    inset: 6px;
+    border-radius: 8px;
+  }
+  .ik-cover-deva {
+    font-size: 1.15rem;
+    padding: 0 0.4rem;
+  }
+  .ik-cover-om {
+    font-size: 4.5rem;
+  }
+  .ik-cover-tag {
+    display: none;
+  }
+  .ik-scripture-body {
+    padding: 14px 16px;
+    min-width: 0;
+  }
+  .ik-scripture-body h3 {
+    font-size: 1.05rem;
+  }
+  .ik-scripture-body p {
+    font-size: 0.84rem;
+    margin-bottom: 0.6rem;
+  }
+
+  /* Teachers: monogram above the text. */
+  .ik-teacher {
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+  .ik-teacher-mono {
+    width: 60px;
+    height: 60px;
+    font-size: 1.5rem;
+  }
+}

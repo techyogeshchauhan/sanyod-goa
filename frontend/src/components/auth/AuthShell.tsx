@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { optimizedSrc } from '@/utils/images';
 
 /** Two-column layout of the account pages: form card + calm image panel. */
 export function AuthShell({
@@ -33,7 +34,7 @@ export function AuthShell({
           <aside className="auth-aside" aria-hidden="true">
             {/* The chakra chart is shown whole, with the quote below it (not over it). */}
             <div className="auth-aside-media">
-              <img src="/images/IMG-20250921-WA0003.jpg" alt="" />
+              <img src={optimizedSrc('/images/IMG-20250921-WA0003.jpg')} alt="" />
             </div>
             <div className="auth-aside-inner">
               <div className="eyebrow-deva">योगः कर्मसु कौशलम्</div>

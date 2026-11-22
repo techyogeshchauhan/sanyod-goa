@@ -9,8 +9,14 @@ import { CSRF_HEADER_NAME } from '../src/shared/constants';
 
 const testUri = env.MONGODB_URI_TEST ?? env.MONGODB_URI.replace(/\/([^/?]+)(\?|$)/, '/$1_test$2');
 
+/** Tests drop their database: only a local server, unless MONGODB_URI_TEST names one explicitly. */
+const isLocal = /^mongodb:\/\/(localhost|127\.0\.0\.1|\[::1\])(:\d+)?\//i.test(testUri);
+
 export async function setupTestApp(): Promise<Express> {
-  if (!/test/i.test(testUri)) throw new Error(`Refusing to run tests against a non-test database: ${testUri}`);
+  if (!/test/i.test(testUri)) throw new Error('Refusing to run tests against a non-test database');
+  if (!isLocal && !env.MONGODB_URI_TEST) {
+    throw new Error('Refusing to drop a remote database: set MONGODB_URI_TEST (e.g. mongodb://127.0.0.1:27017/sanyod_replica_test)');
+  }
   await connectDb(testUri);
   await mongoose.connection.dropDatabase();
   await Promise.all(Object.values(mongoose.models).map((m) => m.syncIndexes()));

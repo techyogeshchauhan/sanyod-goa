@@ -4,13 +4,14 @@ import { formLimiter } from '../../middleware/rateLimit';
 import { validate } from '../../middleware/validate';
 import { Event } from '../../models/Event';
 import { EventBooking } from '../../models/EventBooking';
-import { getSettings } from '../../models/Settings';
+import { getSettingsCached } from '../../models/Settings';
 import { eventBookingSchema, type EventBookingInput } from '../../shared/schemas/purchases';
 import type { EventBookingSummary } from '../../shared/types/catalog';
 import { formatRupees } from '../../shared/utils/text';
 import { sendMail } from '../../services/email/mailer';
 import { adminNotificationEmail } from '../../services/email/templates/adminNotification';
 import { eventBookingEmail } from '../../services/email/templates/orders';
+import { cached } from '../../services/cache';
 import { adminNotifyAddress } from '../../services/purchases';
 import { asyncHandler } from '../../utils/asyncHandler';
 import { badRequest, conflict, notFound } from '../../utils/errors';
@@ -24,8 +25,10 @@ eventsRouter.get(
   '/',
   requireUser,
   asyncHandler(async (_req, res) => {
-    const events = await Event.find({ isPublished: true }).sort({ category: 1, sortOrder: 1, createdAt: 1 });
-    res.json({ data: events.map(toEventSummary) });
+    const data = await cached('events:list', async () =>
+      (await Event.find({ isPublished: true }).sort({ category: 1, sortOrder: 1, createdAt: 1 })).map(toEventSummary),
+    );
+    res.json({ data });
   }),
 );
 
@@ -39,7 +42,7 @@ eventBookingsRouter.post(
     const input = req.body as EventBookingInput;
     const event = await Event.findOne({ slug: input.eventSlug, isPublished: true });
     if (!event) throw notFound('Event not found');
-    const settings = await getSettings();
+    const settings = await getSettingsCached();
     if (!settings.upiIdDefault?.trim() && !settings.qrImageBooks?.trim()) {
       throw badRequest('Event payment details are not configured yet. Please contact the site administrator.');
     }

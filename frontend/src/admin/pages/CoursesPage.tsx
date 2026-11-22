@@ -11,10 +11,12 @@ import {
   errorMessage,
   fieldErrors,
   FilterSelect,
+  FormErrors,
   ImageInput,
   Loading,
   PageTitle,
   Pagination,
+  QueryError,
   rupeesInput,
   SearchBox,
   StatusBadge,
@@ -50,6 +52,7 @@ export default function CoursesPage() {
           <SearchBox value={list.q} onChange={list.setQ} placeholder="Course title…" />
           <FilterSelect value={list.status} onChange={list.setStatus} options={['published', 'draft']} all="All" />
         </div>
+        {list.isError && <QueryError error={list.error} onRetry={() => void list.refetch()} />}
         {list.isLoading ? (
           <Loading />
         ) : (
@@ -157,6 +160,7 @@ function CourseForm({ course, onClose }: { course: AdminCourse | null; onClose: 
         </>
       }
     >
+      <FormErrors errors={errors} shown={['title', 'slug', 'price', 'discountPercent', 'level', 'popularRank', 'image', 'sortOrder']} labels={{ description: 'Description' }} />
       <div className="row g-3">
         <div className="col-md-8">
           <label className="form-label fw-semibold">Title *</label>
@@ -181,14 +185,17 @@ function CourseForm({ course, onClose }: { course: AdminCourse | null; onClose: 
           <label className="form-label fw-semibold">Discount shown (%)</label>
           <input className="form-control" inputMode="numeric" value={v.discountPercent} onChange={set('discountPercent')} />
           <div className="form-text">The struck-through price is calculated from it.</div>
+          {err('discountPercent')}
         </div>
         <div className="col-md-3">
           <label className="form-label fw-semibold">Level</label>
           <input className="form-control" value={v.level} onChange={set('level')} />
+          {err('level')}
         </div>
         <div className="col-md-3">
           <label className="form-label fw-semibold">Home "Most Popular" position</label>
           <input className="form-control" inputMode="numeric" value={v.popularRank} onChange={set('popularRank')} placeholder="empty = not listed" />
+          {err('popularRank')}
         </div>
         <div className="col-md-6">
           <ImageInput label="Course image" required={!course} current={course?.image} file={image} onFile={setImage} />
@@ -197,6 +204,7 @@ function CourseForm({ course, onClose }: { course: AdminCourse | null; onClose: 
         <div className="col-md-2">
           <label className="form-label fw-semibold">Sort order</label>
           <input className="form-control" inputMode="numeric" value={v.sortOrder} onChange={set('sortOrder')} />
+          {err('sortOrder')}
         </div>
         <div className="col-md-4 d-flex flex-column justify-content-end gap-2">
           <div className="form-check">
@@ -217,8 +225,9 @@ function CourseForm({ course, onClose }: { course: AdminCourse | null; onClose: 
 export function CourseVideosPage() {
   const { id = '' } = useParams();
   const qc = useQueryClient();
-  const { data: course } = useQuery({ queryKey: ['admin', 'course', id], queryFn: () => adminApi.get<AdminCourse>(`/courses/${id}`) });
-  const { data: videos, isLoading } = useQuery({ queryKey: ['admin', 'videos', id], queryFn: () => adminApi.get<AdminVideo[]>(`/courses/${id}/videos`) });
+  const courseQuery = useQuery({ queryKey: ['admin', 'course', id], queryFn: () => adminApi.get<AdminCourse>(`/courses/${id}`) });
+  const course = courseQuery.data;
+  const { data: videos, isLoading, error, refetch } = useQuery({ queryKey: ['admin', 'videos', id], queryFn: () => adminApi.get<AdminVideo[]>(`/courses/${id}/videos`) });
   const [editing, setEditing] = useState<AdminVideo | 'new' | null>(null);
   const refresh = () => qc.invalidateQueries({ queryKey: ['admin'] });
 
@@ -252,11 +261,13 @@ export function CourseVideosPage() {
         <Link to="/admin/courses" className="btn btn-outline-secondary">
           <i className="fas fa-arrow-left"></i> Courses
         </Link>
-        <button className="btn btn-admin" onClick={() => setEditing('new')}>
+        <button className="btn btn-admin" disabled={!course} onClick={() => setEditing('new')}>
           <i className="fas fa-plus"></i> Add Video
         </button>
       </PageTitle>
       <div className="admin-panel">
+        {courseQuery.isError && <QueryError error={courseQuery.error} onRetry={() => void courseQuery.refetch()} />}
+        {error && <QueryError error={error} onRetry={() => void refetch()} />}
         <p className="small text-muted">
           Paid videos are only sent to students who bought the course. Mark a video <strong>Free</strong> to let every logged-in visitor watch it.
         </p>
@@ -325,7 +336,8 @@ function VideoForm({ courseId, video, onClose }: { courseId: string; video: Admi
   async function save() {
     setBusy(true);
     setErrors({});
-    const body = { title, youtube, isFree, isPublished, ...(minutes ? { durationMinutes: Number(minutes) } : {}) };
+    // An empty duration is sent as null, which clears it.
+    const body = { title, youtube, isFree, isPublished, durationMinutes: minutes.trim() ? minutes.trim() : null };
     try {
       if (video) await adminApi.patch(`/videos/${video.id}`, body);
       else await adminApi.post(`/courses/${courseId}/videos`, body);
@@ -357,7 +369,9 @@ function VideoForm({ courseId, video, onClose }: { courseId: string; video: Admi
       <input className="form-control mb-1" value={youtube} onChange={(e) => setYoutube(e.target.value)} placeholder="https://youtu.be/… or the 11-character ID" />
       {errors.youtube && <div className="invalid-feedback d-block">{errors.youtube}</div>}
       <label className="form-label fw-semibold mt-2">Duration (minutes)</label>
-      <input className="form-control mb-3" inputMode="decimal" value={minutes} onChange={(e) => setMinutes(e.target.value)} style={{ maxWidth: 160 }} />
+      <input className="form-control mb-1" inputMode="decimal" value={minutes} onChange={(e) => setMinutes(e.target.value)} style={{ maxWidth: 160 }} />
+      {errors.durationMinutes && <div className="invalid-feedback d-block">{errors.durationMinutes}</div>}
+      <div className="mb-3"></div>
       <div className="form-check">
         <input className="form-check-input" type="checkbox" id="free" checked={isFree} onChange={(e) => setIsFree(e.target.checked)} />
         <label className="form-check-label" htmlFor="free">Free preview (any logged-in visitor can watch)</label>

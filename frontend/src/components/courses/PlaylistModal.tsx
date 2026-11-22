@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { Modal } from 'bootstrap';
+import Modal from 'bootstrap/js/dist/modal';
 import { useEffect, useRef, useState } from 'react';
 import type { CourseVideo } from '@shared/types/catalog';
 import { courseDetailApi } from '@/api/catalog';

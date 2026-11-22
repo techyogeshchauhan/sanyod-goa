@@ -8,6 +8,7 @@ import { FieldError } from '@/components/common/FieldError';
 import { useAuth } from '@/providers/AuthProvider';
 import { redirectTarget } from '@/routes/guards';
 import { applyApiError } from '@/utils/forms';
+import { PasswordInput } from '@/components/common/PasswordInput';
 
 /** User login (login.php). Returns to the page that asked for a login. */
 export default function LoginPage() {
@@ -44,6 +45,12 @@ export default function LoginPage() {
           <Link to="/register" state={location.state} className="fw-600">
             Create a free account
           </Link>
+          <div className="small mt-2">
+            Site administrator?{' '}
+            <Link to="/admin/login" className="fw-600">
+              <i className="fas fa-user-shield" aria-hidden="true"></i> Admin login
+            </Link>
+          </div>
         </>
       }
     >
@@ -65,7 +72,7 @@ export default function LoginPage() {
               Forgot password?
             </Link>
           </div>
-          <input type="password" id="password" className="form-control" placeholder="Your password" autoComplete="current-password" {...register('password')} />
+          <PasswordInput id="password" placeholder="Your password" autoComplete="current-password" {...register('password')} />
           <FieldError message={errors.password?.message} />
         </div>
         <button type="submit" className="btn btn-primary btn-lg w-100 mt-3" disabled={isSubmitting}>

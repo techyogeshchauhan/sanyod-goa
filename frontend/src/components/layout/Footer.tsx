@@ -2,9 +2,9 @@ import { useState, type FormEvent } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { settingsApi } from '@/api/catalog';
-import { newsletterSchema } from '@shared/schemas/forms';
 import { formsApi } from '@/api/forms';
 import { SITE } from '@/config/site';
+import { optimizedSrc } from '@/utils/images';
 
 const EXPLORE = [
   { to: '/courses', label: 'Courses' },
@@ -43,6 +43,8 @@ export function Footer() {
 
   async function handleSubscribe(e: FormEvent) {
     e.preventDefault();
+    // Loaded on demand: the footer is on every page, the validation library only matters here.
+    const { newsletterSchema } = await import('@shared/schemas/forms');
     const parsed = newsletterSchema.safeParse({ email });
     if (!parsed.success) {
       setState('error');
@@ -67,7 +69,7 @@ export function Footer() {
         <div className="row g-5">
           <div className="col-lg-4">
             <Link to="/" className="brand mb-3">
-              <img src={SITE.logo} alt="" style={{ height: 44, background: '#fff', borderRadius: 12, padding: 4 }} />
+              <img src={optimizedSrc(SITE.logo)} alt="" loading="lazy" style={{ height: 44, background: '#fff', borderRadius: 12, padding: 4 }} />
               <span>
                 <span className="brand-name text-white">{SITE.name}</span>
                 <span className="brand-tagline" style={{ color: '#9a93a3' }}>
@@ -164,7 +166,9 @@ export function Footer() {
                 ))}
               </div>
             )}
-            <Link to="/admin/login">Admin</Link>
+            <Link to="/admin/login" className="footer-admin-btn">
+              <i className="fas fa-user-shield" aria-hidden="true"></i> Admin Login
+            </Link>
             <span>Designed by Hawkswave, New Delhi</span>
           </div>
         </div>

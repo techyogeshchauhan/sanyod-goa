@@ -2,7 +2,7 @@
 
 .home-hero {
   position: relative;
-  padding: clamp(48px, 7vw, 96px) 0 clamp(48px, 6vw, 80px);
+  padding: clamp(24px, 5vw, 72px) 0 clamp(36px, 5vw, 64px);
   background:
     radial-gradient(900px 420px at 0% 0%, rgba(217, 130, 43, 0.16), transparent 60%),
     radial-gradient(800px 400px at 100% 30%, rgba(61, 58, 140, 0.12), transparent 60%),
@@ -22,9 +22,11 @@
   margin-left: auto;
 }
 
-/* The founder photo is 2:3 (853×1280): same frame, so it shows whole. */
+/* The founder photo is 2:3 (853×1280): same frame, so it shows whole.
+   height: auto — the width/height attributes only reserve space; CSS decides the size. */
 .hero-visual img {
   width: 100%;
+  height: auto;
   aspect-ratio: 2 / 3;
   object-fit: contain;
   background: var(--surface-2);
@@ -63,5 +65,48 @@
   }
   .hero-float {
     left: 12px;
+  }
+}
+
+/* Tablets: photo beside the text, in a narrower column. */
+@media (min-width: 768px) and (max-width: 991.98px) {
+  .hero-float {
+    left: -8px;
+    bottom: -28px;
+    padding: 0.7rem 0.85rem;
+  }
+}
+
+/* Phones: a smaller photo so the page doesn't open on one huge image. */
+@media (max-width: 767.98px) {
+  .hero-visual {
+    max-width: 300px;
+  }
+}
+
+/* Laptops and desktops: the whole hero (heading, buttons, photo) fits the first screen.
+   The photo is sized by the screen height, so it never runs under the header or off the screen. */
+@media (min-width: 992px) {
+  .home-hero {
+    padding: clamp(20px, 3.5vh, 44px) 0 clamp(36px, 5vh, 60px);
+  }
+  .display-title {
+    font-size: clamp(2.6rem, min(4.3vw, 7.4vh), 4.1rem);
+  }
+  .home-hero .lead {
+    max-width: 560px;
+  }
+  .hero-visual {
+    max-width: none;
+    width: fit-content;
+    margin-left: auto;
+  }
+  .hero-visual img {
+    width: auto;
+    height: clamp(360px, calc(100vh - var(--header-h) - 200px), 540px);
+  }
+  .hero-float {
+    left: -40px;
+    bottom: 28px;
   }
 }

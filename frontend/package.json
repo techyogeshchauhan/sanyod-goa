@@ -12,7 +12,8 @@
     "test": "vitest run",
     "e2e": "playwright test",
     "visual": "node scripts/screenshot-compare.mjs",
-    "assets": "node scripts/copy-legacy-assets.mjs"
+    "assets": "node scripts/copy-legacy-assets.mjs",
+    "images": "node scripts/optimize-images.mjs"
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "5.15.4",
@@ -46,6 +47,7 @@
     "pixelmatch": "^8.0.0",
     "pngjs": "^7.0.0",
     "postcss": "^8.5.29",
+    "sharp": "^0.34.5",
     "typescript": "^5.9.3",
     "vite": "^8.3.4",
     "vitest": "^5.0.4"

@@ -306,7 +306,7 @@ Only the admin login page is visible (✅ username + password + remember me → 
 | --- | --- |
 | Dashboard | Counts (users, pending payments, orders, revenue) 🔎 |
 | Book payments | List, view screenshot + transaction ID, **approve / reject** |
-| Orders (hard copies) | List, view shipping address, update `order_status` |
+| Orders (hard copies) | List, view shipping address, update `order_status`. `processing`, `shipped` and `delivered` require an **approved** payment (the API answers 409 `PAYMENT_NOT_APPROVED` otherwise); `pending` and `cancelled` are always allowed. Courier and tracking number can be cleared |
 | Books | CRUD; upload cover (`Books/`) and PDF (`Books_pdf/`); set price |
 | Courses | CRUD (name, description, image, price, discount) |
 | Course videos | CRUD (title, YouTube link, free/paid, order) |
@@ -314,8 +314,11 @@ Only the admin login page is visible (✅ username + password + remember me → 
 | Doctors | CRUD (name, category, photo, bio, CV) |
 | Consultations | List and update status |
 | Events and bookings | CRUD events (image, date, time, location, price, category); confirm bookings |
-| Users | List / search |
+| Users | List / search; activate/deactivate; grant or remove access to a course or book PDF. Removing access deletes a manual grant's ₹0 record, or marks a paid purchase `rejected` ("Access revoked by admin") so the user can buy again ([D-29](14-open-questions-and-decisions.md#3-decisions-log)) |
 | Messages | (new) contact messages, guidance requests, newsletter subscribers |
+| Settings | UPI IDs, QR images (upload or remove), contact details, opening hours, social links, alert email: **super admin only** ([03 §3.2](03-user-roles-and-permissions.md)) |
+
+The rebuilt panel's audit, fixes and test coverage: [backend/ADMIN_PANEL_AUDIT.md](../backend/ADMIN_PANEL_AUDIT.md).
 
 ❓ **Confirm the real admin feature list** from the server's `admin/` folder before building.
 

@@ -13,10 +13,12 @@ import {
   errorMessage,
   fieldErrors,
   FilterSelect,
+  FormErrors,
   ImageInput,
   Loading,
   PageTitle,
   Pagination,
+  QueryError,
   rupeesInput,
   SearchBox,
   StatusBadge,
@@ -63,6 +65,7 @@ export function DoctorsPage() {
             all="All categories"
           />
         </div>
+        {list.isError && <QueryError error={list.error} onRetry={() => void list.refetch()} />}
         {list.isLoading ? (
           <Loading />
         ) : (
@@ -84,7 +87,7 @@ export function DoctorsPage() {
                 {list.data?.data.map((d) => (
                   <tr key={d.id}>
                     <td style={{ width: 60 }}>
-                      <span className="d-inline-block admin-thumb overflow-hidden">
+                      <span className="d-block admin-thumb overflow-hidden">
                         <DoctorPhoto src={d.photo} alt="" />
                       </span>
                     </td>
@@ -116,6 +119,9 @@ export function DoctorsPage() {
     </>
   );
 }
+
+/** Fields that show their error next to the input; any other error is listed above the form. */
+const DOCTOR_INLINE = ['name', 'qualification', 'experienceYears', 'fee', 'categories', 'photo', 'cv', 'rating', 'availabilityText', 'sortOrder'];
 
 function DoctorForm({ doctor, onClose }: { doctor: AdminDoctor | null; onClose: () => void }) {
   const qc = useQueryClient();
@@ -175,6 +181,7 @@ function DoctorForm({ doctor, onClose }: { doctor: AdminDoctor | null; onClose: 
         </>
       }
     >
+      <FormErrors errors={errors} shown={DOCTOR_INLINE} labels={{ bio: 'About the doctor', slug: 'URL slug' }} />
       <div className="row g-3">
         <div className="col-md-5">
           <label className="form-label fw-semibold">Name * <span className="text-muted fw-normal small">(without "Dr.")</span></label>
@@ -184,10 +191,12 @@ function DoctorForm({ doctor, onClose }: { doctor: AdminDoctor | null; onClose: 
         <div className="col-md-3">
           <label className="form-label fw-semibold">Qualification</label>
           <input className="form-control" value={v.qualification} onChange={set('qualification')} placeholder="BNYS, BHMS…" />
+          {err('qualification')}
         </div>
         <div className="col-md-2">
           <label className="form-label fw-semibold">Experience (yrs)</label>
           <input className="form-control" inputMode="numeric" value={v.experienceYears} onChange={set('experienceYears')} />
+          {err('experienceYears')}
         </div>
         <div className="col-md-2">
           <label className="form-label fw-semibold">Fee (₹) *</label>
@@ -250,14 +259,17 @@ function DoctorForm({ doctor, onClose }: { doctor: AdminDoctor | null; onClose: 
         <div className="col-md-2">
           <label className="form-label fw-semibold">Rating</label>
           <input className="form-control" inputMode="decimal" value={v.rating} onChange={set('rating')} placeholder="4.7" />
+          {err('rating')}
         </div>
         <div className="col-md-4">
           <label className="form-label fw-semibold">Availability badge</label>
           <input className="form-control" value={v.availabilityText} onChange={set('availabilityText')} />
+          {err('availabilityText')}
         </div>
         <div className="col-md-2">
           <label className="form-label fw-semibold">Sort order</label>
           <input className="form-control" inputMode="numeric" value={v.sortOrder} onChange={set('sortOrder')} />
+          {err('sortOrder')}
         </div>
         <div className="col-md-4 d-flex flex-column justify-content-end gap-1">
           <div className="form-check">
@@ -286,6 +298,7 @@ export function ConsultationsPage() {
           <SearchBox value={list.q} onChange={list.setQ} placeholder="Patient, phone, issue…" />
           <FilterSelect value={list.status} onChange={list.setStatus} options={CONSULTATION_STATUSES} all="All statuses" />
         </div>
+        {list.isError && <QueryError error={list.error} onRetry={() => void list.refetch()} />}
         {list.isLoading ? (
           <Loading />
         ) : (

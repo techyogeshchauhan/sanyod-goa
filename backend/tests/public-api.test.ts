@@ -2,6 +2,7 @@ import type { Express } from 'express';
 import request from 'supertest';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { ContactMessage, GuidanceRequest, NewsletterSubscriber } from '../src/models/FormSubmissions';
+import { getSettings } from '../src/models/Settings';
 import { seedCourses } from '../src/scripts/seed';
 import { outbox } from '../src/services/email/mailer';
 import { csrfAgent, setupTestApp, teardownTestApp } from './helpers';
@@ -43,6 +44,10 @@ describe('courses API', () => {
 
 describe('forms API', () => {
   it('stores a contact message and notifies the admin', async () => {
+    // Admin alerts go only to a configured address (blank disables them).
+    const settings = await getSettings();
+    settings.adminNotifyEmail = 'alerts@example.com';
+    await settings.save();
     const c = await csrfAgent(app);
     const before = outbox.length;
     const res = await c.post('/api/contact', {

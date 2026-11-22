@@ -65,7 +65,7 @@ const NAV: { section: string; items: NavItem[] }[] = [
     section: 'Administration',
     items: [
       { to: '/admin/users', icon: 'fas fa-users', label: 'Users' },
-      { to: '/admin/settings', icon: 'fas fa-cog', label: 'Settings' },
+      { to: '/admin/settings', icon: 'fas fa-cog', label: 'Settings', superOnly: true },
       { to: '/admin/admins', icon: 'fas fa-user-shield', label: 'Admin Accounts', superOnly: true },
       { to: '/admin/activity', icon: 'fas fa-history', label: 'Activity Log' },
       { to: '/admin/account', icon: 'fas fa-key', label: 'My Password' },
@@ -91,7 +91,13 @@ export function AdminLayout() {
       <AdminChrome />
       <div className="admin-topbar">
         <div className="d-flex align-items-center gap-2">
-          <button className="menu-toggle d-lg-none" type="button" aria-label="Menu" onClick={() => setOpen((o) => !o)}>
+          <button
+            className="menu-toggle d-lg-none"
+            type="button"
+            aria-label="Menu"
+            aria-expanded={open}
+            onClick={() => setOpen((o) => !o)}
+          >
             <i className="fas fa-bars"></i>
           </button>
           <Link to="/admin" className="pppht">
@@ -137,6 +143,7 @@ export function AdminLayout() {
             </div>
           ))}
         </nav>
+        {open && <div className="admin-backdrop d-lg-none" aria-hidden="true" onClick={() => setOpen(false)} />}
         <main id="page-wrapper">
           <Outlet />
         </main>

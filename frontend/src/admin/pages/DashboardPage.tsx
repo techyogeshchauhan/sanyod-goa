@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import type { DashboardStats } from '@shared/types/admin';
 import { dateTime, rupees } from '@/utils/format';
 import { adminApi } from '../api';
-import { Loading, PageTitle, StatusBadge } from '../ui';
+import { Loading, PageTitle, QueryError, StatusBadge } from '../ui';
 
 const TYPE = { book_pdf: 'Book (PDF)', book_hardcopy: 'Book (Hard copy)', course: 'Course' } as const;
 
@@ -23,7 +23,15 @@ function Card({ label, value, icon, color, to }: { label: string; value: string 
 }
 
 export default function DashboardPage() {
-  const { data: s, isLoading } = useQuery({ queryKey: ['admin', 'dashboard'], queryFn: () => adminApi.get<DashboardStats>('/dashboard') });
+  const { data: s, isLoading, error, refetch } = useQuery({ queryKey: ['admin', 'dashboard'], queryFn: () => adminApi.get<DashboardStats>('/dashboard') });
+  if (error && !s) {
+    return (
+      <>
+        <PageTitle title="Dashboard" icon="fas fa-tachometer-alt" />
+        <QueryError error={error} onRetry={() => void refetch()} />
+      </>
+    );
+  }
   if (isLoading || !s) return <Loading />;
   const pending = s.pendingPayments.book_pdf + s.pendingPayments.book_hardcopy + s.pendingPayments.course;
 
