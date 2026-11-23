@@ -11,6 +11,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "create-admin": "tsx src/scripts/create-admin.ts",
+    "create-user": "tsx src/scripts/create-user.ts",
     "db:init": "tsx src/scripts/init-db.ts",
     "migrate:mysql": "tsx src/scripts/migrate-mysql.ts",
     "security:remediate-passwords": "tsx src/scripts/remediate-legacy-passwords.ts",
